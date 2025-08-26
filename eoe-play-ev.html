@@ -1,0 +1,853 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Edge of Eternities — Play Booster EV</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+	html {background-color:#0b0d10;}
+  /* Scoped styles */
+  .eoe-app {
+    --bg:#0b0d10; --fg:#e8ecf1; --muted:#a7b0bb; --acc:#6ac1ff;
+    --card:#151a20; --ok:#1e7f3c; --err:#9b2c2c;
+    --line:#222a33;
+    --hi-bg:rgba(106,193,255,.14); --hi-line:#6ac1ff;
+    --est-bg:rgba(106,193,255,.18); --est-line:#6ac1ff;
+    min-height:100vh; background:var(--bg); color:var(--fg);
+    font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    max-width:1120px; margin:32px auto; padding:0 16px; box-sizing:border-box;
+  }
+  .eoe-app a{ color:var(--acc); text-decoration:underline }
+  .eoe-app h1{font-size:22px;margin:0 0 12px}
+  .eoe-app p.lede{color:var(--muted);margin:0 0 16px}
+  .eoe-app .panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin:16px 0}
+  .eoe-app label{display:block;margin:4px 0}
+  .eoe-app .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .eoe-app input[type="number"], .eoe-app input[type="text"], .eoe-app select{
+    width:10ch;background:#0e1216;color:#cfe3f5;border:1px solid #2a3541;border-radius:6px;padding:6px
+  }
+  .eoe-app select{width:auto}
+  .eoe-app button{appearance:none;border:1px solid #2c3845;background:#1b232c;color:var(--fg);padding:10px 14px;border-radius:8px;cursor:pointer}
+  .eoe-app button[disabled]{opacity:.5;cursor:default}
+  .eoe-app .actions{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
+  .eoe-app #status{margin-top:8px;color:var(--muted)}
+  .eoe-app #counts b{color:#7ddc7a}
+  .eoe-app textarea{width:100%;min-height:200px;background:#0e1216;color:#cfe3f5;border:1px solid #2a3541;border-radius:8px;padding:10px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;box-sizing:border-box}
+  .eoe-app code{background:#0e1216;border:1px solid #2a3541;padding:1px 4px;border-radius:4px}
+
+  /* Back-to-index links (top & bottom) */
+  .eoe-app .nav-row{display:flex;justify-content:space-between;align-items:center;margin:0 0 12px}
+  .eoe-app .back-link{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:6px 10px; border-radius:999px;
+    background:#10171f; border:1px solid var(--line);
+    color:#dff1ff; text-decoration:none;
+  }
+  .eoe-app .back-link:hover{ border-color:var(--acc); color:#ffffff }
+  .eoe-app .back-link .arrow{font-size:16px; line-height:1}
+
+  /* Emphasis / highlights */
+  .btn-primary{
+    border-color:var(--hi-line); background:linear-gradient(180deg,#203245,#1a2530);
+    box-shadow:0 0 0 0 rgba(106,193,255,.5); position:relative;
+    color:#dff1ff; font-weight:600;
+    animation:pulse 2.2s infinite;
+  }
+  .btn-primary:focus{outline:2px solid var(--hi-line); outline-offset:2px}
+  @keyframes pulse{
+    0% { box-shadow:0 0 0 0 rgba(106,193,255,.45) }
+    70%{ box-shadow:0 0 0 10px rgba(106,193,255,0) }
+    100%{ box-shadow:0 0 0 0 rgba(106,193,255,0) }
+  }
+
+  .hi-label{
+    border:1px solid var(--hi-line);
+    background:var(--hi-bg);
+    border-radius:8px;
+    padding:6px 8px;
+  }
+  .hi-label > input[type="number"],
+  .hi-label > input[type="text"]{ background:#0f141a }
+
+  .hi-inline{
+    display:flex; align-items:center; gap:6px;
+    border:1px solid var(--hi-line);
+    background:var(--hi-bg);
+    border-radius:8px;
+    padding:6px 8px;
+  }
+
+  /* Error panel */
+  .error-panel{border-color:#ff7a7a!important}
+  .error-panel h2{margin:0 0 8px; color:#ff7a7a; font-size:16px}
+  .error-panel pre{white-space:pre-wrap; background:#0e1216; border:1px solid #2a3541; padding:8px; border-radius:6px; color:#ffd4d4}
+
+  /* Tables */
+  table{width:100%; border-collapse:collapse; margin-top:8px}
+  th,td{border:1px solid #2a3541; padding:6px 8px; text-align:right}
+  th:first-child,td:first-child{text-align:left}
+  thead th{background:#0e1216; position:sticky; top:0; z-index:1}
+  tbody tr:nth-child(even){background:#12171d}
+
+  /* Highlight the Est. column and its LEFT boundary under collapsed borders */
+  .evbox table th:nth-child(3),
+  .evbox table td:nth-child(3){
+    background:var(--est-bg);
+    border-color:var(--est-line);
+    border-left-color:var(--est-line);
+    color:#eaf6ff;
+    font-weight:700;
+  }
+  .evbox table th:nth-child(2),
+  .evbox table td:nth-child(2){
+    border-right-color:var(--est-line);
+  }
+
+  .sift-tablewrap{max-height:520px; overflow:auto; border:1px solid #2a3541; border-radius:8px; margin-top:8px}
+  .pill{display:inline-block; padding:2px 8px; border-radius:999px; border:1px solid #2a3541}
+  .pill.ok{background:rgba(30,127,60,.20);color:#d9ffe3;border-color:#1e7f3c}
+  .pill.bad{background:rgba(155,44,44,.16);color:#ffdede;border-color:#9b2c2c}
+  .sift-ok{background:rgba(30,127,60,.12)!important}
+  .sift-bad{background:rgba(155,44,44,.10)!important}
+
+  .evbox{margin-top:8px}
+  .evbox table{width:auto; min-width:360px}
+  .evbox th,.evbox td{text-align:right}
+  .evbox th:first-child,.evbox td:first-child{text-align:left;white-space:nowrap}
+  .note{color:#a7b0bb;font-size:12px;margin-top:6px}
+
+  /* Collapsible totals */
+  details.eoe-collapse{border:0; padding:0; margin:0}
+  details.eoe-collapse > summary{
+    cursor:pointer; list-style:none;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:8px 10px; border:1px solid #2a3541; border-radius:8px;
+    background:#0e1216; color:#dfeeff; font-weight:600;
+  }
+  details.eoe-collapse > summary::-webkit-details-marker{ display:none }
+  details.eoe-collapse > summary::after{
+    content:'▼'; opacity:.8; transform:rotate(-90deg); transition:transform .18s ease;
+    margin-left:12px; font-size:12px;
+  }
+  details.eoe-collapse[open] > summary::after{ transform:rotate(0deg) }
+  details.eoe-collapse .content{ margin-top:10px }
+</style>
+</head>
+<body>
+<main class="eoe-app" role="main" aria-label="EOE Play Booster EV">
+  <!-- TOP: back to index -->
+  <nav class="nav-row" aria-label="Top navigation">
+    <a class="back-link" href="./index.html"><span class="arrow">←</span> Back to EV Tools Index</a>
+  </nav>
+
+  <h1>Edge of Eternities — Play Booster EV</h1>
+  <p class="lede">
+    Auto‑builds on load. Probabilities are normalized to exactly <strong>14 Magic cards per pack</strong> (tokens not scaled).
+  </p>
+
+  <div class="panel">
+    <strong>Refresh data</strong>
+    <label><input type="checkbox" id="englishOnly" checked> English-only (avoid duplicate rows for other languages)</label>
+    <label><input type="checkbox" id="includeEOE" checked> Include <strong>EOE</strong> (1–316; Play‑eligible)</label>
+    <label><input type="checkbox" id="includeEOS" checked> Include <strong>EoE:SS</strong> (1–45; no galaxy/etched)</label>
+    <label><input type="checkbox" id="includeSPG" checked> Include <strong>SG</strong> (119–128; nonfoil only)</label>
+    <div class="row">
+      <label><input type="checkbox" id="includeTOK" checked> Include <strong>TOK</strong> (TEOE tokens/emblem)</label>
+      <label>Token pool size: <input type="number" id="tokenPool" value="11" min="1" step="1"></label>
+      <label>Token fallback (USD): <input type="text" id="tokenFallback" value="0.05"></label>
+    </div>
+    <div class="actions">
+      <button id="buildBtn" class="btn-primary" title="Fetch live Scryfall data and recompute everything">Refresh List</button>
+      <button id="downloadCsv" disabled>Download CSV</button>
+      <button id="copyCsv" disabled>Copy CSV</button>
+    </div>
+    <div id="status" aria-live="polite">Preparing…</div>
+    <div id="counts"></div>
+  </div>
+
+  <!-- Purchase EV Calculator -->
+  <div id="purchasePanel" class="panel" style="display:none">
+    <strong>Purchase EV Calculator</strong>
+    <div class="row" style="margin-top:6px">
+      <label class="hi-label">Boxes to buy: <input type="number" id="boxesToBuy" value="1" min="0" step="1" aria-label="Boxes to buy"></label>
+      <span class="hi-inline" title="Only count prints with card value ≥ this amount">
+        <input type="checkbox" id="useSiftForEV" checked aria-label="Use Sift (≥)">
+        <span><strong>Use Sift (≥)</strong></span>
+        <input type="text" id="siftMin" value="0.25" title="Minimum Card Value (USD)">
+      </span>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <label><input type="radio" name="rangeMode" value="stat" checked> Statistical range (CLT)</label>
+      <label><input type="radio" name="rangeMode" value="struct"> Structural range (model band)</label>
+      <label>Confidence:
+        <select id="confLevel">
+          <option value="68">68% (~1σ)</option>
+          <option value="90">90% (~1.645σ)</option>
+          <option value="95" selected>95% (~1.96σ)</option>
+          <option value="99">99% (~2.576σ)</option>
+        </select>
+      </label>
+      <button id="calcEV" disabled>Calculate EV</button>
+    </div>
+
+    <div id="purchaseSummary" class="note"></div>
+    <div id="purchaseEVContainer" class="evbox" style="display:none"></div>
+    <div id="rangeNotes" class="note"></div>
+  </div>
+
+  <!-- Sift table -->
+  <div id="siftPanel" class="panel" style="display:none">
+    <strong>Row List (linked) — highlight by Sift threshold</strong>
+    <div class="row">
+      <span class="pill ok">≥ threshold</span>
+      <span class="pill bad">&lt; threshold</span>
+      <button id="applySift" disabled>Re‑Apply Sift</button>
+      <button id="downloadSiftCsv" disabled>Download Sift Table</button>
+    </div>
+    <div id="siftSummary" class="note" aria-live="polite"></div>
+    <div class="sift-tablewrap" id="siftTableWrap" style="display:none">
+      <table id="siftTable">
+        <thead>
+          <tr>
+            <th>Set</th><th>No.</th><th>R</th><th>Name</th><th>Treat</th>
+            <th>Pack Prob Min (%)</th><th>Pack Prob Max (%)</th><th>Card Value (USD)</th>
+            <th>Per 1000 Min</th><th>Per 1000 Max</th>
+            <th>Per 30000 Min</th><th>Per 30000 Max</th>
+            <th>Per 300000 Min</th><th>Per 300000 Max</th>
+          </tr>
+        </thead>
+        <tbody id="siftBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="errorBox" class="panel error-panel" style="display:none">
+    <h2>Load failed</h2>
+    <div id="errorMsg"></div>
+    <pre id="errorDetails"></pre>
+  </div>
+
+  <div class="panel">
+    <strong>CSV preview</strong>
+    <textarea id="preview" placeholder="Your CSV will appear after the list builds…"></textarea>
+    <details>
+      <summary>Advanced: Scryfall queries</summary>
+      <pre id="queries" style="white-space:pre-wrap;"></pre>
+    </details>
+  </div>
+
+  <!-- BOTTOM: Totals (collapsible; default closed) -->
+  <div id="totalsPanel" class="panel" style="display:none">
+    <details id="totalsDetails" class="eoe-collapse">
+      <summary><strong>Totals for Your Purchase Size (No sift, Developer Model check)</strong></summary>
+      <div class="content">
+        <div class="note">
+          Columns show <em>Low / Est. / High</em>. Totals <b>ignore Sift</b> and include tokens.
+          Playing‑card probabilities are normalized so the per‑pack EST sums to 14; tokens are not normalized.
+        </div>
+        <table>
+          <thead><tr><th>Metric</th><th>Low</th><th>Est.</th><th>High</th></tr></thead>
+          <tbody id="totalsBody"></tbody>
+        </table>
+        <div id="totalsNotes" class="note"></div>
+      </div>
+    </details>
+  </div>
+
+  <!-- BOTTOM: back to index -->
+  <nav class="nav-row" aria-label="Bottom navigation" style="margin-top:12px">
+    <a class="back-link" href="./index.html"><span class="arrow">←</span> Back to EV Tools Index</a>
+  </nav>
+</main>
+
+<script>
+  /* ===== Helpers ===== */
+  const rarityLetter = r => ({ common:'C', uncommon:'U', rare:'R', mythic:'M' }[r] || (r ? r[0].toUpperCase() : ''));
+  const sleep = ms => new Promise(res => setTimeout(res, ms));
+  const padCollector = s => { const m=String(s||'').match(/^(\d+)(.*)$/); return m?m[1].padStart(4,'0')+(m[2]||''):(s||''); };
+  const baseCN = s => { const m=String(s||'').match(/^(\d+)/); return m?parseInt(m[1],10):NaN; };
+  const parseUSD = s => { const n=parseFloat(String(s).replace(/[^0-9.]/g,'')); return Number.isFinite(n)?n:null; };
+  const money = n => Number.isFinite(n)? n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) : '';
+  const fmtUSD = n => money(n);
+  const fmtCount = n => !Number.isFinite(n)? '' : (Math.abs(n-Math.round(n))<1e-9? String(Math.round(n)) : (n>=100?n.toFixed(1):n>=10?n.toFixed(2):n.toFixed(3)));
+  const fmtInt = n => Number.isFinite(n)? Math.round(n).toLocaleString() : '';
+  const fmtPct5 = x => Number.isFinite(x) ? (x*100).toFixed(5)+'%' : '';
+  const zFromConf = c => { c=Math.round(c); if(c>=99)return 2.576; if(c>=95)return 1.96; if(c>=90)return 1.645; if(c>=68)return 1.0; return 1.96; };
+  const priceUSD = (card, treat) => { const p=(treat==='foil'?card?.prices?.usd_foil:card?.prices?.usd); const f=parseFloat(p); return Number.isFinite(f)?f:null; };
+
+  /* ===== EOE Odds (per pack) ===== */
+  const ODDS = {
+    // 7 commons + 12.5% wildcard common − 1.8% SPG replace
+    E_COMMON_SLOTS: 7 + 0.125 - 0.018,
+    E_UNCOMMON_SLOTS: 3 + 0.625,
+    N_COMMONS: 81, N_UNCOMMONS: 100, N_RARES: 60, N_MYTHICS: 20,
+    WC_MAINSET_RARE: 0.106, WC_MAINSET_MYTHIC_LT: 0.01,
+    WC_EOS_RARE: 0.10, WC_EOS_MYTHIC: 0.025,
+    WC_VIEWPORT_RARE: 0.01, WC_VIEWPORT_MYTHIC_LT: 0.01,
+    WC_TRISUR_RARE_LT: 0.01, WC_TRISUR_MYTHIC_LT: 0.01,
+    RS_MAINSET_RARE: 0.804, RS_MAINSET_MYTHIC: 0.142,
+    RS_TRI_RARE: 0.02, RS_TRI_MYTHIC_LT: 0.01,
+    RS_SURR_RARE: 0.02, RS_SURR_MYTHIC_LT: 0.01,
+    RS_VIEWPORT_MYTHIC_LT: 0.01,
+    FOIL_MAINSET_C: 0.58, FOIL_MAINSET_U: 0.32, FOIL_MAINSET_R: 0.064, FOIL_MAINSET_M: 0.011,
+    FOIL_EOS_RARE: 0.01, FOIL_EOS_MYTHIC_LT: 0.01,
+    FOIL_BORDERLESS_RARE_LT: 0.01, FOIL_BORDERLESS_MYTHIC_LT: 0.01,
+    LAND_DEFAULT_NF: 0.64, LAND_DEFAULT_F: 0.16,
+    LAND_CELESTIAL_NF: 0.16, LAND_CELESTIAL_F: 0.04,
+    SPG_ANY: 0.018
+  };
+  const FAM = {
+    TRI_RARE: 12, TRI_MYTHIC: 4, SURR_RARE: 11, SURR_MYTHIC: 3,
+    VIEW_RARE: 5, VIEW_MYTHIC: 5, EOS_RARE: 30, EOS_MYTHIC: 15,
+    BASIC_DEFAULT: 10, BASIC_CELESTIAL: 5, SPG: 10
+  };
+  FAM.BORDERLESS_RARE = FAM.TRI_RARE + FAM.SURR_RARE + FAM.VIEW_RARE;
+  FAM.BORDERLESS_MYTHIC = FAM.TRI_MYTHIC + FAM.SURR_MYTHIC + FAM.VIEW_MYTHIC;
+
+  /* ===== Probability models ===== */
+  let __NORM_SCALE__ = 1;
+  let __TOKEN_POOL__ = 11;
+
+  function countFromModelRaw(model, packs){
+    if(!model) return null;
+    if(model.type==='point') return { lo:model.p*packs, est:model.p*packs, hi:model.p*packs, max:model.p*packs };
+    if(model.type==='range') return { lo:model.lo*packs, est:((model.lo+model.hi)/2)*packs, hi:model.hi*packs, max:model.hi*packs };
+    if(model.type==='max')   return { lo:0, est:(model.max/2)*packs, hi:model.max*packs, max:model.max*packs };
+    return null;
+  }
+  function probMinMaxRaw(model){
+    if(!model) return {min:null, max:null};
+    if(model.type==='point') return {min:model.p, max:model.p};
+    if(model.type==='range') return {min:model.lo, max:model.hi};
+    if(model.type==='max')   return {min:0, max:model.max};
+    return {min:null, max:null};
+  }
+  function probEstRaw(model){
+    if(!model) return null;
+    if(model.type==='point') return model.p;
+    if(model.type==='range') return (model.lo + model.hi)/2;
+    if(model.type==='max')   return model.max/2;
+    return null;
+  }
+  function countFromModel(model, packs, isToken=false, useScaled=true){
+    const c = countFromModelRaw(model, packs);
+    if(!c || isToken || !useScaled) return c;
+    return { lo:c.lo*__NORM_SCALE__, est:c.est*__NORM_SCALE__, hi:c.hi*__NORM_SCALE__, max:c.max*__NORM_SCALE__ };
+  }
+  function probMinMaxScaled(model, isToken=false, useScaled=true){
+    const {min,max} = probMinMaxRaw(model);
+    if(min==null || isToken || !useScaled) return {min, max};
+    return {min:min*__NORM_SCALE__, max:max*__NORM_SCALE__};
+  }
+  function probEstScaled(model, isToken=false, useScaled=true){
+    const p = probEstRaw(model);
+    if(p==null || isToken || !useScaled) return p;
+    return p*__NORM_SCALE__;
+  }
+
+  function classifyEOE(cnBase){
+    if(cnBase>=262 && cnBase<=266) return 'CELESTIAL_BASIC';
+    if(cnBase>=267 && cnBase<=276) return 'DEFAULT_BASIC';
+    if(cnBase>=277 && cnBase<=286) return 'VIEWPORT';
+    if(cnBase>=287 && cnBase<=316) return 'TRISUR';
+    return 'DEFAULT_FRAME';
+  }
+
+  function probModel({ set, cnBase, rarity, treatment }){
+    if(set==='TOK'){ if(treatment!=='normal') return null; return { type:'point', p: 1 / Math.max(1,__TOKEN_POOL__) }; }
+    if(set==='SG'){ if(treatment!=='normal') return null; return { type:'point', p: ODDS.SPG_ANY / FAM.SPG }; }
+    if(set==='EoE:SS'){
+      if(rarity==='R') return (treatment==='normal') ? {type:'point',p:ODDS.WC_EOS_RARE/FAM.EOS_RARE} : {type:'point',p:ODDS.FOIL_EOS_RARE/FAM.EOS_RARE};
+      if(rarity==='M') return (treatment==='normal') ? {type:'point',p:ODDS.WC_EOS_MYTHIC/FAM.EOS_MYTHIC} : {type:'max',max:ODDS.FOIL_EOS_MYTHIC_LT/FAM.EOS_MYTHIC};
+      return null;
+    }
+    if(set==='EOE'){
+      const fam = classifyEOE(cnBase);
+      if(fam==='DEFAULT_BASIC'){
+        return (treatment==='normal') ? {type:'point',p:ODDS.LAND_DEFAULT_NF/FAM.BASIC_DEFAULT} : {type:'point',p:ODDS.LAND_DEFAULT_F/FAM.BASIC_DEFAULT};
+      }
+      if(fam==='CELESTIAL_BASIC'){
+        return (treatment==='normal') ? {type:'point',p:ODDS.LAND_CELESTIAL_NF/FAM.BASIC_CELESTIAL} : {type:'point',p:ODDS.LAND_CELESTIAL_F/FAM.BASIC_CELESTIAL};
+      }
+      if(fam==='VIEWPORT'){
+        if(rarity==='R') return (treatment==='normal') ? {type:'point',p:ODDS.WC_VIEWPORT_RARE/FAM.VIEW_RARE} : {type:'max',max:ODDS.FOIL_BORDERLESS_RARE_LT/FAM.BORDERLESS_RARE};
+        if(rarity==='M') return (treatment==='normal') ? {type:'max',max:(ODDS.WC_VIEWPORT_MYTHIC_LT+ODDS.RS_VIEWPORT_MYTHIC_LT)/FAM.VIEW_MYTHIC} : {type:'max',max:ODDS.FOIL_BORDERLESS_MYTHIC_LT/FAM.BORDERLESS_MYTHIC};
+      }
+      if(fam==='TRISUR'){
+        if(rarity==='R'){
+          if(treatment==='normal'){
+            const base=(ODDS.RS_TRI_RARE+ODDS.RS_SURR_RARE)/(FAM.TRI_RARE+FAM.SURR_RARE);
+            const hi=base+(ODDS.WC_TRISUR_RARE_LT/(FAM.TRI_RARE+FAM.SURR_RARE));
+            return {type:'range',lo:base,hi:hi};
+          } else return {type:'max',max:ODDS.FOIL_BORDERLESS_RARE_LT/FAM.BORDERLESS_RARE};
+        }
+        if(rarity==='M'){
+          if(treatment==='normal'){
+            const ub=(ODDS.RS_TRI_MYTHIC_LT+ODDS.RS_SURR_MYTHIC_LT+ODDS.WC_TRISUR_MYTHIC_LT)/(FAM.TRI_MYTHIC+FAM.SURR_MYTHIC);
+            return {type:'max',max:ub};
+          } else return {type:'max',max:ODDS.FOIL_BORDERLESS_MYTHIC_LT/FAM.BORDERLESS_MYTHIC};
+        }
+      }
+      if(rarity==='C') return (treatment==='normal') ? {type:'point',p:ODDS.E_COMMON_SLOTS/ODDS.N_COMMONS} : {type:'point',p:ODDS.FOIL_MAINSET_C/ODDS.N_COMMONS};
+      if(rarity==='U') return (treatment==='normal') ? {type:'point',p:ODDS.E_UNCOMMON_SLOTS/ODDS.N_UNCOMMONS} : {type:'point',p:ODDS.FOIL_MAINSET_U/ODDS.N_UNCOMMONS};
+      if(rarity==='R') return (treatment==='normal') ? {type:'point',p:(ODDS.RS_MAINSET_RARE+ODDS.WC_MAINSET_RARE)/ODDS.N_RARES} : {type:'point',p:ODDS.FOIL_MAINSET_R/ODDS.N_RARES};
+      if(rarity==='M'){
+        if(treatment==='normal'){ const lo=(ODDS.RS_MAINSET_MYTHIC)/ODDS.N_MYTHICS; const hi=(ODDS.RS_MAINSET_MYTHIC+ODDS.WC_MAINSET_MYTHIC_LT)/ODDS.N_MYTHICS; return {type:'range',lo,hi}; }
+        else return {type:'point',p:ODDS.FOIL_MAINSET_M/ODDS.N_MYTHICS};
+      }
+    }
+    return null;
+  }
+
+  /* ===== Data state ===== */
+  let __ROW_MODELS__ = []; // { model, price, isToken, fallback }
+  let __META_ROWS__  = []; // { setTag, cn, rarity, name, treatment, model, price, isToken, url }
+  let __SIFT_CSV__   = '';
+
+  /* ===== Scryfall ===== */
+  function buildQuery(setCode, englishOnly){
+    let q='';
+    if(setCode==='EOE') q='e:eoe is:booster cn<=316 -finish:glossy -finish:etched';
+    else if(setCode==='EOS') q='e:eos cn<=45 -finish:glossy -finish:etched';
+    else if(setCode==='SPG') q='e:spg cn>=119 cn<=128';
+    else if(setCode==='TOK') q='e:teoe (layout:token or layout:double_faced_token or layout:emblem) -layout:art_series -name:"Punchcard"';
+    if(englishOnly) q+=' lang:en';
+    return q;
+  }
+  async function fetchAllPages(q, setLabel, statusEl){
+    const base='https://api.scryfall.com/cards/search?unique=prints&order=set&dir=asc&q=';
+    let url=base+encodeURIComponent(q), out=[], page=1;
+    while(url){
+      statusEl.textContent=`Fetching ${setLabel}: page ${page}…`;
+      let resp;
+      try{ resp=await fetch(url); }catch(e){ throw {set:setLabel,query:q,status:'NETWORK',details:e?.message||String(e)}; }
+      if(!resp.ok){ const text=await resp.text().catch(()=> ''); throw {set:setLabel,query:q,status:resp.status,details:text}; }
+      const json=await resp.json();
+      out = out.concat(json.data||[]);
+      url = json.has_more ? json.next_page : null;
+      page++; if(url) await sleep(120);
+    }
+    return out;
+  }
+
+  /* ===== Row collection ===== */
+  function rowsFromCards(cards, setTag, spgNonfoilOnly=false, isTokenSet=false, tokenFallback=null){
+    for(const c of cards){
+      const layout=c.layout||'';
+      if(!isTokenSet && (layout.includes('token') || layout==='art_series' || layout==='emblem')) continue;
+
+      if(isTokenSet){
+        const nameLC=(c.name||'').toLowerCase();
+        const isTokLayout=layout.includes('token'); const isEmblem=layout==='emblem';
+        if(!(isTokLayout || isEmblem)) continue;
+        if(nameLC.includes('punchcard')) continue;
+      }
+
+      const cn=padCollector(c.collector_number);
+      const cnNum=baseCN(c.collector_number);
+      if(!cn || (!isTokenSet && isNaN(cnNum))) continue;
+
+      const finishes=Array.isArray(c.finishes)?c.finishes:[];
+      const rarity=isTokenSet?(c.rarity?rarityLetter(c.rarity):'C'):rarityLetter(c.rarity);
+      const name=c.name;
+
+      const pushOne=(treat)=>{
+        const model = probModel({ set:setTag, cnBase:cnNum, rarity, treatment:treat });
+        if(!model) return;
+        let val = priceUSD(c, treat), usedFallback=false;
+        if(isTokenSet && !Number.isFinite(val)){
+          const tf=tokenFallback; if(Number.isFinite(tf)){ val=tf; usedFallback=true; }
+        }
+        __ROW_MODELS__.push({ model, price:val, isToken:isTokenSet, fallback:usedFallback });
+        __META_ROWS__.push({ setTag, cn, rarity, name, treatment:treat, model, price:val, isToken:isTokenSet, url:c.scryfall_uri||'' });
+      };
+
+      if(setTag==='SG' || spgNonfoilOnly){ if(finishes.includes('nonfoil')) pushOne('normal'); continue; }
+      if(isTokenSet){ pushOne('normal'); continue; }
+      if(finishes.includes('nonfoil')) pushOne('normal');
+      if(finishes.includes('foil'))    pushOne('foil');
+    }
+  }
+
+  /* ===== CSV helpers ===== */
+  function toCsv(rows){
+    return rows.map(r => r.map(v => {
+      const s=String(v??'');
+      return /[",\n]/.test(s)? '"'+s.replace(/"/g,'""')+'"' : s;
+    }).join(',')).join('\n');
+  }
+  function downloadCsv(filename, data){
+    const blob=new Blob(["\uFEFF"+data],{type:'text/csv;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename;
+    document.body.appendChild(a); a.click(); URL.revokeObjectURL(a.href); a.remove();
+  }
+
+  /* ===== Error box ===== */
+  function showErrorBox(err){
+    const box=document.getElementById('errorBox');
+    document.getElementById('errorMsg').innerHTML = `<strong>Set:</strong> ${err?.set||'Unknown'} &nbsp; <strong>Status:</strong> ${err?.status??'ERROR'}`;
+    document.getElementById('errorDetails').textContent = `Query:\n${err?.query||'(no query)'}\n\nResponse snippet:\n${String(err?.details||'').slice(0,800)}`;
+    box.style.display='';
+  }
+
+  /* ===== Aggregation ===== */
+  function aggregateFor(packs, includeTokens=true, useScaled=true){
+    let lowCount=0,estCount=0,highCount=0,lowEV=0,estEV=0,highEV=0,missingPrice=0,fallbackUsed=0;
+    for(const row of __ROW_MODELS__){
+      const {model,price,isToken,fallback}=row;
+      if(!includeTokens && isToken) continue;
+      const cnt=countFromModel(model,packs,isToken,useScaled); if(!cnt) continue;
+      lowCount+=cnt.lo; estCount+=cnt.est; highCount+=cnt.hi;
+      if(Number.isFinite(price)){ lowEV+=price*cnt.lo; estEV+=price*cnt.est; highEV+=price*cnt.hi; } else missingPrice++;
+      if(fallback) fallbackUsed++;
+    }
+    return {lowCount,estCount,highCount,lowEV,estEV,highEV,missingPrice,fallbackUsed};
+  }
+
+  function aggregateSift(packs,minUSD){
+    let include=0,exclude=0,missingPrice=0,tokensIncluded=0;
+    let lowEV=0,estEV=0,highEV=0,lowCount=0,estCount=0,highCount=0;
+    for(const row of __ROW_MODELS__){
+      const {model,price,isToken}=row;
+      const ok=Number.isFinite(price) && price>=minUSD;
+      if(ok){
+        include++; if(isToken) tokensIncluded++;
+        const cnt=countFromModel(model,packs,isToken,true);
+        if(cnt){ lowCount+=cnt.lo; estCount+=cnt.est; highCount+=cnt.hi; lowEV+=price*cnt.lo; estEV+=price*cnt.est; highEV+=price*cnt.hi; }
+      } else {
+        exclude++; if(!Number.isFinite(price)) missingPrice++;
+      }
+    }
+    return {include,exclude,tokensIncluded,lowCount,estCount,highCount,lowEV,estEV,highEV,missingPrice};
+  }
+
+  /* ===== Statistical range (CLT) ===== */
+  function statRange(packs, useSift, minUSD){
+    let meanPerPack=0, varPerPack=0, missingPrice=0, used=0;
+    for(const row of __ROW_MODELS__){
+      const {model,price,isToken}=row;
+      if(useSift && !(Number.isFinite(price) && price>=minUSD)) continue;
+      if(!Number.isFinite(price)){ missingPrice++; continue; }
+      const p = probEstScaled(model, isToken, true);
+      if(!Number.isFinite(p)) continue;
+      used++;
+      meanPerPack += p * price;
+      varPerPack  += p * (1 - p) * price * price;
+    }
+    const mean = meanPerPack * packs;
+    const sd   = Math.sqrt(Math.max(0, varPerPack * packs));
+    return { mean, sd, meanPerPack, varPerPack, missingPrice, used };
+  }
+
+  /* ===== Sift table (linked) ===== */
+  function renderSiftTable(minUSD){
+    const body=document.getElementById('siftBody'); body.innerHTML='';
+    for(const m of __META_ROWS__){
+      const ok = Number.isFinite(m.price) && m.price>=minUSD;
+      const cls= ok ? 'sift-ok' : 'sift-bad';
+      const {min:pMin,max:pMax}=probMinMaxScaled(m.model,m.isToken,true);
+      const c1k  = countFromModel(m.model,1000,   m.isToken,true);
+      const c30k = countFromModel(m.model,30000,  m.isToken,true);
+      const c300k= countFromModel(m.model,300000, m.isToken,true);
+
+      const tr=document.createElement('tr'); tr.className=cls;
+      const cells=[
+        m.setTag, m.cn, m.rarity, /*name link*/, m.treatment,
+        (Number.isFinite(pMin)?(pMin*100).toFixed(5)+'%':''), (Number.isFinite(pMax)?(pMax*100).toFixed(5)+'%':''), fmtUSD(m.price),
+        fmtCount(c1k?c1k.lo:NaN), fmtCount(c1k?c1k.hi:NaN),
+        fmtCount(c30k?c30k.lo:NaN), fmtCount(c30k?c30k.hi:NaN),
+        fmtCount(c300k?c300k.lo:NaN), fmtCount(c300k?c300k.hi:NaN)
+      ];
+      let td=document.createElement('td'); td.textContent=cells[0]; tr.appendChild(td);
+      td=document.createElement('td'); td.textContent=cells[1]; tr.appendChild(td);
+      td=document.createElement('td'); td.textContent=cells[2]; tr.appendChild(td);
+      td=document.createElement('td');
+      if(m.url){ const a=document.createElement('a'); a.href=m.url; a.target='_blank'; a.rel='noopener noreferrer'; a.textContent=m.name; td.appendChild(a); }
+      else td.textContent=m.name;
+      tr.appendChild(td);
+      td=document.createElement('td'); td.textContent=cells[4]; tr.appendChild(td);
+      for(let i=5;i<cells.length;i++){ const t=document.createElement('td'); t.textContent=cells[i]; tr.appendChild(t); }
+      body.appendChild(tr);
+    }
+    document.getElementById('siftTableWrap').style.display='';
+  }
+  function applySift(minUSD){
+    renderSiftTable(minUSD);
+    const header=['Set','Number','Rarity','Name','Treatment','Pack Prob Min (%)','Pack Prob Max (%)','Card Value (USD)','Per 1000 Min','Per 1000 Max','Per 30000 Min','Per 30000 Max','Per 300000 Min','Per 300000 Max'];
+    const rows=[], tbody=document.getElementById('siftBody');
+    for(const tr of tbody.querySelectorAll('tr')) rows.push(Array.from(tr.querySelectorAll('td')).map(td=>td.textContent));
+    __SIFT_CSV__ = toCsv([header, ...rows]);
+    document.getElementById('downloadSiftCsv').disabled=false;
+  }
+
+  /* ===== Totals (No Sift; collapsible) ===== */
+  function renderTotalsTable(){
+    const PACKS_PER_BOX=30;
+    const boxes = Math.max(0, parseFloat(document.getElementById('boxesToBuy').value)||0);
+    const P = boxes*PACKS_PER_BOX;
+
+    const body  = document.getElementById('totalsBody');
+    const notes = document.getElementById('totalsNotes');
+    body.innerHTML=''; notes.textContent='';
+
+    if(P<=0){ return; } // keep section collapsed + empty until user sets boxes
+
+    // Exact per spec: 14 cards + 1 token per pack
+    const exactPlaying = 14 * P;
+    const exactTokens  = 1  * P;
+    const exactItems   = exactPlaying + exactTokens;
+
+    // EV band — respect selected range mode, but always ignore Sift here
+    const mode = (document.querySelector('input[name="rangeMode"]:checked')||{}).value || 'stat';
+    const conf = parseFloat(document.getElementById('confLevel').value)||95;
+    const z    = zFromConf(conf);
+
+    let lowEV, estEV, highEV, missingNote='';
+    if(mode==='struct'){
+      const aggAll = aggregateFor(P, /*includeTokens=*/true, /*useScaled=*/true);
+      lowEV=aggAll.lowEV; estEV=aggAll.estEV; highEV=aggAll.highEV;
+      if(aggAll.missingPrice>0) missingNote=`${aggAll.missingPrice} rows had no USD price and were excluded from EV sums.`;
+      if(aggAll.fallbackUsed>0) missingNote += (missingNote?' ':'')+`${aggAll.fallbackUsed} token/emblem rows used the fallback (${document.getElementById('tokenFallback').value}).`;
+    }else{
+      const { mean, sd, missingPrice } = statRange(P, /*useSift=*/false, 0);
+      estEV = mean; lowEV = Math.max(0, mean - z*sd); highEV = mean + z*sd;
+      if(missingPrice>0) missingNote=`${missingPrice} rows had no USD price and were excluded from EV sums.`;
+    }
+
+    const perBoxLow  = boxes>0 ? lowEV/boxes : 0;
+    const perBoxEst  = boxes>0 ? estEV/boxes : 0;
+    const perBoxHigh = boxes>0 ? highEV/boxes : 0;
+
+    // Model‑check counts (playing cards only; normalized)
+    const aggCardsOnly = aggregateFor(P, /*includeTokens=*/false, /*useScaled=*/true);
+
+    body.innerHTML = `
+      <tr><td>Total expected cards + tokens @ ${P.toLocaleString()} packs (exact)</td>
+          <td>${fmtInt(exactItems)}</td><td>${fmtInt(exactItems)}</td><td>${fmtInt(exactItems)}</td></tr>
+      <tr><td>…of which tokens (exact)</td>
+          <td>${fmtInt(exactTokens)}</td><td>${fmtInt(exactTokens)}</td><td>${fmtInt(exactTokens)}</td></tr>
+      <tr><td>…of which playing cards (exact)</td>
+          <td>${fmtInt(exactPlaying)}</td><td>${fmtInt(exactPlaying)}</td><td>${fmtInt(exactPlaying)}</td></tr>
+      <tr><td>Model‑check: sum across per‑print playing cards (normalized)</td>
+          <td>${fmtInt(aggCardsOnly.lowCount)}</td><td>${fmtInt(aggCardsOnly.estCount)}</td><td>${fmtInt(aggCardsOnly.highCount)}</td></tr>
+      <tr><td>Total EV across ${P.toLocaleString()} packs (incl. tokens)</td>
+          <td>$${money(lowEV)}</td><td>$${money(estEV)}</td><td>$${money(highEV)}</td></tr>
+      <tr><td>EV per 30‑pack box (${boxes.toLocaleString()} boxes)</td>
+          <td>$${money(perBoxLow)}</td><td>$${money(perBoxEst)}</td><td>$${money(perBoxHigh)}</td></tr>
+    `;
+
+    const notesOut = [];
+    notesOut.push('Totals ignore Sift and include tokens.');
+    notesOut.push('Playing‑card probabilities are normalized so the per‑pack EST sums to 14; tokens are not normalized.');
+    if(missingNote) notesOut.push(missingNote);
+    notes.textContent = 'Notes: ' + notesOut.join(' ');
+  }
+
+  /* ===== Build flow ===== */
+  async function build(){
+    // Reset
+    document.getElementById('errorBox').style.display='none';
+    document.getElementById('purchasePanel').style.display='none';
+    document.getElementById('purchaseEVContainer').style.display='none';
+    document.getElementById('siftPanel').style.display='none';
+    document.getElementById('siftTableWrap').style.display='none';
+    document.getElementById('siftSummary').textContent='';
+    document.getElementById('preview').value='';
+    document.getElementById('status').textContent='Building list…';
+
+    // Collapse Totals by default each build
+    document.getElementById('totalsPanel').style.display='none';
+    const det = document.getElementById('totalsDetails');
+    if(det) det.open = false;
+    document.getElementById('totalsBody').innerHTML='';
+    document.getElementById('totalsNotes').textContent='';
+
+    __ROW_MODELS__=[]; __META_ROWS__=[]; __SIFT_CSV__='';
+
+    const englishOnly=document.getElementById('englishOnly').checked;
+    const incEOE=document.getElementById('includeEOE').checked;
+    const incEOS=document.getElementById('includeEOS').checked;
+    const incSPG=document.getElementById('includeSPG').checked;
+    const incTOK=document.getElementById('includeTOK').checked;
+    __TOKEN_POOL__=Math.max(1, parseInt(document.getElementById('tokenPool').value,10)||11);
+    const tokenFallback=parseUSD(document.getElementById('tokenFallback').value);
+
+    const status=document.getElementById('status');
+    const counts=document.getElementById('counts');
+    const queriesEl=document.getElementById('queries');
+    const preview=document.getElementById('preview');
+
+    const header=['Set','Number','Rarity','Name','Treatment','Pack Prob Min (%)','Pack Prob Max (%)','Card Value (USD)','Per 1000 Min','Per 1000 Max','Per 30000 Min','Per 30000 Max','Per 300000 Min','Per 300000 Max'];
+
+    const qList=[];
+    if(incEOE) qList.push(['EOE', buildQuery('EOE', englishOnly)]);
+    if(incEOS) qList.push(['EoE:SS', buildQuery('EOS', englishOnly)]);
+    if(incSPG) qList.push(['SG', buildQuery('SPG', englishOnly)]);
+    if(incTOK) qList.push(['TOK', buildQuery('TOK', englishOnly)]);
+    queriesEl.textContent = qList.map(([tag,q])=>`${tag}: ${q}`).join('\n');
+
+    try{
+      status.textContent='Starting…';
+      const results=[];
+      for(const [tag,q] of qList){ const cards = await fetchAllPages(q, tag, status); results.push([tag,cards]); }
+      for(const [tag,cards] of results){ rowsFromCards(cards, tag, tag==='SG', tag==='TOK', tokenFallback); }
+
+      // Normalize to exactly 14 playing cards per pack (EST)
+      const rawAggPerPack = aggregateFor(1,false,false);
+      __NORM_SCALE__ = (rawAggPerPack && rawAggPerPack.estCount) ? (14 / rawAggPerPack.estCount) : 1;
+
+      // Sort meta
+      __META_ROWS__.sort((a,b)=>{
+        if(a.setTag!==b.setTag) return a.setTag.localeCompare(b.setTag);
+        const pa=(a.cn||'').match(/^(\d+)(.*)$/)||[], pb=(b.cn||'').match(/^(\d+)(.*)$/)||[];
+        const na=pa[1]?parseInt(pa[1],10):0, nb=pb[1]?parseInt(pb[1],10):0;
+        if(na!==nb) return na-nb; const sa=pa[2]||'', sb=pb[2]||'';
+        if(sa!==sb) return sa.localeCompare(sb);
+        if(a.name!==b.name) return a.name.localeCompare(b.name);
+        return a.treatment.localeCompare(b.treatment);
+      });
+
+      // Build CSV
+      const allRows = __META_ROWS__.map(m=>{
+        const {min:pMin,max:pMax}=probMinMaxScaled(m.model,m.isToken,true);
+        const c1k  = countFromModel(m.model,1000,   m.isToken,true);
+        const c30k = countFromModel(m.model,30000,  m.isToken,true);
+        const c300k= countFromModel(m.model,300000, m.isToken,true);
+        return [ m.setTag, m.cn, m.rarity, m.name, m.treatment,
+          (Number.isFinite(pMin)?(pMin*100).toFixed(5)+'%':''), (Number.isFinite(pMax)?(pMax*100).toFixed(5)+'%':''), fmtUSD(m.price),
+          fmtCount(c1k?c1k.lo:NaN), fmtCount(c1k?c1k.hi:NaN),
+          fmtCount(c30k?c30k.lo:NaN), fmtCount(c30k?c30k.hi:NaN),
+          fmtCount(c300k?c300k.lo:NaN), fmtCount(c300k?c300k.hi:NaN) ];
+      });
+      const csv = toCsv([header, ...allRows]); window.__CSV__=csv; preview.value=csv.slice(0,300000);
+      document.getElementById('downloadCsv').disabled=false;
+      document.getElementById('copyCsv').disabled=false;
+
+      // Sift view + Purchase panel
+      document.getElementById('siftPanel').style.display='';
+      document.getElementById('applySift').disabled=false;
+      document.getElementById('purchasePanel').style.display='';
+      document.getElementById('calcEV').disabled=false;
+
+      // Auto‑apply Sift and counts
+      const minUSD=parseUSD(document.getElementById('siftMin').value) ?? 0.25;
+      applySift(minUSD);
+
+      const eoeCount = __META_ROWS__.filter(r=>r.setTag==='EOE').length;
+      const eosCount = __META_ROWS__.filter(r=>r.setTag==='EoE:SS').length;
+      const spgCount = __META_ROWS__.filter(r=>r.setTag==='SG').length;
+      const tokCount = __META_ROWS__.filter(r=>r.setTag==='TOK').length;
+      counts.innerHTML = `Built <b>${__META_ROWS__.length.toLocaleString()}</b> rows — EOE: <b>${eoeCount.toLocaleString()}</b>, EoE:SS: <b>${eosCount.toLocaleString()}</b>, SG: <b>${spgCount.toLocaleString()}</b>, TOK: <b>${tokCount.toLocaleString()}</b>.`;
+
+      document.getElementById('status').textContent = `Done. (Normalization factor: ${__NORM_SCALE__.toFixed(5)})`;
+
+      // Initial EV render and reveal the collapsible Totals panel (collapsed)
+      renderPurchaseEV();
+      renderTotalsTable();
+      document.getElementById('totalsPanel').style.display='';
+      if(det) det.open = false;
+    }catch(err){
+      console.error(err); document.getElementById('status').textContent='Error while building — see details below.'; showErrorBox(err);
+      document.getElementById('downloadCsv').disabled=true; document.getElementById('copyCsv').disabled=true;
+      document.getElementById('applySift').disabled=true; document.getElementById('downloadSiftCsv').disabled=true; document.getElementById('calcEV').disabled=true;
+    }
+  }
+
+  /* ===== Purchase EV rendering ===== */
+  function renderPurchaseEV(){
+    const PACKS_PER_BOX=30;
+    const boxes = Math.max(0, parseFloat(document.getElementById('boxesToBuy').value)||0);
+    const packs = boxes*PACKS_PER_BOX;
+    const useSift = document.getElementById('useSiftForEV').checked;
+    const minUSD = parseUSD(document.getElementById('siftMin').value) ?? 0.25;
+    const mode = (document.querySelector('input[name="rangeMode"]:checked')||{}).value || 'stat';
+    const conf = parseFloat(document.getElementById('confLevel').value)||95;
+    const z = zFromConf(conf);
+
+    let lowEV, estEV, highEV, tag;
+    let missingPriceNote = '';
+
+    if(mode==='struct'){
+      if(useSift){
+        const agg = aggregateSift(packs, minUSD);
+        lowEV=agg.lowEV; estEV=agg.estEV; highEV=agg.highEV;
+        if(agg.missingPrice>0) missingPriceNote=`${agg.missingPrice} rows without USD were excluded.`;
+      }else{
+        const agg = aggregateFor(packs,true,true);
+        lowEV=agg.lowEV; estEV=agg.estEV; highEV=agg.highEV;
+        if(agg.missingPrice>0) missingPriceNote=`${agg.missingPrice} rows without USD were excluded.`;
+      }
+      tag = `Structural model band (slot‑odds uncertainty)`;
+    }else{
+      const { mean, sd, missingPrice } = statRange(packs, useSift, minUSD);
+      estEV = mean;
+      lowEV = Math.max(0, mean - z*sd);
+      highEV= mean + z*sd;
+      tag = `Statistical ${conf}% interval (CLT)`;
+      if(missingPrice>0) missingPriceNote=`${missingPrice} rows without USD were excluded.`;
+    }
+
+    const perBoxLow  = boxes>0 ? lowEV/boxes : 0;
+    const perBoxEst  = boxes>0 ? estEV/boxes : 0;
+    const perBoxHigh = boxes>0 ? highEV/boxes : 0;
+
+    const evDiv=document.getElementById('purchaseEVContainer');
+    evDiv.innerHTML=`
+      <table>
+        <thead><tr><th>Metric</th><th>Low</th><th>Est.</th><th>High</th></tr></thead>
+        <tbody>
+          <tr><td>${tag} — across ${packs.toLocaleString()} packs</td><td>$${money(lowEV)}</td><td>$${money(estEV)}</td><td>$${money(highEV)}</td></tr>
+          <tr><td>${tag} — per 30‑pack box</td><td>$${money(perBoxLow)}</td><td>$${money(perBoxEst)}</td><td>$${money(perBoxHigh)}</td></tr>
+        </tbody>
+      </table>
+    `;
+    evDiv.style.display='';
+
+    const notes=[];
+    notes.push(`Boxes: ${boxes.toLocaleString()} × 30 = ${packs.toLocaleString()} packs.`);
+    notes.push(`Using ${useSift ? `Sift ≥ $${(Number.isFinite(minUSD)?minUSD:0.25).toFixed(2)}` : 'all prints'}.`);
+    if(mode==='stat') notes.push(`Variance method: Σ p·(1−p)·value² per pack (independence approximation).`);
+    if(missingPriceNote) notes.push(missingPriceNote);
+    document.getElementById('purchaseSummary').textContent = notes.join(' ');
+
+    const rangeNotes = document.getElementById('rangeNotes');
+    if(mode==='struct'){
+      rangeNotes.textContent = 'Structural range reflects uncertainty in exact slot odds for certain families (e.g., ≤ or ranges). It scales roughly linearly with packs.';
+    }else{
+      rangeNotes.textContent = 'Statistical range reflects random pack variance and narrows with more boxes (~1/√n). Actual slot correlations can make the true interval slightly narrower.';
+    }
+
+    // Keep collapsible totals in sync
+    renderTotalsTable();
+  }
+
+  /* ===== Hooks ===== */
+  document.getElementById('buildBtn').addEventListener('click', build);
+  document.getElementById('downloadCsv').addEventListener('click', ()=>{ if(window.__CSV__) downloadCsv('EOE_PlayBooster_List_Normalized.csv', window.__CSV__); });
+  document.getElementById('copyCsv').addEventListener('click', async ()=>{
+    if(!window.__CSV__) return;
+    try{ await navigator.clipboard.writeText(window.__CSV__); alert('CSV copied to clipboard.'); }
+    catch{ const t=document.getElementById('preview'); t.focus(); t.select(); alert('Select all (Ctrl/Cmd+A) and copy (Ctrl/Cmd+C).'); }
+  });
+
+  document.getElementById('applySift').addEventListener('click', ()=>{
+    const minUSD=parseUSD(document.getElementById('siftMin').value) ?? 0.25;
+    applySift(minUSD); renderPurchaseEV();
+  });
+  document.getElementById('downloadSiftCsv').addEventListener('click', ()=>{ if(__SIFT_CSV__) downloadCsv('EOE_PlayBooster_SiftTable.csv', __SIFT_CSV__); });
+
+  // EV inputs reactively update + totals follow
+  document.getElementById('calcEV').addEventListener('click', renderPurchaseEV);
+  document.getElementById('boxesToBuy').addEventListener('change', renderPurchaseEV);
+  document.getElementById('useSiftForEV').addEventListener('change', renderPurchaseEV);
+  document.getElementById('siftMin').addEventListener('change', ()=>{ applySift(parseUSD(document.getElementById('siftMin').value) ?? 0.25); renderPurchaseEV(); });
+  document.getElementById('confLevel').addEventListener('change', renderPurchaseEV);
+  for(const r of document.querySelectorAll('input[name="rangeMode"]')) r.addEventListener('change', renderPurchaseEV);
+
+  // Auto‑build on page load
+  window.addEventListener('DOMContentLoaded', () => {
+    build();
+  });
+</script>
+</body>
+</html>
