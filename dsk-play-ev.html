@@ -1,0 +1,732 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Duskmourn — Play Box EV</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  html{background-color:#0b0d10}
+  /* All styles scoped under .eoe-app for portability */
+  .eoe-app{
+    --bg:#0b0d10; --fg:#e8ecf1; --muted:#a7b0bb; --acc:#6ac1ff;
+    --card:#151a20; --line:#222a33; --ok:#1e7f3c; --warn:#9b2c2c;
+    --est-bg:rgba(106,193,255,.18); --est-line:#6ac1ff;
+    max-width:1120px; margin:32px auto; padding:0 16px; box-sizing:border-box;
+    color:var(--fg); background:var(--bg); font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  }
+  .eoe-app a{ color:var(--acc); text-decoration:underline }
+  .eoe-app h1{font-size:22px;margin:0 0 12px}
+  .eoe-app p.lede{color:var(--muted);margin:0 0 16px}
+  .panel{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; margin:16px 0}
+  .row{display:flex; flex-wrap:wrap; gap:12px; align-items:center}
+  label{display:flex; gap:6px; align-items:center}
+  input[type="number"], input[type="text"], select{
+    background:#0e1216; color:#cfe3f5; border:1px solid #2a3541; border-radius:6px; padding:6px;
+  }
+  button{appearance:none;border:1px solid #2c3845;background:#1b232c;color:var(--fg);padding:10px 14px;border-radius:8px;cursor:pointer}
+  button[disabled]{opacity:.55;cursor:default}
+  .btn-primary{
+    border-color:var(--est-line); background:linear-gradient(180deg,#203245,#1a2530);
+    color:#dff1ff; font-weight:600; position:relative; animation:pulse 2.2s infinite;
+  }
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(106,193,255,.45)}70%{box-shadow:0 0 0 10px rgba(106,193,255,0)}100%{box-shadow:0 0 0 0 rgba(106,193,255,0)}}
+  .hi-inline{display:flex;align-items:center;gap:6px;border:1px solid var(--est-line);background:var(--est-bg);border-radius:8px;padding:6px 8px}
+  .hi-label{border:1px solid var(--est-line);background:var(--est-bg);border-radius:8px;padding:6px 8px}
+  .nav-row{display:flex;justify-content:space-between;align-items:center;margin:0 0 12px}
+  .back-link{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:#10171f;border:1px solid var(--line);color:#dff1ff;text-decoration:none}
+  .back-link:hover{border-color:var(--acc);color:#fff}
+  .arrow{font-size:16px;line-height:1}
+  table{width:100%;border-collapse:collapse;margin-top:8px}
+  th,td{border:1px solid #2a3541;padding:6px 8px;text-align:right}
+  th:first-child,td:first-child{text-align:left}
+  thead th{background:#0e1216;position:sticky;top:0;z-index:1}
+  tbody tr:nth-child(even){background:#12171d}
+  .sift-tablewrap{max-height:520px;overflow:auto;border:1px solid #2a3541;border-radius:8px;margin-top:8px}
+  .pill{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid #2a3541}
+  .pill.ok{background:rgba(30,127,60,.20);color:#d9ffe3;border-color:#1e7f3c}
+  .pill.bad{background:rgba(155,44,44,.16);color:#ffdede;border-color:#9b2c2c}
+  .sift-ok{background:rgba(30,127,60,.12)!important}
+  .sift-bad{background:rgba(155,44,44,.10)!important}
+  .evbox th:nth-child(3), .evbox td:nth-child(3){
+    background:var(--est-bg); border-color:var(--est-line); border-left-color:var(--est-line); color:#eaf6ff; font-weight:700;
+  }
+  .evbox th:nth-child(2), .evbox td:nth-child(2){ border-right-color:var(--est-line) }
+  .note{color:#a7b0bb;font-size:12px;margin-top:6px}
+  .error-panel{border-color:#ff7a7a!important}
+  .error-panel h2{margin:0 0 8px;color:#ff7a7a;font-size:16px}
+  .error-panel pre{white-space:pre-wrap;background:#0e1216;border:1px solid #2a3541;padding:8px;border-radius:6px;color:#ffd4d4}
+</style>
+</head>
+<body>
+<main class="eoe-app" role="main" aria-label="Duskmourn — Play Box EV">
+  <!-- Back to index (optional; leave if your index is co-located) -->
+  <nav class="nav-row" aria-label="Top navigation">
+    <a class="back-link" href="./index.html"><span class="arrow">←</span> Back to EV Tools Index</a>
+  </nav>
+
+  <h1>Duskmourn — Play Booster EV</h1>
+  <p class="lede">Auto‑builds on load. Probabilities are normalized to exactly <strong>14 Magic cards per pack</strong> (tokens/art not scaled). Per‑box math uses <strong>36 packs</strong>.</p>
+
+  <div class="panel">
+    <strong>Refresh data</strong>
+    <div class="row" style="margin-top:6px">
+      <label><input type="checkbox" id="englishOnly" checked> English‑only</label>
+      <label><input type="checkbox" id="includeDSK" checked> Include <strong>DSK</strong> (1–367; Play‑eligible)</label>
+      <label><input type="checkbox" id="includeSPG" checked> Include <strong>SPG</strong> (64–73; nonfoil only)</label>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <label><input type="checkbox" id="includeTOK" checked> Include <strong>TDSK</strong> tokens</label>
+      <label>Token fallback (USD): <input type="text" id="tokenFallback" value="0.05" size="6"></label>
+      <label>Token pool size: <input type="number" id="tokenPool" value="20" min="1" step="1" style="width:8ch"></label>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <label><input type="checkbox" id="includeART" checked> Include <strong>ADSK</strong> art (normal + signed)</label>
+      <label>Art fallback (USD): <input type="text" id="artFallback" value="0.05" size="6"></label>
+    </div>
+    <div class="row actions">
+      <button id="buildBtn" class="btn-primary" title="Fetch live Scryfall data and recompute everything">Refresh List</button>
+      <button id="downloadCsv" disabled>Download CSV</button>
+      <button id="copyCsv" disabled>Copy CSV</button>
+    </div>
+    <div id="status" class="note" aria-live="polite">Preparing…</div>
+    <div id="counts" class="note"></div>
+  </div>
+
+  <!-- Purchase EV -->
+  <div id="purchasePanel" class="panel" style="display:none">
+    <strong>Purchase EV Calculator</strong>
+    <div class="row" style="margin-top:6px">
+      <label class="hi-label">Boxes to buy: <input type="number" id="boxesToBuy" value="1" min="0" step="1" style="width:10ch"></label>
+      <span class="hi-inline" title="Only count prints with card value ≥ this amount">
+        <input type="checkbox" id="useSiftForEV" checked>
+        <span><strong>Use Sift (≥)</strong></span>
+        <input type="text" id="siftMin" value="0.25" style="width:8ch">
+      </span>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <label><input type="radio" name="rangeMode" value="stat" checked> Statistical range (CLT)</label>
+      <label><input type="radio" name="rangeMode" value="struct"> Structural range (model band)</label>
+      <label>Confidence:
+        <select id="confLevel">
+          <option value="68">68% (~1σ)</option>
+          <option value="90">90% (~1.645σ)</option>
+          <option value="95" selected>95% (~1.96σ)</option>
+          <option value="99">99% (~2.576σ)</option>
+        </select>
+      </label>
+      <button id="calcEV" disabled>Calculate EV</button>
+    </div>
+    <div id="purchaseSummary" class="note"></div>
+    <div id="purchaseEVContainer" class="evbox" style="display:none"></div>
+    <div id="rangeNotes" class="note"></div>
+  </div>
+
+  <!-- Sift table -->
+  <div id="siftPanel" class="panel" style="display:none">
+    <strong>Row List (linked) — highlight by Sift threshold</strong>
+    <div class="row">
+      <span class="pill ok">≥ threshold</span>
+      <span class="pill bad">&lt; threshold</span>
+      <button id="applySift" disabled>Re‑Apply Sift</button>
+      <button id="downloadSiftCsv" disabled>Download Sift Table</button>
+    </div>
+    <div id="siftSummary" class="note" aria-live="polite"></div>
+    <div class="sift-tablewrap" id="siftTableWrap" style="display:none">
+      <table id="siftTable">
+        <thead>
+          <tr>
+            <th>Set</th><th>No.</th><th>R</th><th>Name</th><th>Treat</th>
+            <th>Pack Prob Min (%)</th><th>Pack Prob Max (%)</th><th>Card Value (USD)</th>
+            <th>Per 1000 Min</th><th>Per 1000 Max</th>
+            <th>Per 30000 Min</th><th>Per 30000 Max</th>
+            <th>Per 300000 Min</th><th>Per 300000 Max</th>
+          </tr>
+        </thead>
+        <tbody id="siftBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div id="errorBox" class="panel error-panel" style="display:none">
+    <h2>Load failed</h2>
+    <div id="errorMsg"></div>
+    <pre id="errorDetails"></pre>
+  </div>
+
+  <div class="panel">
+    <strong>CSV preview</strong>
+    <textarea id="preview" placeholder="Your CSV will appear after the list builds…" style="width:100%;min-height:220px;background:#0e1216;color:#cfe3f5;border:1px solid #2a3541;border-radius:8px;padding:10px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;"></textarea>
+    <details>
+      <summary>Advanced: Scryfall queries</summary>
+      <pre id="queries" style="white-space:pre-wrap"></pre>
+    </details>
+  </div>
+
+  <footer class="note">
+    Prices are Scryfall per‑print (usd / usd_foil). Tokens & art use fallback if missing USD.  
+    Statistical variance assumes independent per‑print hits; real collation slightly narrows true intervals.  
+    UI/interaction pattern matches the earlier Play EV tool for consistency. :contentReference[oaicite:6]{index=6}
+  </footer>
+
+  <!-- Bottom back link -->
+  <nav class="nav-row" aria-label="Bottom navigation" style="margin-top:12px">
+    <a class="back-link" href="./index.html"><span class="arrow">←</span> Back to EV Tools Index</a>
+  </nav>
+</main>
+
+<script>
+/* ========= Helpers ========= */
+const rarityLetter = r => ({ common:'C', uncommon:'U', rare:'R', mythic:'M' }[r] || (r ? r[0].toUpperCase() : ''));
+const sleep = ms => new Promise(res => setTimeout(res, ms));
+const padCollector = s => { const m=String(s||'').match(/^(\d+)(.*)$/); return m?m[1].padStart(4,'0')+(m[2]||''):(s||''); };
+const baseCN = s => { const m=String(s||'').match(/^(\d+)/); return m?parseInt(m[1],10):NaN; };
+const parseUSD = s => { const n=parseFloat(String(s).replace(/[^0-9.]/g,'')); return Number.isFinite(n)?n:null; };
+const money = n => Number.isFinite(n)? n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) : '';
+const fmtUSD = n => money(n);
+const fmtCount = n => !Number.isFinite(n)? '' : (Math.abs(n-Math.round(n))<1e-9? String(Math.round(n)) : (n>=100?n.toFixed(1):n>=10?n.toFixed(2):n.toFixed(3)));
+const fmtPct5 = x => Number.isFinite(x) ? (x*100).toFixed(5)+'%' : '';
+const zFromConf = c => { c=Math.round(c); if(c>=99)return 2.576; if(c>=95)return 1.96; if(c>=90)return 1.645; if(c>=68)return 1.0; return 1.96; };
+const priceUSD = (card, treat) => { const p=(treat==='foil'?card?.prices?.usd_foil:card?.prices?.usd); const f=parseFloat(p); return Number.isFinite(f)?f:null; };
+
+/* ========= Pack/odds model (DSK) =========
+   References:
+   - Play Booster composition + land slot split + SPG behavior: Wizards “Collecting Duskmourn”. (See assistant note)
+   - Art cards: 30% art + an additional 5% signed art (total 35% art), 65% token/ad.
+   - SPG in Play Boosters: nonfoil only; 10 cards; replaces a common in 1/64 packs.
+   We normalize all *playing-card* probabilities so the per-pack EST sums to exactly 14.
+*/
+const ODDS = {
+  // Expected common slots: 6–7 commons baseline => model at ~6.5,
+  // + 12.5% of wildcard to commons (heuristic) − SPG replacement of a common (1/64 ≈ 0.015625).
+  E_COMMON_SLOTS: 6.5 + 0.125 - (1/64),
+
+  // Uncommons: 3 baseline + heuristic 62.5% of wildcard to uncommons.
+  E_UNCOMMON_SLOTS: 3 + 0.625,
+
+  // Main set rarity counts (DSK): 81C / 100U / 60R / 20M from Wizards post.
+  N_COMMONS: 81, N_UNCOMMONS: 100, N_RARES: 60, N_MYTHICS: 20,
+
+  // Rare-slot totals by rarity group in DSK (percent of packs)
+  //  - 60 main rares (75%), 20 main mythics (12.6%)
+  //  - Booster-Fun rares (8.2%) + mythics (1.4%)
+  //  - Lurking-evil rares (2.5%) + mythics (0.3%)
+  RS_RARE_TOTAL: 0.75 + 0.082 + 0.025,     // 0.857
+  RS_MYTHIC_TOTAL: 0.126 + 0.014 + 0.003,  // 0.143
+
+  // Wildcard (nonfoil) extra hits to R/M; keep aligned with earlier tools
+  WC_RARE: 0.106,
+  WC_MYTHIC: 0.010,
+
+  // Foil (traditional) slot by rarity (heuristic, consistent with prior pages)
+  FOIL_C: 0.58, FOIL_U: 0.32, FOIL_R: 0.064, FOIL_M: 0.011,
+
+  // Land slot (from Wizards): per-pack shares
+  LAND_MANOR_NF: 0.133, LAND_MANOR_F: 0.033,          // 5 full-art manor basics
+  LAND_BASIC_NF: 0.267, LAND_BASIC_F: 0.067,          // 10 regular basics
+  LAND_DUALC_NF: 0.40,  LAND_DUALC_F: 0.10,           // 10 common duals
+
+  // SPG replacement (nonfoil only, replaces a common 1/64)
+  SPG_ANY: (1/64)
+};
+
+// Family sizes for land distributions
+const FAM = { MANOR_BASICS:5, REG_BASICS:10, DUAL_COMMON:10 };
+
+// Normalization factor (applies to playing cards only; tokens/art untouched)
+let __NORM_SCALE__ = 1;
+// External pools
+let __TOKEN_POOL__ = 20;  // default; user-editable
+let __ART_POOL__   = 54;  // ADSK art count (non-signed); signed variants mirror 54
+
+/* ----- Probability model per print ----- */
+function probModel({ set, card, cnBase, rarity, treatment }){
+  // Art cards (ADSK): split normal vs signed by collector_number suffix
+  if(set==='ADSK'){
+    if(treatment!=='normal' && treatment!=='signed') return null;
+    const isSigned = (treatment==='signed');
+    const p = isSigned ? (0.05 / __ART_POOL__) : (0.30 / __ART_POOL__); // 5% signed + 30% normal
+    return { type:'point', p };
+  }
+
+  // Tokens/emblems (TDSK): equal among pool; tokens/art slot = 65% tokens + 35% art (art handled above)
+  if(set==='TDSK'){
+    if(treatment!=='normal') return null;
+    return { type:'point', p: 0.65 / Math.max(1,__TOKEN_POOL__) };
+  }
+
+  // Special Guests (SPG 64–73): nonfoil only in Play Boosters, 1/64 replaces a common, equally split
+  if(set==='SPG'){
+    if(treatment!=='normal') return null;
+    return { type:'point', p: ODDS.SPG_ANY / 10.0 };
+  }
+
+  // Main set (DSK): land families first
+  if(set==='DSK'){
+    // Land classification by CN/type (from Wizards: manor basics are CN 272–276)
+    const typeLine = (card?.type_line || '').toLowerCase();
+    const isBasic = typeLine.includes('basic land');
+    const isLand  = typeLine.includes('land');
+    const finishes = Array.isArray(card?.finishes)?card.finishes:[];
+    const hasFoil = finishes.includes('foil');
+    const nonfoil = finishes.includes('nonfoil');
+    const isManorCN = isBasic && cnBase>=272 && cnBase<=276;
+    const isRegularBasic = isBasic && !isManorCN;
+    const isCommonDual = isLand && !isBasic && rarity==='C';
+
+    if(isManorCN){
+      if(treatment==='normal') return {type:'point', p: ODDS.LAND_MANOR_NF / FAM.MANOR_BASICS};
+      if(treatment==='foil')   return {type:'point', p: ODDS.LAND_MANOR_F  / FAM.MANOR_BASICS};
+      return null;
+    }
+    if(isRegularBasic){
+      if(treatment==='normal') return {type:'point', p: ODDS.LAND_BASIC_NF / FAM.REG_BASICS};
+      if(treatment==='foil')   return {type:'point', p: ODDS.LAND_BASIC_F  / FAM.REG_BASICS};
+      return null;
+    }
+    if(isCommonDual){
+      if(treatment==='normal') return {type:'point', p: ODDS.LAND_DUALC_NF / FAM.DUAL_COMMON};
+      if(treatment==='foil')   return {type:'point', p: ODDS.LAND_DUALC_F  / FAM.DUAL_COMMON};
+      return null;
+    }
+
+    // Non-land DSK prints
+    if(rarity==='C'){
+      if(treatment==='normal') return { type:'point', p: ODDS.E_COMMON_SLOTS / ODDS.N_COMMONS };
+      if(treatment==='foil')   return { type:'point', p: ODDS.FOIL_C / ODDS.N_COMMONS };
+      return null;
+    }
+    if(rarity==='U'){
+      if(treatment==='normal') return { type:'point', p: ODDS.E_UNCOMMON_SLOTS / ODDS.N_UNCOMMONS };
+      if(treatment==='foil')   return { type:'point', p: ODDS.FOIL_U / ODDS.N_UNCOMMONS };
+      return null;
+    }
+    if(rarity==='R'){
+      if(treatment==='normal') return { type:'point', p: (ODDS.RS_RARE_TOTAL) / __COUNT_R_RNF__ + (ODDS.WC_RARE) / __COUNT_R_RNF__ };
+      if(treatment==='foil')   return { type:'point', p: ODDS.FOIL_R / __COUNT_R_RFOIL__ };
+      return null;
+    }
+    if(rarity==='M'){
+      if(treatment==='normal') return { type:'point', p: (ODDS.RS_MYTHIC_TOTAL) / __COUNT_M_RNF__ + (ODDS.WC_MYTHIC) / __COUNT_M_RNF__ };
+      if(treatment==='foil')   return { type:'point', p: ODDS.FOIL_M / __COUNT_M_RFOIL__ };
+      return null;
+    }
+  }
+
+  return null;
+}
+
+/* ----- Counting & scaling ----- */
+function countFromModelRaw(model, packs){
+  if(!model) return null;
+  if(model.type==='point') return { lo:model.p*packs, est:model.p*packs, hi:model.p*packs, max:model.p*packs };
+  if(model.type==='range') return { lo:model.lo*packs, est:((model.lo+model.hi)/2)*packs, hi:model.hi*packs, max:model.hi*packs };
+  if(model.type==='max')   return { lo:0, est:(model.max/2)*packs, hi:model.max*packs, max:model.max*packs };
+  return null;
+}
+function probMinMaxRaw(model){
+  if(!model) return {min:null, max:null};
+  if(model.type==='point') return {min:model.p, max:model.p};
+  if(model.type==='range') return {min:model.lo, max:model.hi};
+  if(model.type==='max')   return {min:0, max:model.max};
+  return {min:null, max:null};
+}
+function countFromModel(model, packs, isNonGame=false){
+  const c = countFromModelRaw(model, packs);
+  if(!c) return c;
+  if(isNonGame) return c; // tokens/art not normalized
+  return { lo:c.lo*__NORM_SCALE__, est:c.est*__NORM_SCALE__, hi:c.hi*__NORM_SCALE__, max:c.max*__NORM_SCALE__ };
+}
+function probMinMaxScaled(model, isNonGame=false){
+  const {min,max}=probMinMaxRaw(model);
+  if(min==null) return {min,max};
+  return isNonGame? {min,max} : {min:min*__NORM_SCALE__, max:max*__NORM_SCALE__};
+}
+
+/* ----- Data state ----- */
+let __ROW_MODELS__ = []; // { model, price, isNonGame }
+let __META_ROWS__  = []; // { setTag, cn, rarity, name, treatment, model, price, isNonGame, url }
+let __SIFT_CSV__   = '';
+
+/* ----- Scryfall ----- */
+function buildQuery(setCode, englishOnly){
+  let q='';
+  if(setCode==='DSK'){ q='e:dsk is:booster cn<=367 -finish:glossy -finish:etched -finish:textured'; }
+  else if(setCode==='SPG'){ q='e:spg cn>=64 cn<=73'; }               // DSK wave of SPG
+  else if(setCode==='TDSK'){ q='e:tdsk (layout:token or layout:double_faced_token or layout:emblem)'; }
+  else if(setCode==='ADSK'){ q='e:adsk'; }
+  if(englishOnly) q+=' lang:en';
+  return q;
+}
+async function fetchAllPages(q, setLabel, statusEl){
+  const base='https://api.scryfall.com/cards/search?unique=prints&order=set&dir=asc&q=';
+  let url=base+encodeURIComponent(q), out=[], page=1;
+  while(url){
+    statusEl.textContent=`Fetching ${setLabel}: page ${page}…`;
+    let resp;
+    try{ resp=await fetch(url); }catch(e){ throw {set:setLabel,query:q,status:'NETWORK',details:e?.message||String(e)}; }
+    if(!resp.ok){ const text=await resp.text().catch(()=> ''); throw {set:setLabel,query:q,status:resp.status,details:text}; }
+    const json=await resp.json();
+    out = out.concat(json.data||[]);
+    url = json.has_more ? json.next_page : null;
+    page++; if(url) await sleep(120);
+  }
+  return out;
+}
+
+/* ----- Row building ----- */
+function rowsFromCards(cards, tag, opts){
+  const { spgNonfoilOnly=false, isToken=false, isArt=false, tokenFallback=null, artFallback=null } = (opts||{});
+  for(const c of cards){
+    const layout=c.layout||'';
+    const finishes=Array.isArray(c.finishes)?c.finishes:[];
+    const rarity = isToken||isArt ? (c.rarity ? rarityLetter(c.rarity) : 'C') : rarityLetter(c.rarity);
+    const cn = padCollector(c.collector_number);
+    const cnNum = baseCN(c.collector_number);
+    if(!cn) continue;
+
+    // Filter out non-game layouts when not in token/art sets
+    if(!(isToken||isArt) && (layout.includes('token') || layout==='art_series' || layout==='emblem')) continue;
+
+    const name=c.name;
+    const url=c.scryfall_uri||'';
+
+    const pushOne=(treat)=>{
+      const model = probModel({ set:tag, card:c, cnBase:cnNum, rarity, treatment:treat });
+      if(!model) return;
+      // price: tokens & art may be missing; allow fallback
+      let val = priceUSD(c, treat);
+      let usedFallback=false;
+      if(isToken && !Number.isFinite(val) && Number.isFinite(tokenFallback)){ val=tokenFallback; usedFallback=true; }
+      if(isArt   && !Number.isFinite(val) && Number.isFinite(artFallback)){   val=artFallback;   usedFallback=true; }
+      __ROW_MODELS__.push({ model, price:val, isNonGame:(isToken||isArt), fallback:usedFallback });
+      __META_ROWS__.push({ setTag:tag, cn, rarity, name, treatment:treat, model, price:val, isNonGame:(isToken||isArt), url });
+    };
+
+    if(tag==='SPG' || spgNonfoilOnly){
+      if(finishes.includes('nonfoil')) pushOne('normal'); // Play Boosters: SPG nonfoil only
+      continue;
+    }
+
+    if(tag==='TDSK'){ pushOne('normal'); continue; }
+
+    if(tag==='ADSK'){
+      // Split art normal vs signed by CN suffix (e.g., 34 / 34s)
+      const isSigned = /[A-Za-z]$/.test(c.collector_number) && c.collector_number.toLowerCase().endsWith('s');
+      pushOne(isSigned ? 'signed' : 'normal');
+      continue;
+    }
+
+    // DSK main set: standard nonfoil/foil
+    if(finishes.includes('nonfoil')) pushOne('normal');
+    if(finishes.includes('foil'))    pushOne('foil');
+  }
+}
+
+/* ----- Aggregation ----- */
+function aggregateFor(packs, includeNonGame=true){
+  let lowCount=0,estCount=0,highCount=0,lowEV=0,estEV=0,highEV=0,missingPrice=0,fallbackUsed=0;
+  for(const row of __ROW_MODELS__){
+    const {model,price,isNonGame,fallback}=row;
+    if(!includeNonGame && isNonGame) continue;
+    const cnt=countFromModel(model,packs,isNonGame);
+    if(!cnt) continue;
+    lowCount+=cnt.lo; estCount+=cnt.est; highCount+=cnt.hi;
+    if(Number.isFinite(price)){ lowEV+=price*cnt.lo; estEV+=price*cnt.est; highEV+=price*cnt.hi; } else missingPrice++;
+    if(fallback) fallbackUsed++;
+  }
+  return {lowCount,estCount,highCount,lowEV,estEV,highEV,missingPrice,fallbackUsed};
+}
+function aggregateSift(packs,minUSD){
+  let include=0,exclude=0,missingPrice=0,nonGameIncluded=0;
+  let lowEV=0,estEV=0,highEV=0,lowCount=0,estCount=0,highCount=0;
+  for(const row of __ROW_MODELS__){
+    const {model,price,isNonGame}=row;
+    const ok=Number.isFinite(price) && price>=minUSD;
+    if(ok){
+      include++; if(isNonGame) nonGameIncluded++;
+      const cnt=countFromModel(model,packs,isNonGame);
+      if(cnt){ lowCount+=cnt.lo; estCount+=cnt.est; highCount+=cnt.hi; lowEV+=price*cnt.lo; estEV+=price*cnt.est; highEV+=price*cnt.hi; }
+    }else{
+      exclude++; if(!Number.isFinite(price)) missingPrice++;
+    }
+  }
+  return {include,exclude,nonGameIncluded,lowCount,estCount,highCount,lowEV,estEV,highEV,missingPrice};
+}
+
+/* ----- Statistical range (CLT) ----- */
+function statRange(packs, useSift, minUSD){
+  let meanPerPack=0, varPerPack=0, missingPrice=0;
+  for(const row of __ROW_MODELS__){
+    const {model,price,isNonGame}=row;
+    if(useSift && !(Number.isFinite(price) && price>=minUSD)) continue;
+    if(!Number.isFinite(price)){ missingPrice++; continue; }
+    const p = probMinMaxRaw(model)?.min; // point models used; for safety, compute est
+    const estP = (model?.type==='range') ? (model.lo+model.hi)/2 : (model?.p ?? p);
+    const pScaled = (isNonGame ? estP : estP*__NORM_SCALE__);
+    if(!Number.isFinite(pScaled)) continue;
+    meanPerPack += pScaled * price;
+    varPerPack  += pScaled * (1 - pScaled) * price * price;
+  }
+  const mean=meanPerPack*packs, sd=Math.sqrt(Math.max(0,varPerPack*packs));
+  return {mean,sd,missingPrice};
+}
+
+/* ----- UI rendering ----- */
+function toCsv(rows){
+  return rows.map(r => r.map(v => {
+    const s=String(v??'');
+    return /[",\n]/.test(s)? '"'+s.replace(/"/g,'""')+'"' : s;
+  }).join(',')).join('\n');
+}
+
+function renderSiftTable(minUSD){
+  const body=document.getElementById('siftBody'); body.innerHTML='';
+  for(const m of __META_ROWS__){
+    const ok=Number.isFinite(m.price) && m.price>=minUSD;
+    const cls=ok?'sift-ok':'sift-bad';
+    const {min:pMin,max:pMax}=probMinMaxScaled(m.model,m.isNonGame);
+    const c1k=countFromModel(m.model,1000,m.isNonGame);
+    const c30k=countFromModel(m.model,30000,m.isNonGame);
+    const c300k=countFromModel(m.model,300000,m.isNonGame);
+
+    const tr=document.createElement('tr'); tr.className=cls;
+    const cells=[
+      m.setTag, m.cn, m.rarity,
+      /* name link */ '', m.treatment,
+      Number.isFinite(pMin)?(pMin*100).toFixed(5)+'%':'', Number.isFinite(pMax)?(pMax*100).toFixed(5)+'%':'', fmtUSD(m.price),
+      fmtCount(c1k?c1k.lo:NaN), fmtCount(c1k?c1k.hi:NaN),
+      fmtCount(c30k?c30k.lo:NaN), fmtCount(c30k?c30k.hi:NaN),
+      fmtCount(c300k?c300k.lo:NaN), fmtCount(c300k?c300k.hi:NaN)
+    ];
+    let td=document.createElement('td'); td.textContent=cells[0]; tr.appendChild(td);
+    td=document.createElement('td'); td.textContent=cells[1]; tr.appendChild(td);
+    td=document.createElement('td'); td.textContent=cells[2]; tr.appendChild(td);
+    td=document.createElement('td');
+      if(m.url){ const a=document.createElement('a'); a.href=m.url; a.target='_blank'; a.rel='noopener noreferrer'; a.textContent=m.name; td.appendChild(a); }
+      else td.textContent=m.name;
+    tr.appendChild(td);
+    td=document.createElement('td'); td.textContent=cells[4]; tr.appendChild(td);
+    for(let i=5;i<cells.length;i++){ const t=document.createElement('td'); t.textContent=cells[i]; tr.appendChild(t); }
+    body.appendChild(tr);
+  }
+  document.getElementById('siftTableWrap').style.display='';
+}
+function applySift(minUSD){
+  renderSiftTable(minUSD);
+  const header=['Set','Number','Rarity','Name','Treatment','Pack Prob Min (%)','Pack Prob Max (%)','Card Value (USD)','Per 1000 Min','Per 1000 Max','Per 30000 Min','Per 30000 Max','Per 300000 Min','Per 300000 Max'];
+  const rows=[], tbody=document.getElementById('siftBody');
+  for(const tr of tbody.querySelectorAll('tr')) rows.push(Array.from(tr.querySelectorAll('td')).map(td=>td.textContent));
+  __SIFT_CSV__=toCsv([header,...rows]);
+  document.getElementById('downloadSiftCsv').disabled=false;
+}
+
+function renderPurchaseEV(){
+  const PACKS_PER_BOX=36;
+  const boxes=Math.max(0, parseFloat(document.getElementById('boxesToBuy').value)||0);
+  const packs=boxes*PACKS_PER_BOX;
+  const useSift=document.getElementById('useSiftForEV').checked;
+  const minUSD=parseUSD(document.getElementById('siftMin').value) ?? 0.25;
+  const mode=(document.querySelector('input[name="rangeMode"]:checked')||{}).value || 'stat';
+  const conf=parseFloat(document.getElementById('confLevel').value)||95;
+  const z=zFromConf(conf);
+
+  let lowEV,estEV,highEV,tag,missingPriceNote='';
+  if(mode==='struct'){
+    const agg = useSift ? aggregateSift(packs,minUSD) : aggregateFor(packs,true);
+    lowEV=agg.lowEV; estEV=agg.estEV; highEV=agg.highEV;
+    if(agg.missingPrice>0) missingPriceNote=`${agg.missingPrice} rows without USD were excluded.`;
+    tag='Structural model band (slot‑odds uncertainty)';
+  }else{
+    const {mean,sd,missingPrice}=statRange(packs,useSift,minUSD);
+    estEV=mean; lowEV=Math.max(0, mean - z*sd); highEV=mean + z*sd;
+    if(missingPrice>0) missingPriceNote=`${missingPrice} rows without USD were excluded.`;
+    tag=`Statistical ${conf}% interval (CLT)`;
+  }
+
+  const perBoxLow  = boxes>0 ? lowEV/boxes : 0;
+  const perBoxEst  = boxes>0 ? estEV/boxes : 0;
+  const perBoxHigh = boxes>0 ? highEV/boxes : 0;
+
+  const evDiv=document.getElementById('purchaseEVContainer');
+  evDiv.innerHTML=`
+    <table>
+      <thead><tr><th>Metric</th><th>Low</th><th>Est.</th><th>High</th></tr></thead>
+      <tbody>
+        <tr><td>${tag} — across ${packs.toLocaleString()} packs</td><td>$${money(lowEV)}</td><td>$${money(estEV)}</td><td>$${money(highEV)}</td></tr>
+        <tr><td>${tag} — per 36‑pack box</td><td>$${money(perBoxLow)}</td><td>$${money(perBoxEst)}</td><td>$${money(perBoxHigh)}</td></tr>
+      </tbody>
+    </table>`;
+  evDiv.style.display='';
+  const notes=[];
+  notes.push(`Boxes: ${boxes.toLocaleString()} × 36 = ${packs.toLocaleString()} packs.`);
+  notes.push(`Using ${useSift ? `Sift ≥ $${(Number.isFinite(minUSD)?minUSD:0.25).toFixed(2)}` : 'all prints'}.`);
+  if(mode==='stat') notes.push(`Variance: Σ p·(1−p)·value² per pack (independence approximation).`);
+  if(missingPriceNote) notes.push(missingPriceNote);
+  document.getElementById('purchaseSummary').textContent=notes.join(' ');
+  document.getElementById('rangeNotes').textContent = (mode==='struct')
+    ? 'Structural range reflects slot‑odds uncertainty; scales roughly linearly with packs.'
+    : 'Statistical range reflects random pack variance; narrows with more boxes (~1/√n).';
+}
+
+/* ----- Build flow ----- */
+let __COUNT_R_RNF__=1, __COUNT_M_RNF__=1, __COUNT_R_RFOIL__=1, __COUNT_M_RFOIL__=1;
+
+async function build(){
+  // Reset
+  document.getElementById('errorBox').style.display='none';
+  document.getElementById('purchasePanel').style.display='none';
+  document.getElementById('purchaseEVContainer').style.display='none';
+  document.getElementById('siftPanel').style.display='none';
+  document.getElementById('siftTableWrap').style.display='none';
+  document.getElementById('preview').value='';
+  document.getElementById('status').textContent='Building list…';
+  __ROW_MODELS__=[]; __META_ROWS__=[]; __SIFT_CSV__='';
+
+  const englishOnly=document.getElementById('englishOnly').checked;
+  const incDSK=document.getElementById('includeDSK').checked;
+  const incSPG=document.getElementById('includeSPG').checked;
+  const incTOK=document.getElementById('includeTOK').checked;
+  const incART=document.getElementById('includeART').checked;
+  __TOKEN_POOL__=Math.max(1, parseInt(document.getElementById('tokenPool').value,10)||20);
+  const tokenFallback=parseUSD(document.getElementById('tokenFallback').value);
+  const artFallback=parseUSD(document.getElementById('artFallback').value);
+
+  const status=document.getElementById('status');
+  const counts=document.getElementById('counts');
+  const queriesEl=document.getElementById('queries');
+  const preview=document.getElementById('preview');
+
+  const header=['Set','Number','Rarity','Name','Treatment','Pack Prob Min (%)','Pack Prob Max (%)','Card Value (USD)','Per 1000 Min','Per 1000 Max','Per 30000 Min','Per 30000 Max','Per 300000 Min','Per 300000 Max'];
+
+  const qList=[];
+  if(incDSK) qList.push(['DSK',  buildQuery('DSK', englishOnly)]);
+  if(incSPG) qList.push(['SPG',  buildQuery('SPG', englishOnly)]);
+  if(incTOK) qList.push(['TDSK', buildQuery('TDSK', englishOnly)]);
+  if(incART) qList.push(['ADSK', buildQuery('ADSK', englishOnly)]);
+  queriesEl.textContent = qList.map(([tag,q])=>`${tag}: ${q}`).join('\n');
+
+  try{
+    status.textContent='Starting…';
+    const results=[];
+    for(const [tag,q] of qList){ const cards = await fetchAllPages(q, tag, status); results.push([tag,cards]); }
+
+    // Count rare/mythic pools (nonfoil vs foil) for DSK
+    const dskCards = results.find(([t])=>t==='DSK')?.[1] ?? [];
+    const rn = dskCards.filter(c=>c.rarity==='rare'   && (c.finishes||[]).includes('nonfoil')).length;
+    const mn = dskCards.filter(c=>c.rarity==='mythic' && (c.finishes||[]).includes('nonfoil')).length;
+    const rf = dskCards.filter(c=>c.rarity==='rare'   && (c.finishes||[]).includes('foil')).length;
+    const mf = dskCards.filter(c=>c.rarity==='mythic' && (c.finishes||[]).includes('foil')).length;
+    __COUNT_R_RNF__ = Math.max(1,rn); __COUNT_M_RNF__ = Math.max(1,mn);
+    __COUNT_R_RFOIL__=Math.max(1,rf); __COUNT_M_RFOIL__=Math.max(1,mf);
+
+    // Build rows
+    for(const [tag,cards] of results){
+      if(tag==='SPG')  rowsFromCards(cards, 'SPG',  { spgNonfoilOnly:true });
+      if(tag==='TDSK') rowsFromCards(cards, 'TDSK', { isToken:true, tokenFallback });
+      if(tag==='ADSK') rowsFromCards(cards, 'ADSK', { isArt:true, artFallback });
+      if(tag==='DSK')  rowsFromCards(cards, 'DSK');
+    }
+
+    // Normalize playing cards to 14 per pack (EST)
+    const raw = aggregateFor(1, /*includeNonGame=*/false);
+    __NORM_SCALE__ = (raw && raw.estCount) ? (14 / raw.estCount) : 1;
+
+    // Sort rows by set, CN, name, treatment
+    __META_ROWS__.sort((a,b)=>{
+      if(a.setTag!==b.setTag) return a.setTag.localeCompare(b.setTag);
+      const pa=(a.cn||'').match(/^(\d+)(.*)$/)||[], pb=(b.cn||'').match(/^(\d+)(.*)$/)||[];
+      const na=pa[1]?parseInt(pa[1],10):0, nb=pb[1]?parseInt(pb[1],10):0;
+      if(na!==nb) return na-nb; const sa=pa[2]||'', sb=pb[2]||''; if(sa!==sb) return sa.localeCompare(sb);
+      if(a.name!==b.name) return a.name.localeCompare(b.name);
+      return a.treatment.localeCompare(b.treatment);
+    });
+
+    // CSV
+    const allRows = __META_ROWS__.map(m=>{
+      const {min:pMin,max:pMax}=probMinMaxScaled(m.model,m.isNonGame);
+      const c1k=countFromModel(m.model,1000,m.isNonGame);
+      const c30k=countFromModel(m.model,30000,m.isNonGame);
+      const c300k=countFromModel(m.model,300000,m.isNonGame);
+      return [
+        m.setTag, m.cn, m.rarity, m.name, m.treatment,
+        Number.isFinite(pMin)?(pMin*100).toFixed(5)+'%':'', Number.isFinite(pMax)?(pMax*100).toFixed(5)+'%':'', fmtUSD(m.price),
+        fmtCount(c1k?c1k.lo:NaN), fmtCount(c1k?c1k.hi:NaN),
+        fmtCount(c30k?c30k.lo:NaN), fmtCount(c30k?c30k.hi:NaN),
+        fmtCount(c300k?c300k.lo:NaN), fmtCount(c300k?c300k.hi:NaN)
+      ];
+    });
+    const csv = toCsv([header, ...allRows]); window.__CSV__=csv; preview.value=csv.slice(0,250000);
+    document.getElementById('downloadCsv').disabled=false;
+    document.getElementById('copyCsv').disabled=false;
+
+    // Enable Sift + Purchase EV
+    document.getElementById('siftPanel').style.display='';
+    document.getElementById('applySift').disabled=false;
+    document.getElementById('purchasePanel').style.display='';
+    document.getElementById('calcEV').disabled=false;
+
+    // Auto-apply Sift at default
+    const minUSD=parseUSD(document.getElementById('siftMin').value) ?? 0.25;
+    applySift(minUSD);
+
+    // Counts
+    const dskCount = __META_ROWS__.filter(r=>r.setTag==='DSK').length;
+    const spgCount = __META_ROWS__.filter(r=>r.setTag==='SPG').length;
+    const tokCount = __META_ROWS__.filter(r=>r.setTag==='TDSK').length;
+    const artCount = __META_ROWS__.filter(r=>r.setTag==='ADSK').length;
+    document.getElementById('counts').innerHTML =
+      `Built <b>${__META_ROWS__.length.toLocaleString()}</b> rows — DSK: <b>${dskCount}</b>, SPG: <b>${spgCount}</b>, TDSK: <b>${tokCount}</b>, ADSK: <b>${artCount}</b>.`;
+
+    document.getElementById('status').textContent = `Done. (Normalization factor: ${__NORM_SCALE__.toFixed(5)}; Sift auto‑applied at $${(Number.isFinite(minUSD)?minUSD:0.25).toFixed(2)})`;
+
+    // Initial EV render
+    renderPurchaseEV();
+
+  }catch(err){
+    console.error(err);
+    document.getElementById('status').textContent='Error while building — see details below.';
+    document.getElementById('errorMsg').innerHTML = `<strong>Set:</strong> ${err?.set||'Unknown'} &nbsp; <strong>Status:</strong> ${err?.status??'ERROR'}`;
+    document.getElementById('errorDetails').textContent = `Query:\n${err?.query||'(no query)'}\n\nResponse snippet:\n${String(err?.details||'').slice(0,800)}`;
+    document.getElementById('errorBox').style.display='';
+    document.getElementById('downloadCsv').disabled=true;
+    document.getElementById('copyCsv').disabled=true;
+    document.getElementById('applySift').disabled=true;
+    document.getElementById('downloadSiftCsv').disabled=true;
+    document.getElementById('calcEV').disabled=true;
+  }
+}
+
+/* ----- Hooks ----- */
+document.getElementById('buildBtn').addEventListener('click', build);
+document.getElementById('downloadCsv').addEventListener('click', ()=>{ if(window.__CSV__) {
+  const blob=new Blob(["\uFEFF"+window.__CSV__],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='DSK_PlayBooster_List_Normalized.csv';
+  document.body.appendChild(a); a.click(); URL.revokeObjectURL(a.href); a.remove();
+}});
+document.getElementById('copyCsv').addEventListener('click', async ()=>{
+  if(!window.__CSV__) return;
+  try{ await navigator.clipboard.writeText(window.__CSV__); alert('CSV copied to clipboard.'); }
+  catch{ const t=document.getElementById('preview'); t.focus(); t.select(); alert('Select all (Ctrl/Cmd+A) and copy (Ctrl/Cmd+C).'); }
+});
+document.getElementById('applySift').addEventListener('click', ()=>{
+  const minUSD=parseUSD(document.getElementById('siftMin').value) ?? 0.25;
+  applySift(minUSD); renderPurchaseEV();
+});
+document.getElementById('downloadSiftCsv').addEventListener('click', ()=>{ if(__SIFT_CSV__) {
+  const blob=new Blob(["\uFEFF"+__SIFT_CSV__],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='DSK_PlayBooster_SiftTable.csv';
+  document.body.appendChild(a); a.click(); URL.revokeObjectURL(a.href); a.remove();
+}});
+document.getElementById('calcEV').addEventListener('click', renderPurchaseEV);
+document.getElementById('boxesToBuy').addEventListener('change', renderPurchaseEV);
+document.getElementById('useSiftForEV').addEventListener('change', renderPurchaseEV);
+document.getElementById('siftMin').addEventListener('change', ()=>{ applySift(parseUSD(document.getElementById('siftMin').value) ?? 0.25); renderPurchaseEV(); });
+document.getElementById('confLevel').addEventListener('change', renderPurchaseEV);
+for(const r of document.querySelectorAll('input[name="rangeMode"]')) r.addEventListener('change', renderPurchaseEV);
+
+// Auto-build on page load
+window.addEventListener('DOMContentLoaded', () => { build(); });
+</script>
+</body>
+</html>
