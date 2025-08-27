@@ -32,10 +32,7 @@
   @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(106,193,255,.45)}70%{box-shadow:0 0 0 10px rgba(106,193,255,0)}100%{box-shadow:0 0 0 0 rgba(106,193,255,0)}}
   .hi-inline{display:flex;align-items:center;gap:6px;border:1px solid var(--est-line);background:var(--est-bg);border-radius:8px;padding:6px 8px}
   .hi-label{border:1px solid var(--est-line);background:var(--est-bg);border-radius:8px;padding:6px 8px}
-  .nav-row{display:flex;justify-content:space-between;align-items:center;margin:0 0 12px}
-  .back-link{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:#10171f;border:1px solid var(--line);color:#dff1ff;text-decoration:none}
-  .back-link:hover{border-color:var(--acc);color:#fff}
-  .arrow{font-size:16px;line-height:1}
+
   table{width:100%;border-collapse:collapse;margin-top:8px}
   th,td{border:1px solid #2a3541;padding:6px 8px;text-align:right}
   th:first-child,td:first-child{text-align:left}
@@ -55,14 +52,19 @@
   .error-panel{border-color:#ff7a7a!important}
   .error-panel h2{margin:0 0 8px;color:#ff7a7a;font-size:16px}
   .error-panel pre{white-space:pre-wrap;background:#0e1216;border:1px solid #2a3541;padding:8px;border-radius:6px;color:#ffd4d4}
+  
+  /* Banner header/footer */
+  .freBanner{display:flex;justify-content:center;margin:8px 0 16px}
+  .freBanner img{max-width:420px;width:100%;height:auto;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+  @media (max-width:640px){ .freBanner img{max-width:300px} }
 </style>
 </head>
 <body>
 <main class="eoe-app" role="main" aria-label="Duskmourn — Play Box EV">
-  <!-- Back to index (optional; leave if your index is co-located) -->
-  <nav class="nav-row" aria-label="Top navigation">
-    <a class="back-link" href="./index.html"><span class="arrow">←</span> Back to EV Tools Index</a>
-  </nav>
+  <!-- Banner header (links home) -->
+  <div class="freBanner">
+    <a href="./index.html"><img src="freEV-banner.png" alt="FreEV — Spend your money on cards not calculators"></a>
+  </div>
 
   <h1>Duskmourn — Play Booster EV</h1>
   <p class="lede">Auto‑builds on load. Probabilities are normalized to exactly <strong>14 Magic cards per pack</strong> (tokens/art not scaled). Per‑box math uses <strong>36 packs</strong>.</p>
@@ -169,10 +171,10 @@
     UI/interaction pattern matches the earlier Play EV tool for consistency. :contentReference[oaicite:6]{index=6}
   </footer>
 
-  <!-- Bottom back link -->
-  <nav class="nav-row" aria-label="Bottom navigation" style="margin-top:12px">
-    <a class="back-link" href="./index.html"><span class="arrow">←</span> Back to EV Tools Index</a>
-  </nav>
+  <!-- Banner footer (links home) -->
+  <div class="freBanner">
+    <a href="./index.html"><img src="freEV-banner.png" alt="FreEV — Spend your money on cards not calculators"></a>
+  </div>
 </main>
 
 <script>
