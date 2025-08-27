@@ -32,14 +32,11 @@
   #counts b{color:#7ddc7a}
   textarea{width:100%;min-height:200px;background:#0e1216;color:#cfe3f5;border:1px solid #2a3541;border-radius:8px;padding:10px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;box-sizing:border-box}
 
-  /* Back to index (top/bottom) */
-  .nav-row{display:flex;justify-content:space-between;align-items:center;margin:0 0 12px}
-  .back-link{
-    display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;
-    background:#10171f;border:1px solid var(--line);color:#dff1ff;text-decoration:none
-  }
-  .back-link:hover{border-color:var(--acc);color:#fff}
-  .arrow{font-size:16px;line-height:1}
+  
+  /* Banner header/footer */
+  .freBanner{display:flex;justify-content:center;margin:8px 0 16px}
+  .freBanner img{max-width:420px;width:100%;height:auto;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+  @media (max-width:640px){ .freBanner img{max-width:300px} }
 
   .btn-primary{border-color:var(--hi-line);background:linear-gradient(180deg,#203245,#1a2530);color:#dff1ff;font-weight:600}
   .hi-label{border:1px solid var(--hi-line);background:var(--hi-bg);border-radius:8px;padding:6px 8px}
@@ -81,10 +78,11 @@
 </head>
 <body>
 <main class="eoe-app" aria-label="Aetherdrift Play Booster EV app">
-  <!-- TOP nav -->
-  <nav class="nav-row" aria-label="Top navigation">
-    <a class="back-link" href="./index.html"><img src="freEV-header.png" alt="FreEV — Spend your money on cards not calculators"></a>
-  </nav>
+
+  <!-- Banner header (links home) -->
+  <div class="freBanner">
+    <a href="./index.html"><img src="freEV-banner.png" alt="FreEV — Spend your money on cards not calculators"></a>
+  </div>
 
   <h1>Aetherdrift — Play Booster EV</h1>
   <p class="lede">
@@ -203,11 +201,10 @@
     </details>
   </div>
 
-  <!-- BOTTOM nav -->
-  <nav class="nav-row" aria-label="Bottom navigation" style="margin-top:12px">
-    <a class="back-link" href="./index.html"><img src="freEV-header.png" alt="FreEV — Spend your money on cards not calculators"></a>
-  </nav>
-</main>
+  <!-- Banner footer (links home) -->
+  <div class="freBanner">
+    <a href="./index.html"><img src="freEV-banner.png" alt="FreEV — Spend your money on cards not calculators"></a>
+  </div>
 
 <script>
 /* ===== Helpers ===== */
@@ -773,5 +770,6 @@ window.addEventListener('DOMContentLoaded', build);
 </script>
 </body>
 </html>
+
 
 
