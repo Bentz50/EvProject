@@ -2,77 +2,65 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>EV Tools Index</title>
+<title>FreEV — EV Tools Index</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
-	html {background-color:#0b0d10;}
-  /* All styles scoped under .eoe-app */
-  .eoe-app{
-    --bg:#0b0d10; --fg:#e8ecf1; --muted:#a7b0bb; --acc:#6ac1ff;
-    --card:#151a20; --line:#222a33; --ok:#1e7f3c; --warn:#9b2c2c;
-    max-width:960px; margin:32px auto; padding:0 16px; box-sizing:border-box;
-    color:var(--fg); background:var(--bg); font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-  }
-  .eoe-app a{ color:var(--acc); text-decoration:underline }
-  .eoe-app h1{font-size:24px;margin:0 0 8px}
-  .eoe-app h2{font-size:18px;margin:16px 0 6px}
-  .eoe-app p{margin:8px 0}
-  .lede{color:var(--muted)}
-  .panel{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; margin:16px 0}
-
-  /* Cards container kept for future expansion */
-  .cards{display:block}
-  .card{background:#10151b; border:1px solid var(--line); border-radius:12px; padding:14px}
-  .card h3{margin:0 0 6px; font-size:16px}
-
-  /* Vertical list of tool links */
-  .tool-list{list-style:none; padding-left:0; margin:8px 0 0}
-  .tool-list li{margin:8px 0}
-  .btn{
-    display:block; width:100%;
-    margin-top:0; padding:10px 14px; border-radius:8px;
-    border:1px solid var(--line); background:#1b232c; color:var(--fg);
-    text-decoration:none; text-align:left;
-  }
-  .btn:hover{border-color:var(--acc)}
-
-  .note{color:var(--muted); font-size:13px}
-
-  /* Table (used inside confidence details) */
-  table{width:100%; border-collapse:collapse; margin-top:8px}
-  th,td{border:1px solid var(--line); padding:8px 10px; text-align:right}
+  html{background-color:#0b0d10;}
+  body{margin:0;padding:0;font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#e8ecf1;background:#0b0d10}
+  .eoe-app{max-width:960px;margin:32px auto;padding:0 16px;box-sizing:border-box}
+  a{color:#6ac1ff;text-decoration:underline}
+  h1{font-size:24px;margin:0 0 8px}
+  h2{font-size:18px;margin:16px 0 6px}
+  p{margin:8px 0}
+  .lede{color:#a7b0bb}
+  .panel{background:#151a20;border:1px solid #222a33;border-radius:12px;padding:16px;margin:16px 0}
+  .note{color:#a7b0bb;font-size:13px}
+  table{width:100%;border-collapse:collapse;margin-top:8px}
+  th,td{border:1px solid #222a33;padding:8px 10px;text-align:right}
   th:first-child,td:first-child{text-align:left}
-  thead th{background:#0e1216; position:sticky; top:0}
-
-  /* Collapsible details styling for Confidence levels */
+  thead th{background:#0e1216;position:sticky;top:0}
   details.collapse > summary{
-    cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center;
-    padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:#0e1216; color:#dfeeff; font-weight:600;
+    cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;
+    padding:8px 10px;border:1px solid #222a33;border-radius:8px;background:#0e1216;color:#dfeeff;font-weight:600;
     margin:-4px 0 8px;
   }
   details.collapse > summary::-webkit-details-marker{display:none}
-  details.collapse > summary::after{content:'▼'; opacity:.8; transform:rotate(-90deg); transition:transform .18s; margin-left:12px; font-size:12px}
+  details.collapse > summary::after{content:'▼';opacity:.8;transform:rotate(-90deg);transition:transform .18s;margin-left:12px;font-size:12px}
   details.collapse[open] > summary::after{transform:rotate(0deg)}
   details.collapse .content{margin-top:8px}
+
+  /* Tools list vertical */
+  .tool-list{list-style:none;padding:0;margin:8px 0}
+  .tool-list li{margin:8px 0}
+  .btn{display:block;width:100%;margin-top:0;padding:10px 14px;border-radius:8px;border:1px solid #222a33;background:#1b232c;color:#e8ecf1;text-decoration:none;text-align:left}
+  .btn:hover{border-color:#6ac1ff}
+
+  /* Range modes overview with image */
+  .panel.modes{display:grid;grid-template-columns:1.2fr 0.8fr;gap:16px;align-items:center}
+  @media(max-width:900px){.panel.modes{grid-template-columns:1fr;gap:12px}.panel.modes .modes-media{justify-self:center}}
+  .panel.modes .modes-media img{max-width:100%;height:auto;border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.35)}
+
 </style>
 </head>
 <body>
 <main class="eoe-app">
   <header>
-    <h1>EV Tools Index</h1>
+    <h1>FreEV — EV Tools Index</h1>
     <p class="lede">Start here. Pick a tool below to load data for that box.</p>
   </header>
 
-  <section class="panel" aria-labelledby="modes">	  
-	  <article class="card">
-	    <img src="FreEV_full_card_Logo.png" alt="FreEV — Spend your money on cards not calculators">
-      </article>
-	  <article class="card">
-	    <h3 id="modes">Range modes overview</h3>
-	    <p><strong>Statistical (CLT)</strong> shows a confidence interval for outcomes if you could repeat the purchase many times. It <em>narrows</em> as you buy more boxes (~1/√n).</p>
-      </article>
+  <!-- Range modes with image -->
+  <section class="panel modes">
+    <div class="modes-copy">
+      <h2>Range modes overview</h2>
+      <p><strong>Statistical (CLT)</strong> shows a confidence interval for outcomes if you could repeat the purchase many times. It <em>narrows</em> as you buy more boxes (~1/√n).</p>
+    </div>
+    <figure class="modes-media">
+      <img src="freEV-banner.png" alt="FreEV — Spend your money on cards not calculators" />
+    </figure>
   </section>
 
+  <!-- Confidence section collapsible -->
   <section class="panel" aria-labelledby="conf">
     <details class="collapse" id="confDetails">
       <summary><h2 id="conf" style="margin:0">Confidence levels (for Statistical mode)</h2></summary>
@@ -80,40 +68,30 @@
         <p>For a given purchase, a <strong>C%</strong> band would contain your realized value about <strong>C%</strong> of the time under the model. Higher confidence ⇒ wider band.</p>
         <table aria-label="Confidence level reference">
           <thead>
-            <tr><th>Confidence</th><th>z‑score (±z·σ)</th><th>Coverage inside band</th><th>Outside band (each tail)</th></tr>
+            <tr><th>Confidence</th><th>z-score (±z·σ)</th><th>Coverage inside band</th><th>Outside band (each tail)</th></tr>
           </thead>
           <tbody>
-            <tr><td>68%</td><td>~1.00</td><td>~68% of outcomes</td><td>~16% lower / ~16% higher</td></tr>
-            <tr><td>90%</td><td>~1.645</td><td>~90% of outcomes</td><td>~5% lower / ~5% higher</td></tr>
-            <tr><td>95%</td><td>~1.96</td><td>~95% of outcomes</td><td>~2.5% lower / ~2.5% higher</td></tr>
-            <tr><td>99%</td><td>~2.576</td><td>~99% of outcomes</td><td>~0.5% lower / ~0.5% higher</td></tr>
+            <tr><td>68%</td><td>~1.00</td><td>~68%</td><td>~16% lower / ~16% higher</td></tr>
+            <tr><td>90%</td><td>~1.645</td><td>~90%</td><td>~5% lower / ~5% higher</td></tr>
+            <tr><td>95%</td><td>~1.96</td><td>~95%</td><td>~2.5% lower / ~2.5% higher</td></tr>
+            <tr><td>99%</td><td>~2.576</td><td>~99%</td><td>~0.5% lower / ~0.5% higher</td></tr>
           </tbody>
         </table>
-        <p class="note">Notes: We treat per‑print hits as independent for variance; real collation introduces mild correlations that typically make the true interval slightly narrower.</p>
+        <p class="note">Notes: Per-print pulls assumed independent; real collation correlations narrow true variance slightly.</p>
       </div>
     </details>
   </section>
 
+  <!-- Tool links -->
   <section class="panel" aria-labelledby="tools">
     <h2 id="tools">Open a tool</h2>
-    <div class="cards">
-      <article class="card">
-        <h3>EV based upon the number of boxes you are buying</h3>
-        <p>Enter boxes → see EV (Low/Est./High). Toggle Sift and confidence level.</p>
-        <!-- Vertical list of pages -->
-        <ul class="tool-list">
-          <li><a class="btn" href="./dft-play-ev.html">Aetherdrift — Play Box</a></li>
-          <li><a class="btn" href="./dsk-play-ev.html">Duskmourn: House of Horror — Play Box</a></li>
-          <li><a class="btn" href="./eoe-play-ev.html">Edge of Eternities — Play Box</a></li>
-          <li><a class="btn" href="./fin-play-ev.html">Final Fantasy — Play Box</a></li>
-          <li><a class="btn" href="./otj-play-ev.html">Outlaws of Thunder Junction — Play Box</a></li>
-          <li><a class="btn" href="./tdm-play-ev.html">Tarkir: Dragonstorm — Play Box</a></li>
-        </ul>
-      </article>
-    </div>
+    <ul class="tool-list">
+      <li><a class="btn" href="./eoe-play-ev.html">Edge of Eternities — Play Box</a></li>
+      <li><a class="btn" href="./otj-play-ev.html">Outlaws of Thunder Junction — Play Box</a></li>
+      <li><a class="btn" href="./dsk-play-ev.html">Duskmourn — Play Box</a></li>
+      <li><a class="btn" href="./tdm-play-ev.html">Tarkir: Dragonstorm — Play Box</a></li>
+    </ul>
   </section>
 </main>
 </body>
 </html>
-
-
