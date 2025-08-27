@@ -33,16 +33,10 @@
   .eoe-app #counts b{color:#7ddc7a}
   .eoe-app textarea{width:100%;min-height:200px;background:#0e1216;color:#cfe3f5;border:1px solid #2a3541;border-radius:8px;padding:10px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;box-sizing:border-box}
 
-  /* Back-to-index links (top & bottom) */
-  .eoe-app .nav-row{display:flex;justify-content:space-between;align-items:center;margin:0 0 12px}
-  .eoe-app .back-link{
-    display:inline-flex; align-items:center; gap:8px;
-    padding:6px 10px; border-radius:999px;
-    background:#10171f; border:1px solid var(--line);
-    color:#dff1ff; text-decoration:none;
-  }
-  .eoe-app .back-link:hover{ border-color:var(--acc); color:#ffffff }
-  .eoe-app .back-link .arrow{font-size:16px; line-height:1}
+  /* Banner header/footer */
+  .freBanner{display:flex;justify-content:center;margin:8px 0 16px}
+  .freBanner img{max-width:420px;width:100%;height:auto;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+  @media (max-width:640px){ .freBanner img{max-width:300px} }
 
   /* Emphasis */
   .btn-primary{
@@ -101,10 +95,10 @@
 </head>
 <body>
 <main class="eoe-app" aria-label="Final Fantasy Play Booster EV app">
-  <!-- TOP: back to index -->
-  <nav class="nav-row" aria-label="Top navigation">
-    <a class="back-link" href="./index.html"><span class="arrow">←</span> Back to EV Tools Index</a>
-  </nav>
+  <!-- Banner header (links home) -->
+  <div class="freBanner">
+    <a href="./index.html"><img src="freEV-banner.png" alt="FreEV — Spend your money on cards not calculators"></a>
+  </div>
 
   <h1>Final Fantasy — Play Booster EV</h1>
   <p class="lede">
@@ -224,10 +218,10 @@
     </details>
   </div>
 
-  <!-- BOTTOM: back to index -->
-  <nav class="nav-row" aria-label="Bottom navigation" style="margin-top:12px">
-    <a class="back-link" href="./index.html"><span class="arrow">←</span> Back to EV Tools Index</a>
-  </nav>
+  <!-- Banner footer (links home) -->
+  <div class="freBanner">
+    <a href="./index.html"><img src="freEV-banner.png" alt="FreEV — Spend your money on cards not calculators"></a>
+  </div>
 </main>
 
 <script>
