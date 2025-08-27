@@ -205,7 +205,15 @@
   <div class="freBanner">
     <a href="./index.html"><img src="freEV-banner.png" alt="FreEV — Spend your money on cards not calculators"></a>
   </div>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LWMRXKNY5X"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
 
+  gtag('config', 'G-LWMRXKNY5X');
+</script>
 <script>
 /* ===== Helpers ===== */
 const rarityLetter = r => ({common:'C',uncommon:'U',rare:'R',mythic:'M'}[r] || (r?r[0].toUpperCase():'')); 
@@ -770,6 +778,7 @@ window.addEventListener('DOMContentLoaded', build);
 </script>
 </body>
 </html>
+
 
 
 
