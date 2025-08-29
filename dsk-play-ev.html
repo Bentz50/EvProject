@@ -53,6 +53,10 @@
   .error-panel h2{margin:0 0 8px;color:#ff7a7a;font-size:16px}
   .error-panel pre{white-space:pre-wrap;background:#0e1216;border:1px solid #2a3541;padding:8px;border-radius:6px;color:#ffd4d4}
   
+  /* Vertical list for checkboxes */
+  .vert-list{margin-top:8px}
+  .vert-list label{display:flex; align-items:center; gap:8px; margin:6px 0}
+  
   /* Banner header/footer */
   .freBanner{display:flex;justify-content:center;margin:8px 0 16px}
   .freBanner img{max-width:420px;width:100%;height:auto;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
@@ -71,18 +75,18 @@
 
   <div class="panel">
     <strong>Refresh data</strong>
-    <div class="row" style="margin-top:6px">
+    <div class="vert-list" style="margin-top:6px">
       <label><input type="checkbox" id="englishOnly" checked> English‑only</label>
       <label><input type="checkbox" id="includeDSK" checked> Include <strong>DSK</strong> (1–367; Play‑eligible)</label>
       <label><input type="checkbox" id="includeSPG" checked> Include <strong>SPG</strong> (64–73; nonfoil only)</label>
     </div>
     <div class="row" style="margin-top:6px">
-      <label><input type="checkbox" id="includeTOK" checked> Include <strong>TDSK</strong> tokens</label>
+      <label><input type="checkbox" id="includeTOK"> Include <strong>TDSK</strong> tokens</label>
       <label>Token fallback (USD): <input type="text" id="tokenFallback" value="0.05" size="6"></label>
       <label>Token pool size: <input type="number" id="tokenPool" value="20" min="1" step="1" style="width:8ch"></label>
     </div>
     <div class="row" style="margin-top:6px">
-      <label><input type="checkbox" id="includeART" checked> Include <strong>ADSK</strong> art (normal + signed)</label>
+      <label><input type="checkbox" id="includeART"> Include <strong>ADSK</strong> art (normal + signed)</label>
       <label>Art fallback (USD): <input type="text" id="artFallback" value="0.05" size="6"></label>
     </div>
     <div class="row actions">

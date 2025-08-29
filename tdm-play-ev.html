@@ -105,11 +105,15 @@
   .sift-bad{background:rgba(155,44,44,.10)!important}
 
   .evbox{margin-top:8px}
-  .evbox table{width:auto; min-width:360px}
+  .evbox table{min-width:360px}
   .evbox th,.evbox td{text-align:right}
   .evbox th:first-child,.evbox td:first-child{text-align:left;white-space:nowrap}
   .note{color:#a7b0bb;font-size:12px;margin-top:6px}
 
+  /* Vertical list for checkboxes */
+  .vert-list{margin-top:8px}
+  .vert-list label{display:flex; align-items:center; gap:8px; margin:6px 0}
+  
   /* Collapsible totals */
   details.eoe-collapse{border:0; padding:0; margin:0}
   details.eoe-collapse > summary{
@@ -142,17 +146,21 @@
 
   <div class="panel">
     <strong>Refresh data</strong>
-    <label><input type="checkbox" id="englishOnly" checked> English-only (avoid duplicate rows)</label>
-    <label><input type="checkbox" id="includeTDM" checked> Include <strong>TDM</strong> (main set; Play‑eligible)</label>
-    <label><input type="checkbox" id="includeSPG" checked> Include <strong>SPG</strong> (Special Guests; nonfoil)</label>
-    <div class="row">
+    <div class="vert-list">
+		<label><input type="checkbox" id="englishOnly" checked> English-only (avoid duplicate rows)</label>
+		<label><input type="checkbox" id="includeTDM" checked> Include <strong>TDM</strong> (main set; Play‑eligible)</label>
+		<label><input type="checkbox" id="includeSPG" checked> Include <strong>SPG</strong> (Special Guests; nonfoil)</label>
+	</div>
+    <div class="row" style="display:none">
       <label class="hi-label">SPG month (YYYY‑MM): <input type="text" id="spgMonth" value="2025-04" style="width:10.5ch"></label>
       <span class="note">SPG is fetched broadly and filtered client‑side to this month; clear to skip SPG.</span>
     </div>
     <div class="row" style="margin-top:6px">
-      <label><input type="checkbox" id="includeTOK" checked> Include <strong>TTDM</strong> (tokens/emblems)</label>
+      <label><input type="checkbox" id="includeTOK"> Include <strong>TTDM</strong> (tokens/emblems)</label>
       <label>Token fallback (USD): <input type="text" id="tokenFallback" value="0.05"></label>
-      <label><input type="checkbox" id="includeART" checked> Include <strong>ATDM</strong> (art cards)</label>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <label><input type="checkbox" id="includeART"> Include <strong>ATDM</strong> (art cards)</label>
       <label>Art fallback (USD): <input type="text" id="artFallback" value="0.00"></label>
     </div>
     <div class="actions">

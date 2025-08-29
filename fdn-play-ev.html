@@ -38,6 +38,10 @@
   .freBanner img{max-width:420px;width:100%;height:auto;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
   @media (max-width:640px){ .freBanner img{max-width:300px} }
 
+  /* Vertical list for checkboxes */
+  .vert-list{margin-top:8px}
+  .vert-list label{display:flex; align-items:center; gap:8px; margin:6px 0}
+  
   /* Tables */
   table{width:100%;border-collapse:collapse;margin-top:8px}
   th,td{border:1px solid #2a3541;padding:6px 8px;text-align:right}
@@ -86,18 +90,18 @@
 
   <div class="panel">
     <strong>Refresh data</strong>
-    <div class="row" style="margin-top:6px">
+    <div class="vert-list">
       <label><input type="checkbox" id="englishOnly" checked> English‑only</label>
       <label><input type="checkbox" id="includeFDN" checked> Include <strong>FDN</strong> (main set, is:booster)</label>
       <label><input type="checkbox" id="includeSPG" checked> Include <strong>SPG</strong> (Special Guests — nonfoil only)</label>
     </div>
     <div class="row" style="margin-top:6px">
-      <label><input type="checkbox" id="includeTOK" checked> Include <strong>TFDN</strong> tokens</label>
+      <label><input type="checkbox" id="includeTOK"> Include <strong>TFDN</strong> tokens</label>
       <label>Token fallback (USD): <input type="text" id="tokenFallback" value="0.05" size="6"></label>
       <label>Token pool size: <input type="number" id="tokenPool" value="20" min="1" step="1" style="width:8ch"></label>
     </div>
     <div class="row" style="margin-top:6px">
-      <label><input type="checkbox" id="includeART" checked> Include <strong>AFDN</strong> art (normal + signed)</label>
+      <label><input type="checkbox" id="includeART"> Include <strong>AFDN</strong> art (normal + signed)</label>
       <label>Art fallback (USD): <input type="text" id="artFallback" value="0.00" size="6"></label>
     </div>
     <div class="row actions">
@@ -452,7 +456,7 @@ function renderSiftTable(minUSD){
   const body=document.getElementById('siftBody'); body.innerHTML='';
   for(const m of __META_ROWS__){
     const ok = Number.isFinite(m.price) && m.price>=minUSD;
-    const cls= ok ? 'sift-ok' : 'sift-bad';
+    const cls = ok ? 'sift-ok' : 'sift-bad';
     const {min:pMin,max:pMax}=probMinMaxScaled(m.model,m.isNonGame);
     const c1k  = countFromModel(m.model,1000,   m.isNonGame);
     const c30k = countFromModel(m.model,30000,  m.isNonGame);

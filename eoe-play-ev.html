@@ -76,13 +76,6 @@
   .error-panel h2{margin:0 0 8px; color:#ff7a7a; font-size:16px}
   .error-panel pre{white-space:pre-wrap; background:#0e1216; border:1px solid #2a3541; padding:8px; border-radius:6px; color:#ffd4d4}
 
-  /* Tables */
-  table{width:100%; border-collapse:collapse; margin-top:8px}
-  th,td{border:1px solid #2a3541; padding:6px 8px; text-align:right}
-  th:first-child,td:first-child{text-align:left}
-  thead th{background:#0e1216; position:sticky; top:0; z-index:1}
-  tbody tr:nth-child(even){background:#12171d}
-
   /* Highlight the Est. column and its LEFT boundary under collapsed borders */
   .evbox table th:nth-child(3),
   .evbox table td:nth-child(3){
@@ -97,6 +90,11 @@
     border-right-color:var(--est-line);
   }
 
+  table{width:100%;border-collapse:collapse;margin-top:8px}
+  th,td{border:1px solid #2a3541;padding:6px 8px;text-align:right}
+  th:first-child,td:first-child{text-align:left}
+  thead th{background:#0e1216;position:sticky;top:0;z-index:1}
+  tbody tr:nth-child(even){background:#12171d}
   .sift-tablewrap{max-height:520px; overflow:auto; border:1px solid #2a3541; border-radius:8px; margin-top:8px}
   .pill{display:inline-block; padding:2px 8px; border-radius:999px; border:1px solid #2a3541}
   .pill.ok{background:rgba(30,127,60,.20);color:#d9ffe3;border-color:#1e7f3c}
@@ -105,7 +103,7 @@
   .sift-bad{background:rgba(155,44,44,.10)!important}
 
   .evbox{margin-top:8px}
-  .evbox table{width:auto; min-width:360px}
+  .evbox table{min-width:360px}
   .evbox th,.evbox td{text-align:right}
   .evbox th:first-child,.evbox td:first-child{text-align:left;white-space:nowrap}
   .note{color:#a7b0bb;font-size:12px;margin-top:6px}
@@ -147,7 +145,7 @@
     <label><input type="checkbox" id="includeEOS" checked> Include <strong>EoE:SS</strong> (1–45; no galaxy/etched)</label>
     <label><input type="checkbox" id="includeSPG" checked> Include <strong>SG</strong> (119–128; nonfoil only)</label>
     <div class="row">
-      <label><input type="checkbox" id="includeTOK" checked> Include <strong>TOK</strong> (TEOE tokens/emblem)</label>
+      <label><input type="checkbox" id="includeTOK"> Include <strong>TOK</strong> (TEOE tokens/emblem)</label>
       <label>Token pool size: <input type="number" id="tokenPool" value="11" min="1" step="1"></label>
       <label>Token fallback (USD): <input type="text" id="tokenFallback" value="0.05"></label>
     </div>
