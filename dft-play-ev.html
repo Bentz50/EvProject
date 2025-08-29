@@ -2,124 +2,126 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Aetherdrift — Play Booster EV</title>
+<title>DFT — Play Booster EV</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
   html{background-color:#0b0d10}
-  /* Theme scope */
+  /* All styles scoped under .eoe-app */
   .eoe-app{
     --bg:#0b0d10; --fg:#e8ecf1; --muted:#a7b0bb; --acc:#6ac1ff;
-    --card:#151a20; --line:#222a33; --ok:#1e7f3c; --err:#9b2c2c;
+    --card:#151a20; --line:#222a33; --ok:#1e7f3c; --warn:#9b2c2c;
     --hi-bg:rgba(106,193,255,.14); --hi-line:#6ac1ff;
     --est-bg:rgba(106,193,255,.18); --est-line:#6ac1ff;
-    min-height:100vh;background:var(--bg);color:var(--fg);
-    font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-    max-width:1120px;margin:32px auto;padding:0 16px;box-sizing:border-box;
+    max-width:1120px; margin:32px auto; padding:0 16px; box-sizing:border-box;
+    color:var(--fg); background:var(--bg); font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
   }
   .eoe-app a{color:var(--acc);text-decoration:underline}
   .eoe-app h1{font-size:22px;margin:0 0 12px}
   .eoe-app p.lede{color:var(--muted);margin:0 0 16px}
-  .panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin:16px 0}
-  .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
-  label{display:block;margin:4px 0}
-  input[type="number"],input[type="text"],select{
-    width:12ch;background:#0e1216;color:#cfe3f5;border:1px solid #2a3541;border-radius:6px;padding:6px
+  .panel{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; margin:16px 0}
+  .row{display:flex; flex-wrap:wrap; gap:12px; align-items:center}
+  label{display:flex; gap:6px; align-items:center}
+  input[type="number"], input[type="text"], select{
+    background:#0e1216; color:#cfe3f5; border:1px solid #2a3541; border-radius:6px; padding:6px;
   }
   button{appearance:none;border:1px solid #2c3845;background:#1b232c;color:var(--fg);padding:10px 14px;border-radius:8px;cursor:pointer}
-  button[disabled]{opacity:.5;cursor:default}
-  .actions{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
-  #status{margin-top:8px;color:var(--muted)}
-  #counts b{color:#7ddc7a}
-  textarea{width:100%;min-height:200px;background:#0e1216;color:#cfe3f5;border:1px solid #2a3541;border-radius:8px;padding:10px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;box-sizing:border-box}
-
-  
-  /* Banner header/footer */
-  .freBanner{display:flex;justify-content:center;margin:8px 0 16px}
-  .freBanner img{max-width:420px;width:100%;height:auto;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
-  @media (max-width:640px){ .freBanner img{max-width:300px} }
-
-  .btn-primary{border-color:var(--hi-line);background:linear-gradient(180deg,#203245,#1a2530);color:#dff1ff;font-weight:600}
-  .hi-label{border:1px solid var(--hi-line);background:var(--hi-bg);border-radius:8px;padding:6px 8px}
+  button[disabled]{opacity:.55;cursor:default}
+  .btn-primary{
+    border-color:var(--hi-line); background:linear-gradient(180deg,#203245,#1a2530);
+    color:#dff1ff; font-weight:600; position:relative; animation:pulse 2.2s infinite;
+  }
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(106,193,255,.45)}70%{box-shadow:0 0 0 10px rgba(106,193,255,0)}100%{box-shadow:0 0 0 0 rgba(106,193,255,0)}}
   .hi-inline{display:flex;align-items:center;gap:6px;border:1px solid var(--hi-line);background:var(--hi-bg);border-radius:8px;padding:6px 8px}
+  .hi-label{border:1px solid var(--hi-line);background:var(--hi-bg);border-radius:8px;padding:6px 8px}
 
-  /* Tables */
   table{width:100%;border-collapse:collapse;margin-top:8px}
   th,td{border:1px solid #2a3541;padding:6px 8px;text-align:right}
   th:first-child,td:first-child{text-align:left}
   thead th{background:#0e1216;position:sticky;top:0;z-index:1}
   tbody tr:nth-child(even){background:#12171d}
+  .sift-tablewrap{max-height:520px;overflow:auto;border:1px solid #2a3541;border-radius:8px;margin-top:8px}
   .pill{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid #2a3541}
   .pill.ok{background:rgba(30,127,60,.20);color:#d9ffe3;border-color:#1e7f3c}
   .pill.bad{background:rgba(155,44,44,.16);color:#ffdede;border-color:#9b2c2c}
   .sift-ok{background:rgba(30,127,60,.12)!important}
   .sift-bad{background:rgba(155,44,44,.10)!important}
 
-  /* Emphasize Est. column and its left boundary */
+  /* Highlight the Est. column + its left border */
   .evbox table th:nth-child(3),
   .evbox table td:nth-child(3){
     background:var(--est-bg);
     border-color:var(--est-line);
     border-left-color:var(--est-line);
-    color:#eaf6ff;font-weight:700
+    color:#eaf6ff;
+    font-weight:700;
   }
-  .evbox table th:nth-child(2),
-  .evbox table td:nth-child(2){border-right-color:var(--est-line)}
+  .evbox table th:nth-child(2), .evbox table td:nth-child(2){ border-right-color:var(--est-line) }
+
+  .note{color:#a7b0bb;font-size:12px;margin-top:6px}
 
   /* Collapsible totals */
   details.eoe-collapse>summary{
     cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;
-    padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#0e1216;color:#dfeeff;font-weight:600
+    padding:8px 10px;border:1px solid #2a3541;border-radius:8px;background:#0e1216;color:#dfeeff;font-weight:600
   }
   details.eoe-collapse>summary::-webkit-details-marker{display:none}
   details.eoe-collapse>summary::after{content:'▼';opacity:.8;transform:rotate(-90deg);transition:transform .18s;margin-left:12px;font-size:12px}
   details.eoe-collapse[open]>summary::after{transform:rotate(0deg)}
   details.eoe-collapse .content{margin-top:10px}
+
+  /* Banner header/footer */
+  .freBanner{display:flex;justify-content:center;margin:8px 0 16px}
+  .freBanner img{max-width:420px;width:100%;height:auto;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+  @media (max-width:640px){ .freBanner img{max-width:300px} }
 </style>
 </head>
 <body>
-<main class="eoe-app" aria-label="Aetherdrift Play Booster EV app">
-
+<main class="eoe-app" role="main" aria-label="DFT — Play Booster EV">
   <!-- Banner header (links home) -->
   <div class="freBanner">
     <a href="./index.html"><img src="freEV-banner.png" alt="FreEV — Spend your money on cards not calculators"></a>
   </div>
 
-  <h1>Aetherdrift — Play Booster EV</h1>
+  <h1>DFT — Play Booster EV</h1>
   <p class="lede">
-    Auto‑builds from Scryfall. Playing‑card odds match Wizards’ Aetherdrift Play‑Booster breakdown; we normalize to exactly <b>14 Magic cards per pack</b>. Boxes = <b>30 packs</b>
+    Auto‑builds on load. Probabilities are normalized so the playing‑card EST sums to exactly <b>14 per pack</b>.
+    Non‑game items (token/art) are modeled separately. Box math uses <b>36 packs</b>.
   </p>
 
   <div class="panel">
     <strong>Refresh data</strong>
-    <label><input type="checkbox" id="englishOnly" checked> English‑only (avoid dupes)</label>
-    <div class="row">
-      <label><input type="checkbox" id="includeDFT" checked> Include <b>DFT</b> (main set, <code>is:booster</code>)</label>
-      <label><input type="checkbox" id="includeSPG" checked> Include <b>SPG</b> (Aetherdrift’s 10 Special Guests, nonfoil only)</label>
+    <div class="row" style="margin-top:6px">
+      <label><input type="checkbox" id="englishOnly" checked> English‑only</label>
+      <label><input type="checkbox" id="includeDFT" checked> Include <strong>DFT</strong> (main set, is:booster)</label>
+      <label><input type="checkbox" id="includeSPG"> Include <strong>SPG</strong> (Special Guests — nonfoil only)</label>
     </div>
-    <div class="row">
-      <label><input type="checkbox" id="includeTOK" checked> Include <b>TDFT</b> Tokens/Emblem/Play‑Aid</label>
-      <label>Token fallback (USD): <input type="text" id="tokenFallback" value="0.05" title="Used if token price missing"></label>
-      <label><input type="checkbox" id="includeART" checked> Include <b>ADFT</b> Art Series (normal + signed)</label>
-      <label>Art fallback (USD): <input type="text" id="artFallback" value="0.00" title="Used if art price missing"></label>
+    <div class="row" style="margin-top:6px">
+      <label><input type="checkbox" id="includeTOK" checked> Include <strong>TDFT</strong> tokens</label>
+      <label>Token fallback (USD): <input type="text" id="tokenFallback" value="0.05" size="6"></label>
+      <label>Token pool size: <input type="number" id="tokenPool" value="20" min="1" step="1" style="width:8ch"></label>
     </div>
-    <div class="actions">
-      <button id="buildBtn" class="btn-primary">Refresh List</button>
+    <div class="row" style="margin-top:6px">
+      <label><input type="checkbox" id="includeART"> Include <strong>ADFT</strong> art (normal + signed)</label>
+      <label>Art fallback (USD): <input type="text" id="artFallback" value="0.05" size="6"></label>
+    </div>
+    <div class="row actions">
+      <button id="buildBtn" class="btn-primary" title="Fetch live Scryfall data and recompute everything">Refresh List</button>
       <button id="downloadCsv" disabled>Download CSV</button>
       <button id="copyCsv" disabled>Copy CSV</button>
     </div>
-    <div id="status" aria-live="polite">Preparing…</div>
-    <div id="counts"></div>
+    <div id="status" class="note" aria-live="polite">Preparing…</div>
+    <div id="counts" class="note"></div>
   </div>
 
   <!-- Purchase EV -->
   <div id="purchasePanel" class="panel" style="display:none">
     <strong>Purchase EV Calculator</strong>
     <div class="row" style="margin-top:6px">
-      <label class="hi-label">Boxes to buy: <input type="number" id="boxesToBuy" value="1" min="0" step="1"></label>
-      <span class="hi-inline" title="Only count prints with Card Value ≥ this amount">
+      <label class="hi-label">Boxes to buy: <input type="number" id="boxesToBuy" value="1" min="0" step="1" style="width:10ch"></label>
+      <span class="hi-inline" title="Only count prints with card value ≥ this amount">
         <input type="checkbox" id="useSiftForEV" checked>
-        <b>Use Sift (≥)</b>
-        <input type="text" id="siftMin" value="0.25">
+        <span><strong>Use Sift (≥)</strong></span>
+        <input type="text" id="siftMin" value="0.25" style="width:8ch">
       </span>
     </div>
     <div class="row" style="margin-top:6px">
@@ -142,7 +144,7 @@
 
   <!-- Sift table -->
   <div id="siftPanel" class="panel" style="display:none">
-    <strong>Row List (linked)</strong>
+    <strong>Row List (linked) — highlighted by Sift threshold</strong>
     <div class="row">
       <span class="pill ok">≥ threshold</span>
       <span class="pill bad">&lt; threshold</span>
@@ -166,9 +168,9 @@
     </div>
   </div>
 
-  <!-- Errors -->
-  <div id="errorBox" class="panel" style="display:none;border-color:#ff7a7a">
-    <h2 style="color:#ff7a7a;margin:0 0 8px;font-size:16px">Load failed</h2>
+  <!-- Error -->
+  <div id="errorBox" class="panel" style="display:none; border-color:#ff7a7a">
+    <h2 style="margin:0 0 8px;color:#ff7a7a;font-size:16px">Load failed</h2>
     <div id="errorMsg"></div>
     <pre id="errorDetails" style="white-space:pre-wrap;background:#0e1216;border:1px solid #2a3541;padding:8px;border-radius:6px;color:#ffd4d4"></pre>
   </div>
@@ -176,21 +178,21 @@
   <!-- CSV -->
   <div class="panel">
     <strong>CSV preview</strong>
-    <textarea id="preview" placeholder="Your CSV will appear after the list builds…"></textarea>
+    <textarea id="preview" placeholder="Your CSV will appear after the list builds…" style="width:100%;min-height:220px;background:#0e1216;color:#cfe3f5;border:1px solid #2a3541;border-radius:8px;padding:10px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;"></textarea>
     <details>
       <summary>Advanced: Scryfall queries</summary>
-      <pre id="queries" style="white-space:pre-wrap;"></pre>
+      <pre id="queries" style="white-space:pre-wrap"></pre>
     </details>
   </div>
 
-  <!-- Totals (collapsible) -->
+  <!-- Totals (collapsible; no Sift) -->
   <div id="totalsPanel" class="panel" style="display:none">
     <details id="totalsDetails" class="eoe-collapse">
       <summary><strong>Totals for Your Purchase Size (No sift, Developer Model check)</strong></summary>
       <div class="content">
         <div class="note">
-          Columns show <em>Low / Est. / High</em>. Totals ignore Sift and include token/art values via fallbacks when missing.
-          Playing‑card probabilities are normalized so EST sums to 14 per pack; non‑game uses 65% token / 30% art / 5% signed art. Packs/box = <b>30</b>. :contentReference[oaicite:6]{index=6}
+          Columns show <em>Low / Est. / High</em>. Totals <b>ignore Sift</b> and include token/art values via fallbacks when missing.
+          Playing‑card probabilities are normalized so EST sums to 14 per pack; non‑game items are modeled separately. Box size uses <b>36 packs</b>.
         </div>
         <table>
           <thead><tr><th>Metric</th><th>Low</th><th>Est.</th><th>High</th></tr></thead>
@@ -206,19 +208,20 @@
     <a href="./index.html"><img src="freEV-banner.png" alt="FreEV — Spend your money on cards not calculators"></a>
   </div>
 </main>
-<!-- Google tag (gtag.js) -->
+
+<!-- Google tag (gtag.js) — before first custom script -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-LWMRXKNY5X"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
   gtag('config', 'G-LWMRXKNY5X');
 </script>
+
 <script>
-/* ===== Helpers ===== */
-const rarityLetter = r => ({common:'C',uncommon:'U',rare:'R',mythic:'M'}[r] || (r?r[0].toUpperCase():'')); 
-const sleep = ms => new Promise(res=>setTimeout(res,ms));
+/* ============================ Helpers ============================ */
+const rarityLetter = r => ({ common:'C', uncommon:'U', rare:'R', mythic:'M' }[r] || (r ? r[0].toUpperCase() : ''));
+const sleep = ms => new Promise(res => setTimeout(res, ms));
 const padCollector = s => { const m=String(s||'').match(/^(\d+)(.*)$/); return m?m[1].padStart(4,'0')+(m[2]||''):(s||''); };
 const baseCN = s => { const m=String(s||'').match(/^(\d+)/); return m?parseInt(m[1],10):NaN; };
 const parseUSD = s => { const n=parseFloat(String(s).replace(/[^0-9.]/g,'')); return Number.isFinite(n)?n:null; };
@@ -227,87 +230,64 @@ const fmtUSD = n => money(n);
 const fmtCount = n => !Number.isFinite(n)? '' : (Math.abs(n-Math.round(n))<1e-9? String(Math.round(n)) : (n>=100?n.toFixed(1):n>=10?n.toFixed(2):n.toFixed(3)));
 const fmtInt = n => Number.isFinite(n)? Math.round(n).toLocaleString() : '';
 const zFromConf = c => { c=Math.round(c); if(c>=99)return 2.576; if(c>=95)return 1.96; if(c>=90)return 1.645; if(c>=68)return 1.0; return 1.96; };
-const priceUSD = (card,treat) => { const p=(treat==='foil'?card?.prices?.usd_foil:card?.prices?.usd); const f=parseFloat(p); return Number.isFinite(f)?f:null; };
+const priceUSD = (card, treat) => { const p=(treat==='foil'?card?.prices?.usd_foil:card?.prices?.usd); const f=parseFloat(p); return Number.isFinite(f)?f:null; };
 
-/* ===== Box size (Aetherdrift uses 30‑pack Play Boosters) ===== */
-const PACKS_PER_BOX = 30; // Wizards: Play Booster boxes contain 30 packs for Aetherdrift. :contentReference[oaicite:7]{index=7}
+/* ======================= DFT model constants =======================
 
-/* ===== Aetherdrift (DFT) per‑pack odds (from Wizards’ article) =====
-   - Commons: base 7, but 1 common is replaced by SPG in 1.5% packs; wildcard adds 8.3% common.
-   - Uncommons: base 3 + wildcard adds 62.5% uncommon.
-   - Wildcard: 20.8% rare/mythic (use same R/M ratio as rare slot: 78/13).
-   - Rare slot: default‑frame R 78%, default‑frame M 13%, borderless R 8%, borderless M 1%.
-   - Foil slot (any rarity, includes borderless): mainset C 60.5%, U 30%, R 6.4%, M 1.1%; borderless C 0.5%, U 0.5%, R 0.9%, M 0.1%.
-   - Land slot (20% foil): 50% common dual; 37.5% default basic; 12.5% full‑art “Driver’s Seat” basic.
-   - SPG: 1.5% of packs (non‑foil only), 10 cards → equal share.
+  Generic Play‑Booster composition:
+  - Playing cards are normalized to sum to 14 per pack (EST) after modeling below.
+  - Rare slot: ~7/8 rare, ~1/8 mythic.
+  - Wildcard: ~1/12 packs yields an extra C/U/R/M; split  (common+uncommon) vs (rare+mythic).
+  - Foil slot rarity mix (heuristic, consistent with other pages): C 0.58 / U 0.32 / R 0.064 / M 0.011.
+  - Non‑game slot: 65% token/ad, 30% art, 5% signed art (if art series enabled).
+  - Packs per box: 36.
+
+  The exact land behavior or special families are not assumed for DFT; any land will follow its printed rarity.
+  Normalization to 14 compensates differences in baseline slot assumptions.
+
 */
-const DFT = {
-  // Common/uncommon expectations including wildcard and SPG replace
-  COMMON_SLOTS: 7 + 0.083 - 0.015,   // 7 + wildcard common − SPG replace
-  UNCOMMON_SLOTS: 3 + 0.625,         // 3 + wildcard uncommon
+const PACKS_PER_BOX = 36;
+const DFT_ODDS = {
+  // Expected non‑foil common & uncommon slots before normalization
+  E_COMMON_SLOTS:   6.5 + 0.125 - (1/64), // base ~6.5 + 12.5% wildcard to commons − SPG replace 1/64 (if used)
+  E_UNCOMMON_SLOTS: 3.0 + 0.625,          // base 3 + remaining wildcard share to uncommons
 
-  // Wildcard breakdown (20.8%) into R/M using rare‑slot ratio 78:13
-  WC_RARE: 0.208 * (78/(78+13)),
-  WC_MYTHIC: 0.208 * (13/(78+13)),
-  WC_REVVED_CU: 0.083, // borderless c/u in wildcard
+  // Rare‑slot split
+  RM_RARE_RATE:   7/8,
+  RM_MYTHIC_RATE: 1/8,
 
-  // Rare slot
-  RS_MAINSET_RARE: 0.78,
-  RS_MAINSET_MYTHIC: 0.13,
-  RS_BORDERLESS_RARE: 0.08,
-  RS_BORDERLESS_MYTHIC: 0.01,
+  // Wildcard sends about 1/12 packs to R/M combined; the rest to C/U
+  WILDCARD_RM: 1/12,
 
-  // Foil slot (main set + borderless)
-  FOIL_MAIN_C: 0.605,
-  FOIL_MAIN_U: 0.30,
-  FOIL_MAIN_R: 0.064,
-  FOIL_MAIN_M: 0.011,
-  FOIL_BORD_C: 0.005,
-  FOIL_BORD_U: 0.005,
-  FOIL_BORD_R: 0.009,
-  FOIL_BORD_M: 0.001,
+  // Foil slot split by rarity
+  FOIL_C: 0.58, FOIL_U: 0.32, FOIL_R: 0.064, FOIL_M: 0.011,
 
-  // Land slot (20% foil inside)
-  LAND_DUAL: 0.50,
-  LAND_BASIC_DEFAULT: 0.375,
-  LAND_BASIC_DRIVER: 0.125,
-  LAND_FOIL_RATE: 0.20,
+  // Non‑game slot (if enabled)
+  NONGAME_TOKEN: 0.65, NONGAME_ART: 0.30, NONGAME_ART_SIGNED: 0.05,
 
-  // SPG (10 cards; nonfoil only; replaces a common)
-  SPG_PER_PACK: 0.015
+  // SPG (if included) — nonfoil only, replaces a common in ~1/64 packs, equal among prints you include
+  SPG_PER_PACK: 1/64
 };
 
-/* ===== Non‑game slot: tokens vs art (Wizards: 30% art + 5% signed; 65% token) ===== */
-const NONGAME = { TOKEN: 0.65, ART: 0.30, ART_SIGNED: 0.05 }; // :contentReference[oaicite:8]{index=8}
-
-/* ===== State ===== */
-let __ROW_MODELS__ = []; // { model, price, nonGame, fallback }
-let __META_ROWS__ = [];  // { setTag, cn, rarity, name, treatment, model, price, nonGame, url }
-let __SIFT_CSV__ = '';
+/* ============================ State ============================ */
+let __ROW_MODELS__ = [];  // { model, price, isNonGame, fallback }
+let __META_ROWS__  = [];  // { setTag, cn, rarity, name, treatment, model, price, isNonGame, url }
+let __SIFT_CSV__   = '';
 let __NORM_SCALE__ = 1;
 
-/* ===== Probability models ===== */
-const PM = { point:p=>({type:'point',p}), range:(lo,hi)=>({type:'range',lo,hi}), max:max=>({type:'max',max}) };
-function countFromModelRaw(model,packs){
-  if(!model) return null;
-  if(model.type==='point') return {lo:model.p*packs, est:model.p*packs, hi:model.p*packs, max:model.p*packs};
-  if(model.type==='range') return {lo:model.lo*packs, est:((model.lo+model.hi)/2)*packs, hi:model.hi*packs, max:model.hi*packs};
-  if(model.type==='max')   return {lo:0, est:(model.max/2)*packs, hi:model.max*packs, max:model.max*packs};
-  return null;
-}
-function probPoint(model){ return model?.type==='point'?model.p : model?.type==='range' ? (model.lo+model.hi)/2 : model?.type==='max' ? model.max/2 : null; }
-function countFromModel(model,packs,nonGame=false,useScaled=true){
-  const c=countFromModelRaw(model,packs); if(!c||nonGame||!useScaled) return c;
-  return {lo:c.lo*__NORM_SCALE__, est:c.est*__NORM_SCALE__, hi:c.hi*__NORM_SCALE__, max:c.max*__NORM_SCALE__};
-}
-
-/* ===== Scryfall I/O ===== */
+/* ========================= Scryfall I/O ========================= */
 function buildQuery(setCode, englishOnly){
   let q='';
-  if(setCode==='DFT') q='e:dft is:booster -finish:glossy -finish:etched';
-  if(setCode==='SPG') q='e:spg cn>=84 cn<=93'; /* Aetherdrift SPG window */ 
-  if(setCode==='TDFT') q='e:tdft (layout:token or layout:double_faced_token or layout:emblem) -layout:art_series';
-  if(setCode==='ADFT') q='e:adft';
+  if(setCode==='DFT'){  // main set, only Play-eligible prints
+    q='e:dft is:booster -finish:glossy -finish:etched -finish:textured';
+  } else if(setCode==='SPG'){
+    // If your DFT wave is known (by release date or CN window), refine this query accordingly.
+    q='e:spg is:booster -finish:foil';
+  } else if(setCode==='TDFT'){
+    q='e:tdft (layout:token or layout:double_faced_token or layout:emblem)';
+  } else if(setCode==='ADFT'){
+    q='e:adft';
+  }
   if(englishOnly) q+=' lang:en';
   return q;
 }
@@ -316,289 +296,201 @@ async function fetchAllPages(q, setLabel, statusEl){
   let url=base+encodeURIComponent(q), out=[], page=1;
   while(url){
     statusEl.textContent=`Fetching ${setLabel}: page ${page}…`;
-    let resp; try{ resp=await fetch(url);}catch(e){ throw {set:setLabel,query:q,status:'NETWORK',details:e?.message||String(e)};}
+    let resp;
+    try{ resp=await fetch(url); }catch(e){ throw {set:setLabel,query:q,status:'NETWORK',details:e?.message||String(e)}; }
     if(!resp.ok){ const text=await resp.text().catch(()=> ''); throw {set:setLabel,query:q,status:resp.status,details:text}; }
-    const json=await resp.json(); out=out.concat(json.data||[]);
-    url=json.has_more? json.next_page : null; page++; if(url) await sleep(120);
+    const json=await resp.json();
+    out = out.concat(json.data||[]);
+    url = json.has_more ? json.next_page : null;
+    page++; if(url) await sleep(120);
   }
   return out;
 }
 
-/* ===== Row push ===== */
-function pushRow(card,setTag,treatment,model,price,nonGame=false,fallbackUsed=false){
-  const cn=padCollector(card.collector_number);
-  const rarity = card.rarity ? rarityLetter(card.rarity) : 'C';
-  __META_ROWS__.push({ setTag, cn, rarity, name:card.name, treatment, model, price, nonGame, url:card.scryfall_uri||'' });
-  __ROW_MODELS__.push({ model, price, nonGame, fallback:fallbackUsed });
+/* ===================== Probability models ====================== */
+const PM = {
+  point: p => ({ type:'point', p }),
+  range: (lo,hi) => ({ type:'range', lo, hi }),
+  max: max => ({ type:'max', max })
+};
+function probPoint(model){
+  if(!model) return null;
+  if(model.type==='point') return model.p;
+  if(model.type==='range') return (model.lo+model.hi)/2;
+  if(model.type==='max')   return model.max/2;
+  return null;
+}
+function countFromModelRaw(model, packs){
+  if(!model) return null;
+  if(model.type==='point') return { lo:model.p*packs, est:model.p*packs, hi:model.p*packs, max:model.p*packs };
+  if(model.type==='range') return { lo:model.lo*packs, est:((model.lo+model.hi)/2)*packs, hi:model.hi*packs, max:model.hi*packs };
+  if(model.type==='max')   return { lo:0, est:(model.max/2)*packs, hi:model.max*packs, max:model.max*packs };
+  return null;
+}
+function countFromModel(model, packs, isNonGame=false){
+  const c=countFromModelRaw(model,packs);
+  if(!c) return c;
+  return isNonGame ? c : { lo:c.lo*__NORM_SCALE__, est:c.est*__NORM_SCALE__, hi:c.hi*__NORM_SCALE__, max:c.max*__NORM_SCALE__ };
 }
 
-/* ===== Build logic ===== */
-async function build(){
-  // Reset UI
-  document.getElementById('errorBox').style.display='none';
-  document.getElementById('purchasePanel').style.display='none';
-  document.getElementById('purchaseEVContainer').style.display='none';
-  document.getElementById('siftPanel').style.display='none';
-  document.getElementById('siftTableWrap').style.display='none';
-  document.getElementById('siftSummary').textContent='';
-  document.getElementById('preview').value='';
-  document.getElementById('status').textContent='Building list…';
-  __ROW_MODELS__=[]; __META_ROWS__=[]; __SIFT_CSV__=''; __NORM_SCALE__=1;
+/* ========================= Build logic ========================= */
+function pushRow(card, setTag, treatment, model, price, isNonGame=false, fallbackUsed=false){
+  const cn = padCollector(card.collector_number);
+  const rarity = rarityLetter(card.rarity||'');
+  const row = { setTag, cn, rarity, name: card.name, treatment, model, price, isNonGame, url: card.scryfall_uri||'' };
+  __META_ROWS__.push(row);
+  __ROW_MODELS__.push({ model, price, isNonGame, fallback:fallbackUsed });
+}
 
-  const englishOnly=document.getElementById('englishOnly').checked;
-  const incDFT=document.getElementById('includeDFT').checked;
-  const incSPG=document.getElementById('includeSPG').checked;
-  const incTOK=document.getElementById('includeTOK').checked;
-  const incART=document.getElementById('includeART').checked;
-  const tokenFallback=parseFloat(document.getElementById('tokenFallback').value);
-  const artFallback=parseFloat(document.getElementById('artFallback').value);
+function rowsFromCards(cards, tag, opts){
+  const { isToken=false, isArt=false, spgNonfoilOnly=false, tokenFallback=null, artFallback=null } = (opts||{});
+  for(const c of cards){
+    const finishes=Array.isArray(c.finishes)?c.finishes:[];
+    const cn = padCollector(c.collector_number); if(!cn) continue;
+    const cnNum = baseCN(c.collector_number);
+    const rarity = (isToken||isArt) ? (c.rarity ? rarityLetter(c.rarity) : 'C') : rarityLetter(c.rarity);
+    const name=c.name, url=c.scryfall_uri||'';
 
-  const qList=[]; if(incDFT) qList.push(['DFT',buildQuery('DFT',englishOnly)]);
-  if(incSPG) qList.push(['SPG',buildQuery('SPG',englishOnly)]);
-  if(incTOK) qList.push(['TDFT',buildQuery('TDFT',englishOnly)]);
-  if(incART) qList.push(['ADFT',buildQuery('ADFT',englishOnly)]);
-  document.getElementById('queries').textContent=qList.map(([tag,q])=>`${tag}: ${q}`).join('\n');
+    const pushOne=(treat, model)=>{
+      let val = priceUSD(c, treat);
+      let usedFallback=false;
+      if(isToken && !Number.isFinite(val) && Number.isFinite(tokenFallback)){ val=tokenFallback; usedFallback=true; }
+      if(isArt   && !Number.isFinite(val) && Number.isFinite(artFallback)){   val=artFallback;   usedFallback=true; }
+      pushRow(c, tag, treat, model, val, (isToken||isArt), usedFallback);
+    };
 
-  try{
-    const status=document.getElementById('status');
-    const results=[];
-    for(const [tag,q] of qList){ const cards=await fetchAllPages(q,tag,status); results.push([tag,cards]); }
-
-    let dftAll=[], spg=[], tdfTokens=[], adft=[];
-    for(const [tag,cards] of results){
-      if(tag==='DFT') dftAll=(cards||[]).filter(c=>(c.games||[]).includes('paper'));
-      if(tag==='SPG') spg=(cards||[]).filter(c=>(c.games||[]).includes('paper'));
-      if(tag==='TDFT') tdfTokens=(cards||[]).filter(c=>(c.games||[]).includes('paper'));
-      if(tag==='ADFT') adft=(cards||[]).filter(c=>(c.games||[]).includes('paper'));
+    if(tag==='SPG' || spgNonfoilOnly){
+      if(finishes.includes('nonfoil')){
+        // Equal share among included SPG prints
+        // The exact SPG pool size is derived from cards.length later via normalization, but we model per‑print as:
+        // p = (SPG_PER_PACK / N_spg). We'll compute p after we know N_spg. For simplicity use a point now; we rescale to 14 anyway.
+        pushOne('normal', PM.point(0)); // placeholder, replaced later
+      }
+      continue;
     }
 
-    // ===== classify DFT pools
-    const isLand = c => /Land/i.test(c.type_line||'');
-    const isBasic = c => /Basic/i.test(c.type_line||'');
-    const isBorderless = c => Array.isArray(c.frame_effects) && c.frame_effects.includes('borderless');
-    const fullArt = c => !!c.full_art;
-
-    const dftCommons = dftAll.filter(c=> c.rarity==='common' && !isLand(c) && !isBorderless(c));
-    const dftUncommons = dftAll.filter(c=> c.rarity==='uncommon' && !isLand(c) && !isBorderless(c));
-    const dftRares = dftAll.filter(c=> c.rarity==='rare' && !isBorderless(c));
-    const dftMythics = dftAll.filter(c=> c.rarity==='mythic' && !isBorderless(c));
-
-    const bordC = dftAll.filter(c=> c.rarity==='common' && isBorderless(c));
-    const bordU = dftAll.filter(c=> c.rarity==='uncommon' && isBorderless(c));
-    const bordR = dftAll.filter(c=> c.rarity==='rare' && isBorderless(c));
-    const bordM = dftAll.filter(c=> c.rarity==='mythic' && isBorderless(c));
-
-    const landDuals = dftAll.filter(c=> c.rarity==='common' && isLand(c) && !isBasic(c));
-    const landBasicDefault = dftAll.filter(c=> isBasic(c) && !fullArt(c));
-    const landBasicDriver  = dftAll.filter(c=> isBasic(c) && fullArt(c)); // Driver's Seat basics
-
-    // ===== per‑print probabilities (non‑land default frame)
-    const pCommonNF = dftCommons.length? DFT.COMMON_SLOTS / dftCommons.length : 0;
-    const pUncommonNF = dftUncommons.length? DFT.UNCOMMON_SLOTS / dftUncommons.length : 0;
-    const pRareNF = dftRares.length? (DFT.RS_MAINSET_RARE + DFT.WC_RARE) / dftRares.length : 0;
-    const pMythicNF = dftMythics.length? (DFT.RS_MAINSET_MYTHIC + DFT.WC_MYTHIC) / dftMythics.length : 0;
-
-    // Wildcard borderless revved c/u pool
-    const revvedCUSize = (bordC.length + bordU.length) || 1;
-    const pRevvedCUNF = DFT.WC_REVVED_CU / revvedCUSize;
-
-    // Borderless R/M rare‑slot pools
-    const pBordR_NF = bordR.length? DFT.RS_BORDERLESS_RARE / bordR.length : 0;
-    const pBordM_NF = bordM.length? DFT.RS_BORDERLESS_MYTHIC / bordM.length : 0;
-
-    // Foil slot pools (main vs borderless)
-    const pFoilMainC = dftCommons.length? DFT.FOIL_MAIN_C / dftCommons.length : 0;
-    const pFoilMainU = dftUncommons.length? DFT.FOIL_MAIN_U / dftUncommons.length : 0;
-    const pFoilMainR = dftRares.length? DFT.FOIL_MAIN_R / dftRares.length : 0;
-    const pFoilMainM = dftMythics.length? DFT.FOIL_MAIN_M / dftMythics.length : 0;
-
-    const pFoilBordC = bordC.length? DFT.FOIL_BORD_C / bordC.length : 0;
-    const pFoilBordU = bordU.length? DFT.FOIL_BORD_U / bordU.length : 0;
-    const pFoilBordR = bordR.length? DFT.FOIL_BORD_R / bordR.length : 0;
-    const pFoilBordM = bordM.length? DFT.FOIL_BORD_M / bordM.length : 0;
-
-    // Land slot per‑print
-    const pLandDualNF = landDuals.length? (DFT.LAND_DUAL*(1-DFT.LAND_FOIL_RATE))/landDuals.length : 0;
-    const pLandDualF  = landDuals.length? (DFT.LAND_DUAL*DFT.LAND_FOIL_RATE)/landDuals.length : 0;
-    const pLandDefNF  = landBasicDefault.length? (DFT.LAND_BASIC_DEFAULT*(1-DFT.LAND_FOIL_RATE))/landBasicDefault.length : 0;
-    const pLandDefF   = landBasicDefault.length? (DFT.LAND_BASIC_DEFAULT*DFT.LAND_FOIL_RATE)/landBasicDefault.length : 0;
-    const pLandDrvNF  = landBasicDriver.length? (DFT.LAND_BASIC_DRIVER*(1-DFT.LAND_FOIL_RATE))/landBasicDriver.length : 0;
-    const pLandDrvF   = landBasicDriver.length? (DFT.LAND_BASIC_DRIVER*DFT.LAND_FOIL_RATE)/landBasicDriver.length : 0;
-
-    // ---- Emit DFT rows
-    for(const c of dftAll){
-      const finishes=Array.isArray(c.finishes)?c.finishes:[];
-      const rar=c.rarity, land=isLand(c), basic=isBasic(c), border=isBorderless(c);
-
-      // Land slot (nonfoil from land slot + foil from land slot)
-      if(land){
-        if(rar==='common' && !basic){
-          if(pLandDualNF>0) pushRow(c,'DFT','normal',PM.point(pLandDualNF), priceUSD(c,'normal'));
-          if(pLandDualF>0)  pushRow(c,'DFT','foil',  PM.point(pLandDualF),  priceUSD(c,'foil'));
-          continue;
-        }
-        if(basic && !fullArt(c)){
-          if(pLandDefNF>0) pushRow(c,'DFT','normal',PM.point(pLandDefNF), priceUSD(c,'normal'));
-          if(pLandDefF>0)  pushRow(c,'DFT','foil',  PM.point(pLandDefF),  priceUSD(c,'foil'));
-          continue;
-        }
-        if(basic && fullArt(c)){
-          if(pLandDrvNF>0) pushRow(c,'DFT','normal',PM.point(pLandDrvNF), priceUSD(c,'normal'));
-          if(pLandDrvF>0)  pushRow(c,'DFT','foil',  PM.point(pLandDrvF),  priceUSD(c,'foil'));
-          continue;
-        }
-      }
-
-      // Non‑land, default frame
-      if(!border){
-        if(rar==='common'){
-          if(pCommonNF>0 && finishes.includes('nonfoil')) pushRow(c,'DFT','normal',PM.point(pCommonNF), priceUSD(c,'normal'));
-          if(pFoilMainC>0 && finishes.includes('foil'))   pushRow(c,'DFT','foil',  PM.point(pFoilMainC), priceUSD(c,'foil'));
-        }else if(rar==='uncommon'){
-          if(pUncommonNF>0 && finishes.includes('nonfoil')) pushRow(c,'DFT','normal',PM.point(pUncommonNF), priceUSD(c,'normal'));
-          if(pFoilMainU>0 && finishes.includes('foil'))     pushRow(c,'DFT','foil',  PM.point(pFoilMainU), priceUSD(c,'foil'));
-        }else if(rar==='rare'){
-          if(pRareNF>0 && finishes.includes('nonfoil')) pushRow(c,'DFT','normal',PM.point(pRareNF), priceUSD(c,'normal'));
-          if(pFoilMainR>0 && finishes.includes('foil')) pushRow(c,'DFT','foil',  PM.point(pFoilMainR), priceUSD(c,'foil'));
-        }else if(rar==='mythic'){
-          if(pMythicNF>0 && finishes.includes('nonfoil')) pushRow(c,'DFT','normal',PM.point(pMythicNF), priceUSD(c,'normal'));
-          if(pFoilMainM>0 && finishes.includes('foil'))   pushRow(c,'DFT','foil',  PM.point(pFoilMainM), priceUSD(c,'foil'));
-        }
-      } else {
-        // Borderless
-        if(rar==='common'){
-          if(pRevvedCUNF>0 && finishes.includes('nonfoil')) pushRow(c,'DFT','normal',PM.point(pRevvedCUNF), priceUSD(c,'normal'));
-          if(pFoilBordC>0 && finishes.includes('foil'))     pushRow(c,'DFT','foil',  PM.point(pFoilBordC), priceUSD(c,'foil'));
-        }else if(rar==='uncommon'){
-          if(pRevvedCUNF>0 && finishes.includes('nonfoil')) pushRow(c,'DFT','normal',PM.point(pRevvedCUNF), priceUSD(c,'normal'));
-          if(pFoilBordU>0 && finishes.includes('foil'))     pushRow(c,'DFT','foil',  PM.point(pFoilBordU), priceUSD(c,'foil'));
-        }else if(rar==='rare'){
-          if(pBordR_NF>0 && finishes.includes('nonfoil')) pushRow(c,'DFT','normal',PM.point(pBordR_NF), priceUSD(c,'normal'));
-          if(pFoilBordR>0 && finishes.includes('foil'))   pushRow(c,'DFT','foil',  PM.point(pFoilBordR), priceUSD(c,'foil'));
-        }else if(rar==='mythic'){
-          if(pBordM_NF>0 && finishes.includes('nonfoil')) pushRow(c,'DFT','normal',PM.point(pBordM_NF), priceUSD(c,'normal'));
-          if(pFoilBordM>0 && finishes.includes('foil'))   pushRow(c,'DFT','foil',  PM.point(pFoilBordM), priceUSD(c,'foil'));
-        }
-      }
+    if(isToken){ pushOne('normal', PM.point(0)); continue; } // probability injected later (token pool)
+    if(isArt){
+      const isSigned = /[A-Za-z]$/.test(c.collector_number||'') && (c.collector_number||'').toLowerCase().endsWith('s');
+      pushOne(isSigned?'signed':'normal', PM.point(0)); // injected later (art pool split)
+      continue;
     }
 
-    // ---- SPG (non‑foil only; equal share across 10 Aetherdrift SPG)
-    if(spg.length){
-      const pSPG = DFT.SPG_PER_PACK / spg.length; // 0.015 / 10
-      for(const c of spg){
-        if(Array.isArray(c.finishes) && c.finishes.includes('nonfoil')){
-          pushRow(c,'SPG','normal',PM.point(pSPG), priceUSD(c,'normal'), false,false);
-        }
-      }
+    // Main DFT: use rarity to assign base nonfoil & foil models
+    if(finishes.includes('nonfoil')){
+      let model=null;
+      if(rarity==='C') model=PM.point(DFT_ODDS.E_COMMON_SLOTS);       // per‑print later ÷ Ncommons
+      if(rarity==='U') model=PM.point(DFT_ODDS.E_UNCOMMON_SLOTS);     // per‑print later ÷ Nuncommons
+      if(rarity==='R') model=PM.point(DFT_ODDS.RM_RARE_RATE);         // ÷ Nrares (+ wildcard share later)
+      if(rarity==='M') model=PM.point(DFT_ODDS.RM_MYTHIC_RATE);       // ÷ Nmythics (+ wildcard share later)
+      pushOne('normal', model);
     }
-
-    // ---- Tokens (TDFT) equal share within token bucket; use fallback if missing
-    if(tdfTokens.length){
-      const pTok = NONGAME.TOKEN / tdfTokens.length;
-      for(const c of tdfTokens){
-        const val = priceUSD(c,'normal');
-        const usedFallback = !Number.isFinite(val) && Number.isFinite(tokenFallback);
-        pushRow(c,'TDFT','normal',PM.point(pTok), usedFallback?tokenFallback:val, true, usedFallback);
-      }
+    if(finishes.includes('foil')){
+      let model=null;
+      if(rarity==='C') model=PM.point(DFT_ODDS.FOIL_C);
+      if(rarity==='U') model=PM.point(DFT_ODDS.FOIL_U);
+      if(rarity==='R') model=PM.point(DFT_ODDS.FOIL_R);
+      if(rarity==='M') model=PM.point(DFT_ODDS.FOIL_M);
+      pushOne('foil', model);
     }
-
-    // ---- Art Series (ADFT) normal + signed
-    if(adft.length){
-      const pNormal = NONGAME.ART / adft.length;
-      const pSigned = NONGAME.ART_SIGNED / adft.length;
-      for(const c of adft){
-        const val = priceUSD(c,'normal');
-        const usedFallback = !Number.isFinite(val) && Number.isFinite(artFallback);
-        pushRow(c,'ADFT','normal',PM.point(pNormal), usedFallback?artFallback:val, true, usedFallback);
-        pushRow(c,'ADFT','signed',PM.point(pSigned), usedFallback?artFallback:val, true, usedFallback);
-      }
-    }
-
-    // Normalize playing cards to exactly 14 per pack (EST)
-    const playingMass = __ROW_MODELS__.reduce((s,r)=> s + (r.nonGame?0:(probPoint(r.model)||0)), 0);
-    __NORM_SCALE__ = playingMass>0 ? (14 / playingMass) : 1;
-
-    // Sort stable
-    __META_ROWS__.sort((a,b)=>{
-      if(a.setTag!==b.setTag) return a.setTag.localeCompare(b.setTag);
-      const pa=(a.cn||'').match(/^(\d+)(.*)$/)||[], pb=(b.cn||'').match(/^(\d+)(.*)$/)||[];
-      const na=pa[1]?parseInt(pa[1],10):0, nb=pb[1]?parseInt(pb[1],10):0;
-      if(na!==nb) return na-nb; const sa=pa[2]||'', sb=pb[2]||'';
-      if(sa!==sb) return sa.localeCompare(sb);
-      if(a.name!==b.name) return a.name.localeCompare(b.name);
-      return a.treatment.localeCompare(b.treatment);
-    });
-
-    // CSV
-    const header=['Set','Number','Rarity','Name','Treatment','Pack Prob Min (%)','Pack Prob Max (%)','Card Value (USD)','Per 1000 Min','Per 1000 Max','Per 30000 Min','Per 30000 Max','Per 300000 Min','Per 300000 Max'];
-    const rows = __META_ROWS__.map(m=>{
-      const p = probPoint(m.model);
-      const pScaled = m.nonGame ? p : (p*__NORM_SCALE__);
-      const c1k=pScaled*1000, c30k=pScaled*30000, c300k=pScaled*300000;
-      return [ m.setTag, m.cn, m.rarity, m.name, m.treatment,
-        (pScaled*100).toFixed(5)+'%', (pScaled*100).toFixed(5)+'%', fmtUSD(m.price),
-        fmtCount(c1k), fmtCount(c1k),
-        fmtCount(c30k), fmtCount(c30k),
-        fmtCount(c300k), fmtCount(c300k)
-      ];
-    });
-    const csv = [header, ...rows].map(r => r.map(v=>{
-      const s=String(v??''); return /[",\n]/.test(s)? '"'+s.replace(/"/g,'""')+'"' : s;
-    }).join(',')).join('\n');
-    window.__CSV__=csv;
-    document.getElementById('preview').value=csv.slice(0,300000);
-    document.getElementById('downloadCsv').disabled=false;
-    document.getElementById('copyCsv').disabled=false;
-
-    // Sift + Purchase panels
-    document.getElementById('siftPanel').style.display='';
-    document.getElementById('applySift').disabled=false;
-    document.getElementById('purchasePanel').style.display='';
-    document.getElementById('calcEV').disabled=false;
-
-    // Auto‑apply Sift
-    applySift(parseFloat(document.getElementById('siftMin').value) || 0.25);
-
-    // Counts
-    const cDFT = __META_ROWS__.filter(r=>r.setTag==='DFT').length;
-    const cSPG = __META_ROWS__.filter(r=>r.setTag==='SPG').length;
-    const cTOK = __META_ROWS__.filter(r=>r.setTag==='TDFT').length;
-    const cART = __META_ROWS__.filter(r=>r.setTag==='ADFT').length;
-    document.getElementById('counts').innerHTML = `Built <b>${__META_ROWS__.length.toLocaleString()}</b> rows — DFT: <b>${cDFT}</b>, SPG: <b>${cSPG}</b>, TDFT: <b>${cTOK}</b>, ADFT: <b>${cART}</b>.`;
-
-    document.getElementById('status').textContent = `Done. (Normalization factor: ${__NORM_SCALE__.toFixed(5)} to 14 cards/pack)`;
-
-    renderPurchaseEV();
-    renderTotalsTable();
-    document.getElementById('totalsPanel').style.display='';
-    const det=document.getElementById('totalsDetails'); if(det) det.open=false;
-
-  }catch(err){
-    console.error(err);
-    document.getElementById('status').textContent='Error while building — see details below.';
-    document.getElementById('errorMsg').innerHTML = `<strong>Set:</strong> ${err?.set||'Unknown'} &nbsp; <strong>Status:</strong> ${err?.status??'ERROR'}`;
-    document.getElementById('errorDetails').textContent = `Query:\n${err?.query||'(no query)'}\n\nResponse snippet:\n${String(err?.details||'').slice(0,800)}`;
-    document.getElementById('downloadCsv').disabled=true;
-    document.getElementById('copyCsv').disabled=true;
-    document.getElementById('applySift').disabled=true;
-    document.getElementById('downloadSiftCsv').disabled=true;
-    document.getElementById('calcEV').disabled=true;
   }
 }
 
-/* ===== Sift table ===== */
+function finalizePerPrintProbabilities(){
+  // Count family sizes
+  const commons   = __META_ROWS__.filter(r=>r.setTag==='DFT' && r.rarity==='C' && r.treatment==='normal').length;
+  const uncommons = __META_ROWS__.filter(r=>r.setTag==='DFT' && r.rarity==='U' && r.treatment==='normal').length;
+  const raresNF   = __META_ROWS__.filter(r=>r.setTag==='DFT' && r.rarity==='R' && r.treatment==='normal').length;
+  const mythsNF   = __META_ROWS__.filter(r=>r.setTag==='DFT' && r.rarity==='M' && r.treatment==='normal').length;
+  const raresF    = __META_ROWS__.filter(r=>r.setTag==='DFT' && r.rarity==='R' && r.treatment==='foil').length;
+  const mythsF    = __META_ROWS__.filter(r=>r.setTag==='DFT' && r.rarity==='M' && r.treatment==='foil').length;
+  const commonsF  = __META_ROWS__.filter(r=>r.setTag==='DFT' && r.rarity==='C' && r.treatment==='foil').length;
+  const uncommsF  = __META_ROWS__.filter(r=>r.setTag==='DFT' && r.rarity==='U' && r.treatment==='foil').length;
+
+  const wcRM = DFT_ODDS.WILDCARD_RM, wcCU = 1 - wcRM;
+  const totalCU = (commons+uncommons)||1;
+  const wcCommonShare = wcCU * (commons/totalCU);
+  const wcUncommonShare = wcCU * (uncommons/totalCU);
+
+  // Inject per‑print probabilities into each model
+  for(const m of __META_ROWS__){
+    const row = __ROW_MODELS__[__META_ROWS__.indexOf(m)];
+    // Non‑game pools handled later
+    if(m.setTag==='DFT'){
+      if(m.treatment==='normal'){
+        if(m.rarity==='C' && commons>0){ row.model = PM.point( (DFT_ODDS.E_COMMON_SLOTS/commons) + (wcCommonShare/commons) ); }
+        if(m.rarity==='U' && uncommons>0){ row.model = PM.point( (DFT_ODDS.E_UNCOMMON_SLOTS/uncommons) + (wcUncommonShare/uncommons) ); }
+        if(m.rarity==='R' && raresNF>0){ row.model = PM.point( (DFT_ODDS.RM_RARE_RATE/raresNF) + ((wcRM*DFT_ODDS.RM_RARE_RATE)/raresNF) ); }
+        if(m.rarity==='M' && mythsNF>0){ row.model = PM.point( (DFT_ODDS.RM_MYTHIC_RATE/mythsNF) + ((wcRM*DFT_ODDS.RM_MYTHIC_RATE)/mythsNF) ); }
+      }else if(m.treatment==='foil'){
+        if(m.rarity==='C' && commonsF>0){ row.model = PM.point( DFT_ODDS.FOIL_C/commonsF ); }
+        if(m.rarity==='U' && uncommsF>0){ row.model = PM.point( DFT_ODDS.FOIL_U/uncommsF ); }
+        if(m.rarity==='R' && raresF>0){ row.model = PM.point( DFT_ODDS.FOIL_R/raresF ); }
+        if(m.rarity==='M' && mythsF>0){ row.model = PM.point( DFT_ODDS.FOIL_M/mythsF ); }
+      }
+    }
+  }
+
+  // SPG: equal split among included SPG nonfoil prints
+  const spgNF = __META_ROWS__.filter(r=>r.setTag==='SPG' && r.treatment==='normal').length;
+  if(spgNF>0){
+    for(const [i,m] of __META_ROWS__.entries()){
+      if(m.setTag==='SPG' && m.treatment==='normal'){
+        __ROW_MODELS__[i].model = PM.point( DFT_ODDS.SPG_PER_PACK / spgNF );
+      }
+    }
+  }
+
+  // Non‑game: tokens/art pools
+  const tokN = __META_ROWS__.filter(r=>r.setTag==='TDFT').length;
+  if(tokN>0){
+    for(const [i,m] of __META_ROWS__.entries()){
+      if(m.setTag==='TDFT'){ __ROW_MODELS__[i].model = PM.point( DFT_ODDS.NONGAME_TOKEN / tokN ); }
+    }
+  }
+  const artN = __META_ROWS__.filter(r=>r.setTag==='ADFT' && r.treatment==='normal').length;
+  const artS = __META_ROWS__.filter(r=>r.setTag==='ADFT' && r.treatment==='signed').length;
+  if(artN>0){
+    const pN = DFT_ODDS.NONGAME_ART / artN;
+    for(const [i,m] of __META_ROWS__.entries()){
+      if(m.setTag==='ADFT' && m.treatment==='normal'){ __ROW_MODELS__[i].model = PM.point(pN); }
+    }
+  }
+  if(artS>0){
+    const pS = DFT_ODDS.NONGAME_ART_SIGNED / artS;
+    for(const [i,m] of __META_ROWS__.entries()){
+      if(m.setTag==='ADFT' && m.treatment==='signed'){ __ROW_MODELS__[i].model = PM.point(pS); }
+    }
+  }
+
+  // Normalize playing mass to 14 cards/pack
+  const playingMass = __ROW_MODELS__.reduce((s,r,idx)=> s + (__META_ROWS__[idx].setTag==='TDFT' || __META_ROWS__[idx].setTag==='ADFT' ? 0 : (probPoint(r.model)||0)), 0);
+  __NORM_SCALE__ = playingMass>0 ? (14 / playingMass) : 1;
+}
+
+/* ========================= Sift & EV ========================= */
+function toCsv(rows){
+  return rows.map(r => r.map(v => {
+    const s=String(v??'');
+    return /[",\n]/.test(s)? '"'+s.replace(/"/g,'""')+'"' : s;
+  }).join(',')).join('\n');
+}
+
 function renderSiftTable(minUSD){
   const body=document.getElementById('siftBody'); body.innerHTML='';
   for(const m of __META_ROWS__){
-    const ok = Number.isFinite(m.price) && m.price>=minUSD;
-    const cls= ok ? 'sift-ok' : 'sift-bad';
-    const p = probPoint(m.model);
-    const pScaled = m.nonGame ? p : (p*__NORM_SCALE__);
+    const row = __ROW_MODELS__[__META_ROWS__.indexOf(m)];
+    const ok=Number.isFinite(row.price) && row.price>=minUSD;
+    const cls=ok?'sift-ok':'sift-bad';
+    const p = probPoint(row.model);
+    const pScaled = (m.setTag==='TDFT' || m.setTag==='ADFT') ? p : (p*__NORM_SCALE__);
     const c1k=pScaled*1000, c30k=pScaled*30000, c300k=pScaled*300000;
 
     const tr=document.createElement('tr'); tr.className=cls;
-    const cells=[ m.setTag, m.cn, m.rarity, /* name link */, m.treatment,
-      (pScaled*100).toFixed(5)+'%', (pScaled*100).toFixed(5)+'%', fmtUSD(m.price),
+    const cells=[
+      m.setTag, m.cn, m.rarity,
+      /* name link */ '', m.treatment,
+      (pScaled*100).toFixed(5)+'%', (pScaled*100).toFixed(5)+'%', fmtUSD(row.price),
       fmtCount(c1k), fmtCount(c1k),
       fmtCount(c30k), fmtCount(c30k),
       fmtCount(c300k), fmtCount(c300k)
@@ -607,43 +499,34 @@ function renderSiftTable(minUSD){
     td=document.createElement('td'); td.textContent=cells[1]; tr.appendChild(td);
     td=document.createElement('td'); td.textContent=cells[2]; tr.appendChild(td);
     td=document.createElement('td');
-    if(m.url){ const a=document.createElement('a'); a.href=m.url; a.target='_blank'; a.rel='noopener noreferrer'; a.textContent=m.name; td.appendChild(a); }
-    else td.textContent=m.name;
+      if(m.url){ const a=document.createElement('a'); a.href=m.url; a.target='_blank'; a.rel='noopener noreferrer'; a.textContent=m.name; td.appendChild(a); }
+      else td.textContent=m.name;
     tr.appendChild(td);
     td=document.createElement('td'); td.textContent=cells[4]; tr.appendChild(td);
     for(let i=5;i<cells.length;i++){ const t=document.createElement('td'); t.textContent=cells[i]; tr.appendChild(t); }
     body.appendChild(tr);
   }
-
-  const P=300000;
-  let include=0,exclude=0,missing=0,estEV=0;
-  for(const r of __ROW_MODELS__){
-    const p=probPoint(r.model), pS=r.nonGame? p : (p*__NORM_SCALE__);
-    if(!Number.isFinite(pS)) continue;
-    const usd=r.price;
-    const ok=Number.isFinite(usd)&&usd>=minUSD;
-    if(ok){ include++; estEV += usd*pS*P; } else { exclude++; if(!Number.isFinite(usd)) missing++; }
-  }
   document.getElementById('siftTableWrap').style.display='';
-  document.getElementById('siftSummary').innerHTML =
-    `Sift ≥ <b>$${Number(minUSD).toFixed(2)}</b> — Included: <b>${include.toLocaleString()}</b> / Excluded: <b>${exclude.toLocaleString()}</b>` +
-    (missing? ` (no USD on ${missing})`:``);
 }
+
 function applySift(minUSD){
   renderSiftTable(minUSD);
   const header=['Set','Number','Rarity','Name','Treatment','Pack Prob Min (%)','Pack Prob Max (%)','Card Value (USD)','Per 1000 Min','Per 1000 Max','Per 30000 Min','Per 30000 Max','Per 300000 Min','Per 300000 Max'];
   const rows=[], tbody=document.getElementById('siftBody');
   for(const tr of tbody.querySelectorAll('tr')) rows.push(Array.from(tr.querySelectorAll('td')).map(td=>td.textContent));
-  __SIFT_CSV__ = [header, ...rows].map(r=>r.join(',')).join('\n');
+  __SIFT_CSV__ = toCsv([header, ...rows]);
   document.getElementById('downloadSiftCsv').disabled=false;
+
+  // IMPORTANT: re‑compute EV whenever Sift changes (your requested fix)
+  renderPurchaseEV();
 }
 
-/* ===== Purchase EV & Totals ===== */
 function statRange(packs, useSift, minUSD){
   let meanPerPack=0, varPerPack=0, missingPrice=0;
-  for(const row of __ROW_MODELS__){
+  for(const [i,row] of __ROW_MODELS__.entries()){
+    const meta=__META_ROWS__[i];
     const p = probPoint(row.model); if(!Number.isFinite(p)) continue;
-    const pS = row.nonGame? p : (p*__NORM_SCALE__);
+    const pS = (meta.setTag==='TDFT' || meta.setTag==='ADFT') ? p : (p*__NORM_SCALE__);
     const usd = row.price;
     const ok = (!useSift) || (Number.isFinite(usd) && usd >= minUSD);
     if(!ok) continue;
@@ -660,7 +543,7 @@ function renderPurchaseEV(){
   const boxes = Math.max(0, parseFloat(document.getElementById('boxesToBuy').value)||0);
   const packs = boxes * PACKS_PER_BOX;
   const useSift = document.getElementById('useSiftForEV').checked;
-  const minUSD = parseFloat(document.getElementById('siftMin').value) || 0.25;
+  const minUSD = parseUSD(document.getElementById('siftMin').value) ?? 0.25;
   const mode = (document.querySelector('input[name="rangeMode"]:checked')||{}).value || 'stat';
   const conf = parseFloat(document.getElementById('confLevel').value)||95;
   const z = zFromConf(conf);
@@ -669,9 +552,10 @@ function renderPurchaseEV(){
 
   if(mode==='struct'){
     let est=0, missing=0;
-    for(const row of __ROW_MODELS__){
-      const p = probPoint(row.model), pS = row.nonGame? p : (p*__NORM_SCALE__);
-      if(!Number.isFinite(pS)) continue;
+    for(const [i,row] of __ROW_MODELS__.entries()){
+      const meta=__META_ROWS__[i];
+      const p = probPoint(row.model); if(!Number.isFinite(p)) continue;
+      const pS = (meta.setTag==='TDFT' || meta.setTag==='ADFT') ? p : (p*__NORM_SCALE__);
       const usd=row.price;
       if(useSift && !(Number.isFinite(usd)&&usd>=minUSD)) continue;
       if(!Number.isFinite(usd)){ missing++; continue; }
@@ -697,8 +581,7 @@ function renderPurchaseEV(){
         <tr><td>${tag} — across ${packs.toLocaleString()} packs</td><td>$${money(lowEV)}</td><td>$${money(estEV)}</td><td>$${money(highEV)}</td></tr>
         <tr><td>${tag} — per ${PACKS_PER_BOX}-pack box</td><td>$${money(perBoxLow)}</td><td>$${money(perBoxEst)}</td><td>$${money(perBoxHigh)}</td></tr>
       </tbody>
-    </table>
-  `;
+    </table>`;
   evDiv.style.display='';
 
   const notes=[];
@@ -710,7 +593,7 @@ function renderPurchaseEV(){
 
   const rangeNotes=document.getElementById('rangeNotes');
   rangeNotes.textContent = (mode==='struct')
-    ? 'Structural range reflects slot‑mix uncertainty; it scales ~linearly with packs.'
+    ? 'Structural range reflects uncertainty from slot mixes; scales roughly linearly with packs.'
     : 'Statistical range reflects random pull variance and narrows ~1/√n with more boxes.';
 
   renderTotalsTable();
@@ -720,11 +603,15 @@ function renderTotalsTable(){
   const boxes = Math.max(0, parseFloat(document.getElementById('boxesToBuy').value)||0);
   if(boxes<=0){ document.getElementById('totalsPanel').style.display='none'; return; }
   const P = boxes * PACKS_PER_BOX;
+
   let estCount=0, estEV=0, missingPrice=0, fallbackUsed=0;
 
-  for(const row of __ROW_MODELS__){
-    const p = probPoint(row.model), pS = row.nonGame? p : (p*__NORM_SCALE__);
-    const cnt = pS*P; estCount += cnt;
+  for(const [i,row] of __ROW_MODELS__.entries()){
+    const meta=__META_ROWS__[i];
+    const p = probPoint(row.model); if(!Number.isFinite(p)) continue;
+    const pS = (meta.setTag==='TDFT' || meta.setTag==='ADFT') ? p : (p*__NORM_SCALE__);
+    const cnt = pS*P;
+    estCount += cnt;
     const usd = row.price;
     if(Number.isFinite(usd)) estEV += usd*cnt; else missingPrice++;
     if(row.fallback) fallbackUsed++;
@@ -748,15 +635,141 @@ function renderTotalsTable(){
   const notes=[];
   if(missingPrice>0) notes.push(`${missingPrice} rows had no USD price (fallbacks used where provided).`);
   if(fallbackUsed>0) notes.push(`${fallbackUsed} token/art rows used fallback values.`);
-  notes.push('Playing‑card probabilities normalized to 14 per pack; non‑game slot 65/30/5 (token/art/signed).');
+  notes.push('Playing‑card probabilities are scaled to sum to 14 per pack; non‑game slot uses 65%/30%/5% split when art is enabled.');
   document.getElementById('totalsNotes').textContent = 'Notes: ' + notes.join(' ');
+  document.getElementById('totalsPanel').style.display='';
+  const det=document.getElementById('totalsDetails'); if(det) det.open=false;
 }
 
-/* ===== Hooks ===== */
+/* ============================== Build ============================== */
+async function build(){
+  // Reset
+  document.getElementById('errorBox').style.display='none';
+  document.getElementById('purchasePanel').style.display='none';
+  document.getElementById('purchaseEVContainer').style.display='none';
+  document.getElementById('siftPanel').style.display='none';
+  document.getElementById('siftTableWrap').style.display='none';
+  document.getElementById('preview').value='';
+  document.getElementById('status').textContent='Building list…';
+  __ROW_MODELS__=[]; __META_ROWS__=[]; __SIFT_CSV__=''; __NORM_SCALE__=1;
+
+  const englishOnly=document.getElementById('englishOnly').checked;
+  const incDFT=document.getElementById('includeDFT').checked;
+  const incSPG=document.getElementById('includeSPG').checked;
+  const incTOK=document.getElementById('includeTOK').checked;
+  const incART=document.getElementById('includeART').checked;
+  const tokenFallback=parseUSD(document.getElementById('tokenFallback').value);
+  const artFallback=parseUSD(document.getElementById('artFallback').value);
+  const tokenPool=Math.max(1, parseInt(document.getElementById('tokenPool').value,10)||20);
+
+  const status=document.getElementById('status');
+  const counts=document.getElementById('counts');
+  const queriesEl=document.getElementById('queries');
+  const preview=document.getElementById('preview');
+
+  const header=['Set','Number','Rarity','Name','Treatment','Pack Prob Min (%)','Pack Prob Max (%)','Card Value (USD)','Per 1000 Min','Per 1000 Max','Per 30000 Min','Per 30000 Max','Per 300000 Min','Per 300000 Max'];
+
+  const qList=[];
+  if(incDFT) qList.push(['DFT',  buildQuery('DFT', englishOnly)]);
+  if(incSPG) qList.push(['SPG',  buildQuery('SPG', englishOnly)]);
+  if(incTOK) qList.push(['TDFT', buildQuery('TDFT', englishOnly)]);
+  if(incART) qList.push(['ADFT', buildQuery('ADFT', englishOnly)]);
+  queriesEl.textContent = qList.map(([tag,q])=>`${tag}: ${q}`).join('\n');
+
+  try{
+    status.textContent='Starting…';
+    const results=[];
+    for(const [tag,q] of qList){ const cards = await fetchAllPages(q, tag, status); results.push([tag,cards]); }
+
+    // Collect rows
+    for(const [tag,cards] of results){
+      if(tag==='TDFT') rowsFromCards(cards, 'TDFT', { isToken:true, tokenFallback });
+      else if(tag==='ADFT') rowsFromCards(cards, 'ADFT', { isArt:true, artFallback });
+      else if(tag==='SPG') rowsFromCards(cards, 'SPG', { spgNonfoilOnly:true });
+      else if(tag==='DFT') rowsFromCards(cards, 'DFT');
+    }
+
+    // Token pool size override (equal split across whatever TDFT we loaded)
+    if(incTOK){
+      const tokRows = __META_ROWS__.map((m,i)=>[m,i]).filter(([m])=>m.setTag==='TDFT');
+      if(tokRows.length>0){
+        const pTok = DFT_ODDS.NONGAME_TOKEN / tokenPool;
+        for(const [m,idx] of tokRows){ __ROW_MODELS__[idx].model = PM.point(pTok); }
+      }
+    }
+
+    finalizePerPrintProbabilities();
+
+    // Sort rows for stable CSV
+    __META_ROWS__.sort((a,b)=>{
+      if(a.setTag!==b.setTag) return a.setTag.localeCompare(b.setTag);
+      const pa=(a.cn||'').match(/^(\d+)(.*)$/)||[], pb=(b.cn||'').match(/^(\d+)(.*)$/)||[];
+      const na=pa[1]?parseInt(pa[1],10):0, nb=pb[1]?parseInt(pb[1],10):0;
+      if(na!==nb) return na-nb; const sa=pa[2]||'', sb=pb[2]||''; if(sa!==sb) return sa.localeCompare(sb);
+      if(a.name!==b.name) return a.name.localeCompare(b.name);
+      return a.treatment.localeCompare(b.treatment);
+    });
+
+    // CSV
+    const rows = __META_ROWS__.map((m,idx)=>{
+      const r=__ROW_MODELS__[idx];
+      const p = probPoint(r.model);
+      const pS = (m.setTag==='TDFT' || m.setTag==='ADFT') ? p : (p*__NORM_SCALE__);
+      const c1k=pS*1000, c30k=pS*30000, c300k=pS*300000;
+      return [
+        m.setTag, m.cn, m.rarity, m.name, m.treatment,
+        (pS*100).toFixed(5)+'%', (pS*100).toFixed(5)+'%', fmtUSD(r.price),
+        fmtCount(c1k), fmtCount(c1k),
+        fmtCount(c30k), fmtCount(c30k),
+        fmtCount(c300k), fmtCount(c300k)
+      ];
+    });
+    const csv = toCsv([header, ...rows]); window.__CSV__=csv; preview.value=csv.slice(0,250000);
+    document.getElementById('downloadCsv').disabled=false;
+    document.getElementById('copyCsv').disabled=false;
+
+    // Enable Sift + Purchase EV
+    document.getElementById('siftPanel').style.display='';
+    document.getElementById('applySift').disabled=false;
+    document.getElementById('purchasePanel').style.display='';
+    document.getElementById('calcEV').disabled=false;
+
+    // Auto‑apply Sift at default (your preference)
+    const minUSD=parseUSD(document.getElementById('siftMin').value) ?? 0.25;
+    applySift(minUSD);
+
+    // Counts
+    const dftCount = __META_ROWS__.filter(r=>r.setTag==='DFT').length;
+    const spgCount = __META_ROWS__.filter(r=>r.setTag==='SPG').length;
+    const tokCount = __META_ROWS__.filter(r=>r.setTag==='TDFT').length;
+    const artCount = __META_ROWS__.filter(r=>r.setTag==='ADFT').length;
+    document.getElementById('counts').innerHTML =
+      `Built <b>${__META_ROWS__.length.toLocaleString()}</b> rows — DFT: <b>${dftCount}</b>, SPG: <b>${spgCount}</b>, TDFT: <b>${tokCount}</b>, ADFT: <b>${artCount}</b>.`;
+
+    document.getElementById('status').textContent = `Done. (Normalization factor: ${__NORM_SCALE__.toFixed(5)} to 14 cards/pack; Sift auto‑applied)`;
+
+    // Initial EV render
+    renderPurchaseEV();
+
+  }catch(err){
+    console.error(err);
+    document.getElementById('status').textContent='Error while building — see details below.';
+    document.getElementById('errorMsg').innerHTML = `<strong>Set:</strong> ${err?.set||'Unknown'} &nbsp; <strong>Status:</strong> ${err?.status??'ERROR'}`;
+    document.getElementById('errorDetails').textContent = `Query:\n${err?.query||'(no query)'}\n\nResponse snippet:\n${String(err?.details||'').slice(0,800)}`;
+    document.getElementById('errorBox').style.display='';
+    document.getElementById('downloadCsv').disabled=true;
+    document.getElementById('copyCsv').disabled=true;
+    document.getElementById('applySift').disabled=true;
+    document.getElementById('downloadSiftCsv').disabled=true;
+    document.getElementById('calcEV').disabled=true;
+  }
+}
+
+/* ============================== Hooks ============================== */
 document.getElementById('buildBtn').addEventListener('click', build);
 document.getElementById('downloadCsv').addEventListener('click', ()=>{ if(window.__CSV__) {
   const blob=new Blob(["\uFEFF"+window.__CSV__],{type:'text/csv;charset=utf-8'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='DFT_PlayBooster_List.csv';
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='DFT_PlayBooster_List_Normalized.csv';
   document.body.appendChild(a); a.click(); URL.revokeObjectURL(a.href); a.remove();
 }});
 document.getElementById('copyCsv').addEventListener('click', async ()=>{
@@ -764,23 +777,26 @@ document.getElementById('copyCsv').addEventListener('click', async ()=>{
   try{ await navigator.clipboard.writeText(window.__CSV__); alert('CSV copied to clipboard.'); }
   catch{ const t=document.getElementById('preview'); t.focus(); t.select(); alert('Select all (Ctrl/Cmd+A) and copy (Ctrl/Cmd+C).'); }
 });
+
 document.getElementById('applySift').addEventListener('click', ()=>{
-  applySift(parseFloat(document.getElementById('siftMin').value) || 0.25);
+  const minUSD=parseUSD(document.getElementById('siftMin').value) ?? 0.25;
+  applySift(minUSD); // also recomputes EV
 });
+document.getElementById('downloadSiftCsv').addEventListener('click', ()=>{ if(__SIFT_CSV__) {
+  const blob=new Blob(["\uFEFF"+__SIFT_CSV__],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='DFT_PlayBooster_SiftTable.csv';
+  document.body.appendChild(a); a.click(); URL.revokeObjectURL(a.href); a.remove();
+}});
+
 document.getElementById('calcEV').addEventListener('click', renderPurchaseEV);
-document.getElementById('boxesToBuy').addEventListener('change', ()=>{ renderPurchaseEV(); renderTotalsTable(); });
+document.getElementById('boxesToBuy').addEventListener('change', renderPurchaseEV);
 document.getElementById('useSiftForEV').addEventListener('change', renderPurchaseEV);
-document.getElementById('siftMin').addEventListener('change', ()=>{ applySift(parseFloat(document.getElementById('siftMin').value) || 0.25); renderPurchaseEV(); });
+document.getElementById('siftMin').addEventListener('change', ()=>{ applySift(parseUSD(document.getElementById('siftMin').value) ?? 0.25); });
 document.getElementById('confLevel').addEventListener('change', renderPurchaseEV);
 for(const r of document.querySelectorAll('input[name="rangeMode"]')) r.addEventListener('change', renderPurchaseEV);
 
-// Auto‑build on load (like your OTJ page) :contentReference[oaicite:9]{index=9}
+// Auto‑build on page load (your request)
 window.addEventListener('DOMContentLoaded', build);
 </script>
 </body>
 </html>
-
-
-
-
-
