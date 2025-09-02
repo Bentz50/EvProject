@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>WOE — Set Booster EV (WOT normal only)</title>
+<title>WOE — Set Booster EV (WOT normal-only, rarity-weighted)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
   html{background-color:#0b0d10}
-  /* All styles scoped under .eoe-app for portability (copied from your template) */
+  /* All styles scoped under .eoe-app for portability (aligned with your template) */
   .eoe-app{
     --bg:#0b0d10; --fg:#e8ecf1; --muted:#a7b0bb; --acc:#6ac1ff;
     --card:#151a20; --line:#222a33; --ok:#1e7f3c; --warn:#9b2c2c;
@@ -30,8 +30,6 @@
     border-color:var(--hi-line); background:linear-gradient(180deg,#203245,#1a2530);
     color:#dff1ff; font-weight:600; position:relative;
   }
-  .hi-inline{display:flex;align-items:center;gap:6px;border:1px solid var(--hi-line);background:var(--hi-bg);border-radius:8px;padding:6px 8px}
-  .hi-label{border:1px solid var(--hi-line);background:var(--hi-bg);border-radius:8px;padding:6px 8px}
 
   /* Banner header/footer */
   .freBanner{display:flex;justify-content:center;margin:8px 0 16px}
@@ -79,7 +77,7 @@
 </style>
 </head>
 <body>
-<main class="eoe-app" role="main" aria-label="WOE — Set Booster EV (WOT normal only)">
+<main class="eoe-app" role="main" aria-label="WOE — Set Booster EV (WOT normal-only)">
   <!-- Banner header (links home) -->
   <div class="freBanner">
     <a href="./index.html"><img src="freEV-banner.png" alt="FreEV — Spend your money on cards not calculators"></a>
@@ -90,8 +88,8 @@
     Builds on load using Scryfall. Playing‑card odds are normalized to exactly
     <strong>12 Magic cards per pack</strong>. Non‑game content is modeled separately:
     <strong>Art card in every pack</strong>, and the final slot is <strong>Token/Ad (~75%) or The List (~25%)</strong>.
-    Boxes are assumed to have <strong>30 packs</strong>. Enchanting Tales (<strong>WOT</strong>) uses its
-    <strong>dedicated slot (1 per pack)</strong> with <em>normal, non‑foil only</em> prints (no anime, no foil).
+    Boxes are assumed to have <strong>30 packs</strong>. Enchanting Tales (<strong>WOT</strong>) uses a
+    <strong>dedicated slot (1 per pack)</strong>, modeled as <em>normal, non‑foil only</em> with <em>rarity‑weighted</em> odds; anime share is excluded from EV but preserved as a placeholder to keep pack composition exact.
   </p>
 
   <div class="panel">
@@ -136,7 +134,7 @@
       <span class="hi-inline" title="Only count prints with card value ≥ this amount">
         <input type="checkbox" id="useSiftForEV" checked>
         <span><strong>Use Sift (≥)</strong></span>
-        <input type="text" id="siftMin" value="0.00" style="width:8ch">
+        <input type="text" id="siftMin" value="0.25" style="width:8ch">
       </span>
     </div>
     <div class="row" style="margin-top:6px">
@@ -207,7 +205,7 @@
         <div class="note">
           Columns show <em>Low / Est. / High</em>. Totals <b>ignore Sift</b> and include token/art values via fallbacks when missing.
           Playing‑card probabilities are normalized so EST sums to 12 per pack; non‑game items: Art (100%) and final slot mix by List rate.
-          WOT dedicated slot is modeled as a <em>fixed</em> 1‑per‑pack share using <em>normal, non‑foil</em> prints only.
+          WOT dedicated slot is <em>fixed</em> at 1/pack with <em>rarity‑weighted normal</em> prints; anime share is a zero‑EV placeholder so pack composition stays exact.
         </div>
         <table>
           <thead><tr><th>Metric</th><th>Low</th><th>Est.</th><th>High</th></tr></thead>
@@ -248,11 +246,11 @@ const zFromConf = c => { c=Math.round(c); if(c>=99)return 2.576; if(c>=95)return
 const priceUSD = (card,treat) => { const p=(treat==='foil'?card?.prices?.usd_foil:card?.prices?.usd); const f=parseFloat(p); return Number.isFinite(f)?f:null; };
 
 /* ========= Pack/odds model (WOE Set Booster) =========
-   - Set Booster: normalize *playing cards* to exactly 12 per pack (EST).
+   - Normalize *playing cards* to exactly 12 per pack (EST).
    - Always: 1 Art card; final slot = Token/Ad (~1 - listRate) or The List (~listRate).
    - Rare slot (main set) baseline: ~87.5% Rare / 12.5% Mythic (nonfoil).
    - Foil slot (1 per pack) rarity split heuristic: 0.60C / 0.30U / 0.085R / 0.015M (sums 1.0).
-   - Enchanting Tales (WOT): dedicated slot modeled as 1 per pack (fixed), **normal non‑foil prints only**.
+   - Enchanting Tales (WOT): dedicated slot is 1 per pack (fixed). We model **normal non‑foil** only, **rarity‑weighted**; anime share kept as a zero‑EV placeholder.
 */
 const PACKS_PER_BOX = 30;
 const ODDS = {
@@ -400,22 +398,48 @@ function rowsFromWOE(cards){
   }
 }
 
+/* ---- WOT dedicated slot — rarity-weighted, normal-only (anime excluded) ----
+   We use a rarity mix proxy of U: 10/15, R: 4/15, M: 1/15 for the dedicated slot.
+   Anime "borderless" appears in 2.8% of packs, split 1.1% Rare, 1.7% Mythic.
+   We exclude anime from EV via zero‑EV placeholders to keep the slot at exactly 1.000 card/pack.
+*/
+const WOT_SHARE_U = 10/15;     // ≈ 0.6666667
+const WOT_SHARE_R =  4/15;     // ≈ 0.2666667
+const WOT_SHARE_M =  1/15;     // ≈ 0.0666667
+const WOT_ANIME_RATE_R = 0.011; // 1.1% of boosters = anime rare
+const WOT_ANIME_RATE_M = 0.017; // 1.7% of boosters = anime mythic
+
 function rowsFromWOT(cards){
-  const paper=cards.filter(c=> (c.games||[]).includes('paper'));
-  // Non‑foil only, and exclude anime/borderless variants
-  const regularNonfoil = paper.filter(c=>{
-    const nf = (c.finishes||[]).includes('nonfoil');
-    const isAnime = (Array.isArray(c.frame_effects) && c.frame_effects.includes('anime')) || !!c.borderless;
-    return nf && !isAnime;
-  });
-  const nReg=Math.max(1, regularNonfoil.length);
+  const paper = cards.filter(c => (c.games||[]).includes('paper'));
+  const isAnime = c => Array.isArray(c.frame_effects) && c.frame_effects.includes('anime');
 
-  // Dedicated slot: fixed 1 per pack, distributed evenly across regular non‑foil WOT prints
-  for(const c of regularNonfoil){
-    pushRow(c,'WOT','dedicated', PM.fixed(1 / nReg), priceUSD(c,'normal'), false,false);
-  }
+  // Normal non‑foil only, excluding anime prints
+  const normalNF = paper.filter(c => (c.finishes||[]).includes('nonfoil') && !isAnime(c));
 
-  // No foil WOT via foil slot; no wildcard extras (normal only).
+  const U = normalNF.filter(c => c.rarity === 'uncommon');
+  const R = normalNF.filter(c => c.rarity === 'rare');
+  const M = normalNF.filter(c => c.rarity === 'mythic');
+
+  const nU = Math.max(1, U.length);
+  const nR = Math.max(1, R.length);
+  const nM = Math.max(1, M.length);
+
+  // Normal shares for EV (subtract anime from R/M only)
+  const pU = WOT_SHARE_U / nU;
+  const pR = Math.max(0, (WOT_SHARE_R - WOT_ANIME_RATE_R)) / nR;
+  const pM = Math.max(0, (WOT_SHARE_M - WOT_ANIME_RATE_M)) / nM;
+
+  for(const c of U){ pushRow(c,'WOT','dedicated', PM.fixed(pU), priceUSD(c,'normal'), false,false); }
+  for(const c of R){ pushRow(c,'WOT','dedicated', PM.fixed(pR), priceUSD(c,'normal'), false,false); }
+  for(const c of M){ pushRow(c,'WOT','dedicated', PM.fixed(pM), priceUSD(c,'normal'), false,false); }
+
+  // Preserve 1.000 card/pack in the slot: zero‑EV placeholders for anime (R + M)
+  pushRow({collector_number:'ANIME_R', rarity:'rare',   name:'WOT Anime Rare (excluded)',   scryfall_uri:'', prices:{}},
+          'WOT','anime_excluded', PM.fixed(WOT_ANIME_RATE_R), 0, false, true);
+  pushRow({collector_number:'ANIME_M', rarity:'mythic', name:'WOT Anime Mythic (excluded)', scryfall_uri:'', prices:{}},
+          'WOT','anime_excluded', PM.fixed(WOT_ANIME_RATE_M), 0, false, true);
+
+  // No WOT foils via the foil slot; no wildcard extras (kept conservative at 0).
 }
 
 function rowsFromPLST(cards){
@@ -489,7 +513,7 @@ function statRange(packs, useSift, minUSD){
     if(useSift && !(Number.isFinite(r.price) && r.price>=minUSD)) continue;
     if(!Number.isFinite(r.price)){ missingPrice++; continue; }
     const p = probPoint(r.model); if(!Number.isFinite(p)) continue;
-    // Fixed models already represent per‑pack probabilities and should not be scaled
+    // Fixed models already represent per‑pack probabilities; do not scale
     const pS = (r.isNonGame || (r.model && r.model.type==='fixed')) ? p : (p*__NORM_SCALE__);
     meanPerPack += pS * r.price;
     varPerPack  += pS * (1-pS) * r.price * r.price;
@@ -597,7 +621,7 @@ function renderPurchaseEV(){
   const { listRate } = getListControls();
   notes.push(`Boxes: ${boxes.toLocaleString()} × ${PACKS_PER_BOX} = ${packs.toLocaleString()} packs.`);
   notes.push(`Using ${useSift ? `Sift ≥ $${(Number.isFinite(minUSD)?minUSD:0).toFixed(2)}` : 'all prints'}.`);
-  notes.push(`Final slot: List rate ${(listRate*100).toFixed(1)}%. WOT dedicated slot uses **normal non‑foil** prints only (1 per pack).`);
+  notes.push(`Final slot: List rate ${(listRate*100).toFixed(1)}%. WOT dedicated slot: U ${(WOT_SHARE_U*100).toFixed(1)}%, R ${(WOT_SHARE_R*100).toFixed(1)}% (−1.1% anime), M ${(WOT_SHARE_M*100).toFixed(1)}% (−1.7% anime).`);
   if(mode==='stat') notes.push('Variance: Σ p·(1−p)·value² per pack (independence approximation).');
   if(missingNote) notes.push(missingNote);
   document.getElementById('purchaseSummary').textContent=notes.join(' ');
@@ -613,8 +637,7 @@ function renderTotalsTable(){
   const P = boxes * PACKS_PER_BOX;
 
   // Exact items per pack: 12 playing + 1 art + 1 final-slot item (token/ad or List)
-  const { listRate } = getListControls();
-  const exactPlaying = 12 * P; // target exact playing-card count (dedicated WOT counted within playing)
+  const exactPlaying = 12 * P; // WOT dedicated 1/pack is part of this count (0.972 normal + 0.028 anime placeholders)
   const exactArt     = 1 * P;
   const exactFinal   = 1 * P; // token/ad or List
   const exactItems   = (12+1+1) * P;
@@ -649,7 +672,7 @@ function renderTotalsTable(){
   if(missingPrice>0) notes.push(`${missingPrice} rows had no USD price (fallbacks used where provided).`);
   const tokenFallback=parseUSD(document.getElementById('tokenFallback').value);
   if(__ROW_MODELS__.some(r=>r.fallback)) notes.push(`Some token/art rows used fallback values (token fallback = $${(tokenFallback??0).toFixed(2)}).`);
-  notes.push('Playing‑card probabilities are scaled so EST sums to exactly 12 per pack; the WOT dedicated share remains fixed at 1 per pack.');
+  notes.push('Playing‑card probabilities are scaled so EST sums to exactly 12 per pack; the WOT dedicated share remains fixed at 1 per pack (0.972 normal + 0.028 anime placeholders).');
   document.getElementById('totalsNotes').textContent = 'Notes: ' + notes.join(' ');
   document.getElementById('totalsPanel').style.display='';
   const det=document.getElementById('totalsDetails'); if(det) det.open=false;
@@ -682,7 +705,6 @@ async function build(){
   const artFallback=parseUSD(document.getElementById('artFallback').value);
 
   const status=document.getElementById('status');
-  const counts=document.getElementById('counts');
   const queriesEl=document.getElementById('queries');
 
   // Build queries list
@@ -722,11 +744,10 @@ async function build(){
          : null;
     if(Number.isFinite(p)) estNonFixed += p;
   }
+  // Fixed portion (WOT dedicated normal + two anime placeholders) counts toward the 12 playing cards
   const fixedShare = __META_ROWS__.reduce((acc,m)=>{
-    if(m.treatment==='dedicated' && m.setTag==='WOT') {
-      const model=m.model;
-      const p=(model && model.type==='fixed') ? model.p : null;
-      if(Number.isFinite(p)) acc+=p;
+    if(m.setTag==='WOT' && m.model && m.model.type==='fixed') {
+      const p=m.model.p; if(Number.isFinite(p)) acc+=p;
     }
     return acc;
   },0);
@@ -785,9 +806,9 @@ async function build(){
   applySift(minUSD);
   renderPurchaseEV();
 
-  // Counts
+  // Counts (exclude the anime placeholders from the WOT count for clarity)
   const woeCount = __META_ROWS__.filter(r=>r.setTag==='WOE').length;
-  const wotCount = __META_ROWS__.filter(r=>r.setTag==='WOT').length;
+  const wotCount = __META_ROWS__.filter(r=>r.setTag==='WOT' && r.treatment!=='anime_excluded').length;
   const plstCount= __META_ROWS__.filter(r=>r.setTag==='PLST').length;
   const tokCount = __META_ROWS__.filter(r=>r.setTag==='TWOE').length;
   const artCount = __META_ROWS__.filter(r=>r.setTag==='AWOE').length;
@@ -829,6 +850,7 @@ document.getElementById('downloadSiftCsv').addEventListener('click', ()=>{ if(__
 document.getElementById('calcEV').addEventListener('click', renderPurchaseEV);
 document.getElementById('boxesToBuy').addEventListener('change', renderPurchaseEV);
 document.getElementById('useSiftForEV').addEventListener('change', renderPurchaseEV);
+document.getElementsByName('rangeMode').forEach(el=>el.addEventListener('change', renderPurchaseEV));
 document.getElementById('siftMin').addEventListener('change', ()=>{
   const v=parseUSD(document.getElementById('siftMin').value) ?? 0.00;
   applySift(v); renderPurchaseEV();
@@ -839,5 +861,42 @@ document.getElementById('listRate').addEventListener('change', ()=>{ build(); })
 // Auto‑build on page load
 window.addEventListener('DOMContentLoaded', build);
 </script>
+<script>
+/* === SIFT MIN CLAMP ($0.01) — drop‑in for FDN ===
+   Paste anywhere after parseUSD() is defined.
+   Enforces $0.01 whenever Sift is 0, negative, blank, or NaN.
+*/
+(function(){
+  function clampSiftMin(){
+    const el = document.getElementById('siftMin');
+    if(!el) return 0.01;
+    let v = parseUSD(el.value);
+    if(!Number.isFinite(v) || v <= 0) v = 0.01;
+    el.value = v.toFixed(2);   // keep UI in sync with the enforced value
+    return v;
+  }
+
+  // Expose in case you want to call it explicitly elsewhere.
+  window.getSiftMinClamped = clampSiftMin;
+
+  // Clamp once on load.
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', clampSiftMin, { once:true });
+  } else {
+    clampSiftMin();
+  }
+
+  // Clamp *before* your existing click handlers for Apply Sift / Calculate EV.
+  // (capture = true ensures this runs first)
+  document.addEventListener('click', function(e){
+    const id = e.target && e.target.id;
+    if (id === 'applySift' || id === 'calcEV') clampSiftMin();
+  }, true);
+
+  // Also clamp when the Sift field is committed.
+  document.getElementById('siftMin')?.addEventListener('change', clampSiftMin, true);
+})();
+</script>
+
 </body>
 </html>

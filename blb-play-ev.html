@@ -740,5 +740,41 @@ for(const r of document.querySelectorAll('input[name="rangeMode"]')) r.addEventL
 // Auto‑build
 window.addEventListener('DOMContentLoaded', build);
 </script>
+<script>
+/* === SIFT MIN CLAMP ($0.01) — drop‑in for FDN ===
+   Paste anywhere after parseUSD() is defined.
+   Enforces $0.01 whenever Sift is 0, negative, blank, or NaN.
+*/
+(function(){
+  function clampSiftMin(){
+    const el = document.getElementById('siftMin');
+    if(!el) return 0.01;
+    let v = parseUSD(el.value);
+    if(!Number.isFinite(v) || v <= 0) v = 0.01;
+    el.value = v.toFixed(2);   // keep UI in sync with the enforced value
+    return v;
+  }
+
+  // Expose in case you want to call it explicitly elsewhere.
+  window.getSiftMinClamped = clampSiftMin;
+
+  // Clamp once on load.
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', clampSiftMin, { once:true });
+  } else {
+    clampSiftMin();
+  }
+
+  // Clamp *before* your existing click handlers for Apply Sift / Calculate EV.
+  // (capture = true ensures this runs first)
+  document.addEventListener('click', function(e){
+    const id = e.target && e.target.id;
+    if (id === 'applySift' || id === 'calcEV') clampSiftMin();
+  }, true);
+
+  // Also clamp when the Sift field is committed.
+  document.getElementById('siftMin')?.addEventListener('change', clampSiftMin, true);
+})();
+</script>
 </body>
 </html>
