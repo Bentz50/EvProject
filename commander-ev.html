@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Precon Commander Deck EV — Sifted & All‑in</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    :root {
+      --bg: #0b1220;
+      --panel: #111827;
+      --muted: #9CA3AF;
+      --text: #E5E7EB;
+      --accent: #60A5FA;
+      --ok: #1e7f3c;
+      --bad: #9b2c2c;
+      --ok-bg: rgba(30,127,60,.15);
+      --bad-bg: rgba(155,44,44,.12);
+      --border: #1F2937;
+      --chip: #0f172a;
+    }
+    html, body { margin:0; padding:0; background:var(--bg); color:var(--text); font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap { max-width: 1024px; margin: 0 auto; padding: 24px 16px 56px; }
+
+    /* Banner — cap matches other pages (420px) */
+    .freBanner { display:flex; align-items:center; justify-content:center; margin: 8px 0 18px; }
+    .freBanner img { max-width: 420px; width: 100%; height: auto; border-radius: 10px; box-shadow: 0 6px 24px rgba(0,0,0,.35); }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.25);
+    }
+    .row {
+      display:grid;
+      grid-template-columns: 200px 1fr;
+      gap: 12px;
+      align-items:center;
+      padding: 10px 0;
+      border-bottom: 1px dashed var(--border);
+    }
+    .row:last-child { border-bottom: 0; }
+    .row label { color: var(--muted); font-size: 14px; }
+    select, input[type="number"], input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #0b132a;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+    }
+    .btn {
+      display:inline-flex; gap:10px; align-items:center;
+      background: linear-gradient(180deg,#2563EB,#1D4ED8);
+      border: 1px solid #1E40AF;
+      color: white; padding: 10px 14px; border-radius: 10px;
+      cursor: pointer; font-weight: 600;
+    }
+    .btn:disabled { opacity:.5; cursor:not-allowed; }
+
+    .pill {
+      display:inline-flex; align-items:center; gap:6px;
+      padding:6px 10px; background:var(--chip); border:1px solid var(--border);
+      border-radius: 999px; font-size:12px; color:var(--muted);
+    }
+
+    table { width:100%; border-collapse: collapse; margin-top: 16px; font-size: 13px; }
+    th, td { padding: 10px 8px; border-bottom:1px dashed var(--border); }
+    th { text-align:left; color: var(--muted); font-weight:600; }
+    tbody tr:hover { background: rgba(255,255,255,0.02); }
+    .right { text-align:right; }
+    .small { font-size: 12px; color: var(--muted); }
+    .foot { margin-top: 18px; display:flex; gap:12px; align-items:center; flex-wrap: wrap; }
+    .time { color: var(--muted); font-size: 12px; }
+
+    /* Row highlighting by Sift (green/red) */
+    .sift-ok  { background: var(--ok-bg) !important; border-left: 2px solid var(--ok); }
+    .sift-bad { background: var(--bad-bg)!important; border-left: 2px solid var(--bad); }
+
+    .table-actions { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:8px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+	  <div class="freBanner">
+		<a href="./index.html"><img src="freEV-banner.png" alt="FreEV — Spend your money on cards not calculators"></a>
+	  </div>
+
+    <h1 style="margin:0 0 8px;">Precon Commander EV</h1>
+    <div class="small">
+      Choose a Commander product and deck. <b>Sifted EV</b> sums <b>green‑tinted</b> rows only; <b>All‑in EV</b> sums all rows. Lands are included. Card names link to Scryfall. Sift values ≤ 0 clamp to <b>$0.01</b>.
+    </div>
+
+    <div class="card" style="margin-top:14px;">
+      <!-- Controls -->
+      <div class="row">
+        <label for="setSelect">Commander product</label>
+        <select id="setSelect" aria-label="Commander product">
+          <option value="">Loading Commander sets…</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <label for="deckSelect">Precon deck</label>
+        <select id="deckSelect" disabled aria-label="Preconstructed deck">
+          <option value="">Select a set first</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <label for="sift">Sift (min value per card)</label>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <input id="sift" type="number" inputmode="decimal" value="0.25" step="0.01" min="0" />
+          <span class="small">Values ≤ 0 are forced to 0.01</span>
+        </div>
+      </div>
+
+      <div class="row">
+        <label>&nbsp;</label>
+        <button id="calcBtn" class="btn" disabled>Calculate EV</button>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="card" style="margin-top:16px;">
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <div class="pill">Source: MTGJSON (decklists) & Scryfall (prices)</div>
+        <div class="time" id="tzNow"></div>
+      </div>
+      <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-top: 12px;">
+        <div>
+          <div class="small">Deck size (total)</div>
+          <div id="kTotal" style="font-weight:700; font-size:22px;">—</div>
+        </div>
+        <div>
+          <div class="small">Cards counted (green only)</div>
+          <div id="kCount" style="font-weight:700; font-size:22px;">—</div>
+        </div>
+        <div>
+          <div class="small">Sifted EV (USD)</div>
+          <div id="kEV" style="font-weight:700; font-size:22px;">—</div>
+        </div>
+        <div>
+          <div class="small">All‑in EV (USD)</div>
+          <div id="kEVAll" style="font-weight:700; font-size:22px;">—</div>
+        </div>
+        <div>
+          <div class="small">Last price fetch</div>
+          <div id="kWhen" style="font-weight:700; font-size:22px;">—</div>
+        </div>
+      </div>
+      <div class="small" style="margin-top:8px">All‑in EV includes all deck cards (including lands). Sifted EV only sums rows with unit price ≥ Sift.</div>
+    </div>
+
+    <!-- Table -->
+    <div class="card" style="margin-top:16px;">
+      <table id="tbl">
+        <thead>
+          <tr>
+            <th style="width:48px;">#</th>
+            <th>Card</th>
+            <th>Set</th>
+            <th>Rarity</th>
+            <th class="right">Count</th>
+            <th class="right">Price (USD)</th>
+            <th class="right">Line EV</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr><td colspan="7" class="small">Pick a set & deck, then click <b>Calculate EV</b>.</td></tr>
+        </tbody>
+      </table>
+
+      <!-- CSV actions -->
+      <div class="table-actions">
+        <button id="downloadCsv" class="btn" disabled>Download All Rows CSV</button>
+        <button id="copyCsv" class="btn" disabled>Copy All Rows CSV</button>
+        <button id="downloadCsvSift" class="btn" disabled>Download Sifted CSV</button>
+        <button id="copyCsvSift" class="btn" disabled>Copy Sifted CSV</button>
+        <span class="small">Sifted CSV = green rows only • All Rows CSV = full deck</span>
+      </div>
+    </div>
+
+    <div class="foot small">
+      <div>Commander set discovery & deck data: MTGJSON v5.</div>
+      <div>Per‑card price: Scryfall <code>prices.usd</code> (nonfoil). Card names link to Scryfall.</div>
+    </div>
+	
+  <!-- Banner footer (links home) -->
+  <div class="freBanner">
+    <a href="./index.html"><img src="freEV-banner.png" alt="FreEV — Spend your money on cards not calculators"></a>
+  </div>
+  </div>
+
+  <!-- Google Analytics (same pattern as other pages) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-LWMRXKNY5X"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-LWMRXKNY5X');
+  </script>
+
+  <script>
+  (function(){
+    // ---------- Config ----------
+    const TZ = 'America/Chicago';
+    const SETLIST_URL = 'https://mtgjson.com/api/v5/SetList.json';
+    const SET_URL = (code) => `https://mtgjson.com/api/v5/${encodeURIComponent(code)}.json`;
+    const SCRY_CARD_ID = (id)   => `https://api.scryfall.com/cards/${encodeURIComponent(id)}`;
+    const SCRY_SEARCH  = (q)    => `https://api.scryfall.com/cards/search?q=${encodeURIComponent(q)}`;
+    const SCRY_NAMED   = (name,set) => `https://api.scryfall.com/cards/named?${set?('set='+encodeURIComponent(set)+'&'):''}exact=${encodeURIComponent(name)}`;
+
+    // ---------- Elements ----------
+    const $set = document.getElementById('setSelect');
+    const $deck = document.getElementById('deckSelect');
+    const $calc = document.getElementById('calcBtn');
+    const $tbody = document.getElementById('tbody');
+    const $kTotal = document.getElementById('kTotal');
+    const $kCount = document.getElementById('kCount');
+    const $kEV = document.getElementById('kEV');
+    const $kEVAll = document.getElementById('kEVAll');
+    const $kWhen = document.getElementById('kWhen');
+    const $tzNow = document.getElementById('tzNow');
+    const $sift = document.getElementById('sift');
+    const $dlAll  = document.getElementById('downloadCsv');
+    const $cpAll  = document.getElementById('copyCsv');
+    const $dlSift = document.getElementById('downloadCsvSift');
+    const $cpSift = document.getElementById('copyCsvSift');
+
+    // ---------- State ----------
+    let SET_CACHE = {}; // code -> set json
+    let CARDS_BY_UUID = {}; // uuid -> card (from set file)
+    let CURRENT_SET_CODE = '';
+    let CURRENT_DECK = null;
+    let __LAST_RESULTS__ = []; // [{name,set,rarity,count,usd,line,uri}]
+    let __CSV_ALL__ = '';
+    let __CSV_SIFT__ = '';
+    const SCRY_CACHE = new Map(); // cache per id/name
+
+    // ---------- Utils ----------
+    const fmtUSD = n => n == null || isNaN(n) ? '—' : `$${Number(n).toFixed(2)}`;
+    function nowCT(){
+      try{ return new Intl.DateTimeFormat('en-US',{ timeZone: TZ, dateStyle:'medium', timeStyle:'short' }).format(new Date()) + ' (America/Chicago)'; }
+      catch{ return new Date().toLocaleString(); }
+    }
+    function coerceSift(val){ const n=Number(val); if(!isFinite(n) || n<=0) return 0.01; return Number(n.toFixed(2)); }
+    function escapeHtml(s){ return String(s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch])); }
+    async function pMap(items, limit, iter){
+      const out=[]; let i=0, active=0;
+      return new Promise((resolve,reject)=>{
+        const next=()=>{ if(i>=items.length && active===0) return resolve(out);
+          while(active<limit && i<items.length){ const idx=i++, it=items[idx]; active++;
+            Promise.resolve(iter(it, idx)).then(v=>{ out[idx]=v; active--; next(); }).catch(reject);
+          }
+        }; next();
+      });
+    }
+    async function fetchJson(url){ try{ const r=await fetch(url,{headers:{'accept':'application/json'}}); if(!r.ok) return null; return await r.json(); }catch{ return null; } }
+    function toNum(x){ const n=Number(x); return isFinite(n)? n : 0; }
+
+    // ---------- Boot ----------
+    (async function init(){
+      $tzNow.textContent = nowCT();
+      try {
+        const res = await fetch(SETLIST_URL, { headers: { 'accept': 'application/json' }});
+        const data = await res.json();
+        const sets = (data?.data || []).filter(s => (s.type || '').toLowerCase() === 'commander');
+        sets.sort((a,b) => (b.releaseDate||'').localeCompare(a.releaseDate||'')); // newest first
+        $set.innerHTML = `<option value="">Select a Commander product…</option>` + sets.map(s => `<option value="${s.code}">${s.name} (${s.code})</option>`).join('');
+        $set.disabled = false;
+      } catch {
+        $set.innerHTML = `<option value="">Failed to load Commander sets</option>`;
+      }
+    })();
+
+    // ---------- Events ----------
+    $set.addEventListener('change', async () => {
+      const code = $set.value;
+      CURRENT_SET_CODE = code;
+      $deck.innerHTML = `<option value="">${code ? 'Loading decks…' : 'Select a set first'}</option>`;
+      $deck.disabled = true; $calc.disabled = true;
+      CURRENT_DECK = null; CARDS_BY_UUID = {}; __LAST_RESULTS__ = []; __CSV_ALL__=''; __CSV_SIFT__='';
+      $dlAll.disabled = $cpAll.disabled = $dlSift.disabled = $cpSift.disabled = true;
+      $tbody.innerHTML = `<tr><td colspan="7" class="small">Pick a deck.</td></tr>`;
+      if(!code) return;
+
+      try {
+        if (!SET_CACHE[code]) {
+          const res = await fetch(SET_URL(code), { headers: { 'accept': 'application/json' }});
+          SET_CACHE[code] = await res.json();
+        }
+        const setData = SET_CACHE[code]?.data || {};
+        const decks = setData.decks || [];
+        const cards = setData.cards || [];
+        CARDS_BY_UUID = {}; for (const c of cards) CARDS_BY_UUID[c.uuid] = c;
+
+        if (!decks.length) { $deck.innerHTML = `<option value="">No decks for ${code}</option>`; return; }
+        decks.sort((a,b) => (a.name||'').localeCompare(b.name||''));
+        $deck.innerHTML = `<option value="">Select a precon deck…</option>` + decks.map((d, idx) => `<option value="${idx}">${d.name}</option>`).join('');
+        $deck.disabled = false;
+      } catch {
+        $deck.innerHTML = `<option value="">Failed to load decks for ${CURRENT_SET_CODE}</option>`;
+      }
+    });
+
+    $deck.addEventListener('change', () => {
+      const idx = $deck.value;
+      if (!CURRENT_SET_CODE || idx === '') { $calc.disabled = true; return; }
+      const setData = SET_CACHE[CURRENT_SET_CODE]?.data || {};
+      CURRENT_DECK = setData.decks?.[Number(idx)] || null;
+      $calc.disabled = !CURRENT_DECK;
+      __LAST_RESULTS__ = []; __CSV_ALL__=''; __CSV_SIFT__='';
+      $dlAll.disabled = $cpAll.disabled = $dlSift.disabled = $cpSift.disabled = true;
+      $kTotal.textContent = String(deckTotalFromMTGJSON(CURRENT_DECK) || '—');
+    });
+
+    function clampSiftField(){ $sift.value = coerceSift($sift.value); }
+    document.addEventListener('DOMContentLoaded', clampSiftField, { once:true });
+    $sift.addEventListener('change', ()=>{ clampSiftField(); recolorRows(); rebuildCsvs(); });
+
+    // ---------- Scryfall resolvers ----------
+    function pickBestPrint(list){
+      if(!Array.isArray(list) || !list.length) return null;
+      const isPaper = c => (c.games||[]).includes('paper');
+      const hasUsd  = c => Number.isFinite(parseFloat(c?.prices?.usd));
+      const nf      = c => (c.finishes||[]).includes('nonfoil');
+      const en      = c => (c.lang||'')==='en';
+      let cand = list.find(c => isPaper(c) && en(c) && nf(c) && hasUsd(c));
+      if(cand) return cand;
+      cand = list.find(c => isPaper(c) && nf(c) && hasUsd(c)) || list.find(c => isPaper(c) && hasUsd(c));
+      if(cand) return cand;
+      return list.find(isPaper) || list[0];
+    }
+    async function resolveByOracle(oracleId){
+      const key = 'oracle:'+oracleId;
+      if(SCRY_CACHE.has(key)) return SCRY_CACHE.get(key);
+      const q = `oracleid:${oracleId} game:paper`;
+      const json = await fetchJson(SCRY_SEARCH(q));
+      const card = json && Array.isArray(json.data) ? pickBestPrint(json.data) : null;
+      const out = card ? { usd: toNum(card?.prices?.usd), uri: String(card?.scryfall_uri||''), name: card?.name||'' } : { usd:0, uri:'', name:'' };
+      SCRY_CACHE.set(key,out); return out;
+    }
+    async function resolveByNamed(name, setHint){
+      const key = 'named:'+name+'|'+(setHint||'');
+      if(SCRY_CACHE.has(key)) return SCRY_CACHE.get(key);
+      let json = await fetchJson(SCRY_NAMED(name, setHint));
+      if(!json) json = await fetchJson(SCRY_NAMED(name, null));
+      const out = json ? { usd: toNum(json?.prices?.usd), uri: String(json?.scryfall_uri||''), name: json?.name||name } : { usd:0, uri:'', name };
+      SCRY_CACHE.set(key,out); return out;
+    }
+    async function resolveCardPriceAndUri({ scryId, oracleId, name, setHint }){
+      if(scryId){
+        const key = 'id:'+scryId;
+        if(SCRY_CACHE.has(key)) return SCRY_CACHE.get(key);
+        const json = await fetchJson(SCRY_CARD_ID(scryId));
+        if(json){
+          const out = { usd: toNum(json?.prices?.usd), uri: String(json?.scryfall_uri||''), name: json?.name||name||'' };
+          SCRY_CACHE.set(key,out); return out;
+        }
+      }
+      if(oracleId){ const got = await resolveByOracle(oracleId); if(got && (got.usd || got.uri || got.name)) return got; }
+      if(name){ return await resolveByNamed(name, setHint); }
+      return { usd:0, uri:'', name: name||'' };
+    }
+    function normalizeName(displayName, card, orig){
+      // Rename 'Unknown' (any case) to 'Basic Land'
+      if(!displayName || /^unknown$/i.test(displayName)) return 'Basic Land';
+      return displayName;
+    }
+
+    // ---------- Calculate ----------
+    $calc.addEventListener('click', async () => {
+      if (!CURRENT_DECK || !CURRENT_SET_CODE) return;
+      clampSiftField();
+
+      // Build rows from the deck only (lands included)
+      const rows = [];
+      const addList = (arr) => { if(!Array.isArray(arr)) return; for(const it of arr){ if(it && typeof it.count === 'number'){ rows.push({ uuid: it.uuid, count: it.count, orig: it }); } } };
+      addList(CURRENT_DECK.commander);
+      addList(CURRENT_DECK.mainBoard);
+      addList(CURRENT_DECK.sideBoard);
+
+      // Prepare fetch items with robust fallbacks (ID → Oracle → Named)
+      const items = rows.map(r => {
+        const card = CARDS_BY_UUID[r.uuid] || null;
+        const scryId   = card?.identifiers?.scryfallId || r.orig?.identifiers?.scryfallId || null;
+        const oracleId = card?.identifiers?.scryfallOracleId || r.orig?.identifiers?.scryfallOracleId || null;
+        const name     = card?.name || r.orig?.name || null;
+        const setHint  = card?.setCode || r.orig?.setCode || CURRENT_SET_CODE || null;
+        return { r, card, scryId, oracleId, name, setHint };
+      });
+
+      $tbody.innerHTML = `<tr><td colspan="7" class="small">Fetching ${items.length} prices from Scryfall…</td></tr>`;
+
+      let results = [];
+      try {
+        results = await pMap(items, 8, async (it) => {
+          const info = await resolveCardPriceAndUri({
+            scryId: it.scryId, oracleId: it.oracleId, name: it.name, setHint: it.setHint
+          });
+          const cnt  = it.r.count || 1;
+          const usd  = Number(info.usd) || 0;
+          const displayName = normalizeName(it.card?.name || info.name || it.name, it.card, it.r.orig);
+          const line = usd * cnt;
+          return {
+            name: displayName,
+            set:  it.card?.setCode || it.setHint || CURRENT_SET_CODE,
+            rarity: (it.card?.rarity || it.r.orig?.rarity || '').toUpperCase(),
+            count: cnt,
+            usd: usd,
+            line: line,
+            uri: info.uri || ''
+          };
+        });
+      } catch(e) {
+        console.error(e);
+      }
+
+      __LAST_RESULTS__ = (results || []).filter(Boolean);
+      renderTable(__LAST_RESULTS__);
+      buildAllCsv(__LAST_RESULTS__);
+      rebuildCsvs();
+
+      const now = nowCT(); $kWhen.textContent = now; $tzNow.textContent = now;
+      $kTotal.textContent = String(deckTotalFromMTGJSON(CURRENT_DECK) || '—');
+
+      $dlAll.disabled = $cpAll.disabled = !__CSV_ALL__;
+      $dlSift.disabled = $cpSift.disabled = !__CSV_SIFT__;
+    });
+
+    function renderTable(results){
+      if (!Array.isArray(results) || !results.length) {
+        $tbody.innerHTML = `<tr><td colspan="7" class="small">No priceable rows. Check your selection.</td></tr>`;
+        $kCount.textContent = '0'; $kEV.textContent = '—'; $kEVAll.textContent = '—';
+        return;
+      }
+      const siftMin = coerceSift($sift.value);
+      let totalSift=0, totalAll=0, countGreen=0, idx=1;
+
+      $tbody.innerHTML = results.map(r => {
+        const ok = Number.isFinite(r.usd) && r.usd >= siftMin;
+        if (ok) { totalSift += r.line; countGreen += r.count; }
+        if (Number.isFinite(r.usd)) totalAll += r.line;
+        const cls = ok ? 'sift-ok' : 'sift-bad';
+        const nameCell = r.uri ? `<a href="${r.uri}" target="_blank" rel="noopener noreferrer">${escapeHtml(r.name)}</a>` : escapeHtml(r.name);
+        return `<tr class="${cls}">
+          <td>${idx++}</td>
+          <td>${nameCell}</td>
+          <td>${r.set || ''}</td>
+          <td>${(r.rarity||'').toUpperCase()}</td>
+          <td class="right">${r.count}</td>
+          <td class="right">${fmtUSD(r.usd)}</td>
+          <td class="right">${fmtUSD(r.line)}</td>
+        </tr>`;
+      }).join('');
+
+      $kCount.textContent = String(countGreen);
+      $kEV.textContent    = fmtUSD(totalSift);
+      $kEVAll.textContent = fmtUSD(totalAll);
+    }
+
+    function recolorRows(){ if(!__LAST_RESULTS__.length) return; renderTable(__LAST_RESULTS__); }
+
+    function deckTotalFromMTGJSON(deck){
+      const sum = (arr)=> Array.isArray(arr) ? arr.reduce((s, it)=> s + (Number(it?.count)||0), 0) : 0;
+      return sum(deck?.commander) + sum(deck?.mainBoard) + sum(deck?.sideBoard);
+    }
+
+    // ---- CSV builders ----
+    function rowsToCsv(rows){
+      return rows.map(r => r.map(v => {
+        const s=String(v??''); return /[",\n]/.test(s)? `"${s.replace(/"/g,'""')}"` : s;
+      }).join(',')).join('\n');
+    }
+    function buildAllCsv(rows){
+      if(!rows || !rows.length){ __CSV_ALL__ = ''; return; }
+      const header = ['Card','Set','Rarity','Count','Price (USD)','Line EV','Scryfall URL'];
+      const body = rows.map(r => [r.name, r.set||'', (r.rarity||'').toUpperCase(), r.count, (Number(r.usd)||0).toFixed(2), (Number(r.line)||0).toFixed(2), r.uri||'']);
+      __CSV_ALL__ = rowsToCsv([header, ...body]);
+    }
+    function rebuildCsvs(){
+      if(!__LAST_RESULTS__.length){ __CSV_SIFT__=''; return; }
+      const siftMin = coerceSift($sift.value);
+      const header = ['Card','Set','Rarity','Count','Price (USD)','Line EV','Scryfall URL'];
+      const body = __LAST_RESULTS__
+        .filter(r => Number.isFinite(r.usd) && r.usd >= siftMin)
+        .map(r => [r.name, r.set||'', (r.rarity||'').toUpperCase(), r.count, (Number(r.usd)||0).toFixed(2), (Number(r.line)||0).toFixed(2), r.uri||'']);
+      __CSV_SIFT__ = rowsToCsv([header, ...body]);
+
+      $dlSift.disabled = $cpSift.disabled = !__CSV_SIFT__;
+      $dlAll.disabled  = $cpAll.disabled  = !__CSV_ALL__;
+    }
+
+    // ---- CSV buttons ----
+    function downloadCsv(text, fname){
+      if(!text) return; const blob=new Blob(["\uFEFF"+text],{type:'text/csv;charset=utf-8'});
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=fname;
+      document.body.appendChild(a); a.click(); URL.revokeObjectURL(a.href); a.remove();
+    }
+    async function copyCsv(text){
+      if(!text) return;
+      try{ await navigator.clipboard.writeText(text); alert('CSV copied to clipboard.'); }
+      catch{ alert('Copy failed. Use Download instead.'); }
+    }
+    $dlAll.addEventListener('click', ()=> downloadCsv(__CSV_ALL__,  'CommanderPrecon_AllRows.csv'));
+    $cpAll.addEventListener('click', ()=> copyCsv(__CSV_ALL__));
+    $dlSift.addEventListener('click',()=> downloadCsv(__CSV_SIFT__, 'CommanderPrecon_SiftedEV.csv'));
+    $cpSift.addEventListener('click',()=> copyCsv(__CSV_SIFT__));
+
+  })();
+  </script>
+</body>
+</html>
