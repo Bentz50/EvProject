@@ -36,6 +36,10 @@
   .freBanner img{max-width:420px;width:100%;height:auto;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
   @media (max-width:640px){ .freBanner img{max-width:300px} }
 
+  /* Vertical list for checkboxes — one per row */
+  .vert-list{margin-top:8px}
+  .vert-list label{display:flex; align-items:center; gap:8px; margin:6px 0}
+
   /* Tables */
   table{width:100%;border-collapse:collapse;margin-top:8px}
   th,td{border:1px solid #2a3541;padding:6px 8px;text-align:right}
@@ -49,7 +53,7 @@
   .sift-bad{background:rgba(155,44,44,.10)!important}
   .sift-tablewrap{max-height:520px;overflow:auto;border:1px solid #2a3541;border-radius:8px;margin-top:8px}
 
-  /* Highlight the Est. column + its left border */
+  /* Highlight Est. column */
   .evbox table th:nth-child(3), .evbox table td:nth-child(3){
     background:var(--est-bg); border-color:var(--est-line); border-left-color:var(--est-line);
     color:#eaf6ff; font-weight:700;
@@ -78,19 +82,23 @@
   <p class="lede">
     Builds on load using Scryfall. Playing‑card odds are normalized so the per‑pack <b>EST totals 14 cards</b>.
     Non‑game slot (token/ad/art) is modeled separately (65% token/ad, 30% art, 5% signed art).
+    <br><b>Retro modeling:</b> R/M slot <b>2.1%</b> (MH3 retro R/M only) + Wildcard <b>4.2%</b> (MH3 retro + H2R). 
   </p>
 
   <div class="panel">
     <strong>Refresh data</strong>
-    <div class="row" style="margin-top:6px">
+    <div class="vert-list">
       <label><input type="checkbox" id="englishOnly" checked> English‑only</label>
-      <label><input type="checkbox" id="includeMH3" checked> Include <b>MH3</b> (main set, <code>is:booster</code>)</label>
+      <label><input type="checkbox" id="includeMH3" checked> Include <b>MH3</b> (main set, <code>is:booster</code>, excludes retro)</label>
+      <label><input type="checkbox" id="includeRETRO" checked> Include <b>Retro Frame</b> (MH3 <code>frame:1997</code> + <code>H2R</code> bonus sheet)</label>
       <label><input type="checkbox" id="includeSPG" checked> Include <b>SPG</b> (MH3 wave; nonfoil only)</label>
     </div>
     <div class="row" style="margin-top:6px">
-      <label><input type="checkbox" id="includeTOK" checked> Include <b>TMH3</b> Tokens</label>
+      <label><input type="checkbox" id="includeTOK"> Include <b>TMH3</b> Tokens</label>
       <label>Token fallback (USD): <input type="text" id="tokenFallback" value="0.05" size="6" title="Used if token price missing"></label>
-      <label><input type="checkbox" id="includeART" checked> Include <b>AMH3</b> Art Series (normal + signed)</label>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <label><input type="checkbox" id="includeART"> Include <b>AMH3</b> Art Series (normal + signed)</label>
       <label>Art fallback (USD): <input type="text" id="artFallback" value="0.00" size="6" title="Used if art price missing"></label>
     </div>
     <div class="actions">
@@ -181,7 +189,7 @@
       <div class="content">
         <div class="note">
           Columns show <em>Low / Est. / High</em>. Totals <b>ignore Sift</b> and include token/art values via fallbacks when missing.
-          Playing‑card probabilities are normalized so EST sums to 14 per pack; non‑game items are not normalized.
+          Playing‑card probabilities are normalized so EST sums to 14 per pack; retro fixed shares are reserved first.
         </div>
         <table>
           <thead><tr><th>Metric</th><th>Low</th><th>Est.</th><th>High</th></tr></thead>
@@ -222,13 +230,12 @@ const zFromConf = c => { c=Math.round(c); if(c>=99)return 2.576; if(c>=95)return
 const priceUSD = (card,treat) => { const p=(treat==='foil'?card?.prices?.usd_foil:card?.prices?.usd); const f=parseFloat(p); return Number.isFinite(f)?f:null; };
 
 /* ========================= Model constants =========================
-   Assumptions consistent with your OTJ/DSK apps:
-   - 6–7 commons baseline; include ~12.5% wildcard to C/U; subtract SPG replacement (1/64).
-   - 3 uncommons baseline; include ~62.5% wildcard to U.
-   - Rare slot R/M: ~7/8 Rare, ~1/8 Mythic; wildcard adds a small share to R/M.
-   - 1 guaranteed foil (C/U/R/M pool); 36 packs/box.
-   - Land slot modeled as basics only (80% nonfoil, 20% foil within land slot) split evenly among basic prints.
-   - SPG: 1 in 64 packs, <b>nonfoil only</b> in Play Boosters.
+   - Non‑game slot: 65% token/ad, 30% art, 5% signed art.
+   - R/M slot baseline ~ 7/8 vs 1/8; foil slot rarity split heuristic.
+   - SPG: 1/64 common replacement (nonfoil).
+   - Retro (MH3 only): official shares from Wizards
+        • R/M slot retro total = 0.021 packs  (2.1%)
+        • Wildcard retro total = 0.042 packs  (4.2%)
 */
 const PACKS_PER_BOX = 36;
 
@@ -236,29 +243,34 @@ const MH3_ODDS = {
   COMMON_SLOTS: 6.5 + 0.125 - (1/64),
   UNCOMMON_SLOTS: 3 + 0.625,
   RARE_SLOT: 1,
-  WILDCARD_RM: 1/12,         // fraction of wildcard going to rare/mythic
-  RM_RARE_RATE: 7/8,         // rare share in RM slot
-  RM_MYTHIC_RATE: 1/8,       // mythic share in RM slot
+  WILDCARD_RM: 1/12,
+  RM_RARE_RATE: 7/8,
+  RM_MYTHIC_RATE: 1/8,
   FOIL_C: 0.58, FOIL_U: 0.32, FOIL_R: 0.064, FOIL_M: 0.011,
   LAND_SLOT: 1,
   LAND_FOIL_WITHIN: 0.20,
   NONGAME_TOKEN: 0.65, NONGAME_ART: 0.30, NONGAME_ART_SIGNED: 0.05,
-  SPG_PER_PACK: 1/64
+  SPG_PER_PACK: 1/64,
+  RETRO_RM_TOTAL: 0.021,
+  RETRO_WC_TOTAL: 0.042
 };
 
 /* ============================ State ============================ */
-let __ROW_MODELS__ = []; // { model, price, nonGame, fallback, url }
+let __ROW_MODELS__ = []; // { model, price, nonGame, fallback, url, noScale }
 let __META_ROWS__  = []; // { setTag, cn, rarity, name, treatment, model, price, nonGame, url }
 let __SIFT_CSV__   = '';
 let __NORM_SCALE__ = 1;
+let __FIXED_SHARE__= 0;   // reserved fixed share (retro)
 
 /* ========================= Scryfall I/O ========================= */
 function buildQuery(tag, englishOnly){
   let q='';
-  if(tag==='MH3')  q='e:mh3 is:booster';
-  if(tag==='SPG')  q='e:spg'; // filter wave by released_at in JS
-  if(tag==='TMH3') q='e:tmh3 (layout:token or layout:double_faced_token or layout:emblem)';
-  if(tag==='AMH3') q='e:amh3';
+  if(tag==='MH3BASE') q='e:mh3 is:booster -frame:1997';
+  // FIX: remove is:booster and include H2R retro bonus sheet
+  if(tag==='RETRO')   q='(e:mh3 frame:1997) OR e:h2r -is:promo';
+  if(tag==='SPG')     q='e:spg'; // filtered by released_at in JS
+  if(tag==='TMH3')    q='e:tmh3 (layout:token or layout:double_faced_token or layout:emblem)';
+  if(tag==='AMH3')    q='e:amh3';
   if(englishOnly) q+=' lang:en';
   return q;
 }
@@ -282,28 +294,38 @@ async function fetchAllPages(q, tagLabel, statusEl){
 const PM = {
   point: p => ({ type:'point', p }),
   range: (lo,hi) => ({ type:'range', lo, hi }),
-  max: max => ({ type:'max', max })
+  max: max => ({ type:'max', max }),
+  fixed: p => ({ type:'fixed', p }) // not scaled by normalization
 };
 function countFromModelRaw(model,packs){
   if(!model) return null;
   if(model.type==='point') return { lo:model.p*packs, est:model.p*packs, hi:model.p*packs, max:model.p*packs };
   if(model.type==='range') return { lo:model.lo*packs, est:((model.lo+model.hi)/2)*packs, hi:model.hi*packs, max:model.hi*packs };
   if(model.type==='max')   return { lo:0, est:(model.max/2)*packs, hi:model.max*packs, max:model.max*packs };
+  if(model.type==='fixed') return { lo:model.p*packs, est:model.p*packs, hi:model.p*packs, max:model.p*packs };
   return null;
 }
-function probPoint(model){ return model?.type==='point'? model.p : model?.type==='range'? (model.lo+model.hi)/2 : model?.type==='max'? model.max/2 : null; }
-function countFromModel(model,packs,nonGame=false,useScaled=true){
+function probPoint(model){
+  if(!model) return null;
+  if(model.type==='point') return model.p;
+  if(model.type==='range') return (model.lo+model.hi)/2;
+  if(model.type==='max')   return model.max/2;
+  if(model.type==='fixed') return model.p;
+  return null;
+}
+function countFromModel(model,packs,nonGame=false,noScale=false){
   const c=countFromModelRaw(model,packs); if(!c) return c;
-  return (nonGame||!useScaled)? c : { lo:c.lo*__NORM_SCALE__, est:c.est*__NORM_SCALE__, hi:c.hi*__NORM_SCALE__, max:c.max*__NORM_SCALE__ };
+  return (nonGame||noScale)? c : { lo:c.lo*__NORM_SCALE__, est:c.est*__NORM_SCALE__, hi:c.hi*__NORM_SCALE__, max:c.max*__NORM_SCALE__ };
 }
 
 /* ====================== Row assembly helpers ====================== */
-function pushRow(card, setTag, treatment, model, price, nonGame=false, fallbackUsed=false){
+function pushRow(card, setTag, treatment, model, price, nonGame=false, fallbackUsed=false, noScale=false){
   const cn = padCollector(card.collector_number);
   const rarity = card.rarity ? rarityLetter(card.rarity) : 'C';
   const row = { setTag, cn, rarity, name: card.name, treatment, model, price, nonGame, url: card.scryfall_uri||'' };
   __META_ROWS__.push(row);
-  __ROW_MODELS__.push({ model, price, nonGame, fallback: fallbackUsed });
+  __ROW_MODELS__.push({ model, price, nonGame, fallback: fallbackUsed, noScale });
+  if(!nonGame && noScale){ const p=probPoint(model); if(Number.isFinite(p)) __FIXED_SHARE__ += p; }
 }
 
 /* ========================= Build the dataset ========================= */
@@ -321,11 +343,12 @@ async function build(){
   const det=document.getElementById('totalsDetails'); if(det) det.open=false;
   document.getElementById('totalsBody').innerHTML=''; document.getElementById('totalsNotes').textContent='';
 
-  __ROW_MODELS__=[]; __META_ROWS__=[]; __SIFT_CSV__=''; __NORM_SCALE__=1;
+  __ROW_MODELS__=[]; __META_ROWS__=[]; __SIFT_CSV__=''; __NORM_SCALE__=1; __FIXED_SHARE__=0;
 
   // Options
   const englishOnly=document.getElementById('englishOnly').checked;
   const incMH3=document.getElementById('includeMH3').checked;
+  const incRETRO=document.getElementById('includeRETRO').checked;
   const incSPG=document.getElementById('includeSPG').checked;
   const incTOK=document.getElementById('includeTOK').checked;
   const incART=document.getElementById('includeART').checked;
@@ -333,14 +356,14 @@ async function build(){
   const artFallback=parseUSD(document.getElementById('artFallback').value);
 
   const status=document.getElementById('status');
-  const countsEl=document.getElementById('counts');
   const queriesEl=document.getElementById('queries');
 
   const qList=[];
-  if(incMH3) qList.push(['MH3',  buildQuery('MH3',  englishOnly)]);
-  if(incSPG) qList.push(['SPG',  buildQuery('SPG',  englishOnly)]);
-  if(incTOK) qList.push(['TMH3', buildQuery('TMH3', englishOnly)]);
-  if(incART) qList.push(['AMH3', buildQuery('AMH3', englishOnly)]);
+  if(incMH3)   qList.push(['MH3BASE', buildQuery('MH3BASE', englishOnly)]);
+  if(incRETRO) qList.push(['RETRO',   buildQuery('RETRO',   englishOnly)]);
+  if(incSPG)   qList.push(['SPG',     buildQuery('SPG',     englishOnly)]);
+  if(incTOK)   qList.push(['TMH3',    buildQuery('TMH3',    englishOnly)]);
+  if(incART)   qList.push(['AMH3',    buildQuery('AMH3',    englishOnly)]);
   queriesEl.textContent = qList.map(([tag,q])=>`${tag}: ${q}`).join('\n');
 
   try{
@@ -352,30 +375,30 @@ async function build(){
     // Filter SPG to MH3 wave (global tabletop launch ~2024‑06‑14)
     const spgAll = (data.SPG||[]).filter(c => (c.games||[]).includes('paper'));
     const spgMH3 = spgAll.filter(c => String(c.released_at||'').startsWith('2024-06-14')); // MH3 launch wave
-    // Pools
-    const mh3All = (data.MH3||[]).filter(c => (c.games||[]).includes('paper'));
-    const tokAll = (data.TMH3||[]).filter(c => (c.games||[]).includes('paper'));
-    const artAll = (data.AMH3||[]).filter(c => (c.games||[]).includes('paper'));
 
-    // Split MH3 by type/rarity
+    // Pools
+    const mh3Base = (data.MH3BASE||[]).filter(c => (c.games||[]).includes('paper'));
+    const retroFetched = (data.RETRO||[]).filter(c => (c.games||[]).includes('paper'));
+    const tokAll  = (data.TMH3||[]).filter(c => (c.games||[]).includes('paper'));
+    const artAll  = (data.AMH3||[]).filter(c => (c.games||[]).includes('paper'));
+
+    // Split helpers
     const isLand = c => /Land/i.test(c.type_line||'');
     const isBasic = c => /Basic/i.test(c.type_line||'');
-    const basics = mh3All.filter(c => isBasic(c));
-    const commons    = mh3All.filter(c => c.rarity==='common'   && !isLand(c));
-    const uncommons  = mh3All.filter(c => c.rarity==='uncommon' && !isLand(c));
-    const rares      = mh3All.filter(c => c.rarity==='rare');
-    const mythics    = mh3All.filter(c => c.rarity==='mythic');
 
-    // Per‑print probabilities (non‑game handled later)
+    // ===== MH3 Base (no retro) — nonfoil + land-slot foils =====
+    const commons    = mh3Base.filter(c => c.rarity==='common'   && !isLand(c));
+    const uncommons  = mh3Base.filter(c => c.rarity==='uncommon' && !isLand(c));
+    const rares      = mh3Base.filter(c => c.rarity==='rare');
+    const mythics    = mh3Base.filter(c => c.rarity==='mythic');
+    const basics     = mh3Base.filter(isBasic);
+
     const P = MH3_ODDS;
     const pCommonNF   = (commons.length>0)   ? (P.COMMON_SLOTS / commons.length) : 0;
     const pUncommonNF = (uncommons.length>0) ? (P.UNCOMMON_SLOTS / uncommons.length) : 0;
-
-    // Rare slot
     const pRslotRare   = (rares.length>0)   ? (P.RM_RARE_RATE   / rares.length)   : 0;
     const pRslotMythic = (mythics.length>0) ? (P.RM_MYTHIC_RATE / mythics.length) : 0;
 
-    // Wildcard split (remaining to C/U)
     const wcRM = P.WILDCARD_RM, wcCU = 1 - wcRM;
     const cuTotal = (commons.length + uncommons.length) || 1;
     const wcCommonShare   = wcCU * (commons.length   / cuTotal);
@@ -385,27 +408,16 @@ async function build(){
     const pWcRare     = (rares.length>0)     ? (wcRM*P.RM_RARE_RATE   / rares.length)   : 0;
     const pWcMythic   = (mythics.length>0)   ? (wcRM*P.RM_MYTHIC_RATE / mythics.length) : 0;
 
-    // Land slot (basics only; 80% nonfoil / 20% foil within land)
     const pLandNF = (basics.length>0) ? (P.LAND_SLOT*(1-P.LAND_FOIL_WITHIN)/basics.length) : 0;
     const pLandF  = (basics.length>0) ? (P.LAND_SLOT*P.LAND_FOIL_WITHIN     /basics.length) : 0;
 
-    // Foil slot pools: allow all MH3 prints by rarity (C/U include any card; R/M include R/M)
-    const foilPoolC = commons.slice();                           // C
-    const foilPoolU = uncommons.slice();                         // U
-    const foilPoolR = rares.slice();                             // R
-    const foilPoolM = mythics.slice();                           // M
-    const pFoilC = (foilPoolC.length>0)? P.FOIL_C / foilPoolC.length : 0;
-    const pFoilU = (foilPoolU.length>0)? P.FOIL_U / foilPoolU.length : 0;
-    const pFoilR = (foilPoolR.length>0)? P.FOIL_R / foilPoolR.length : 0;
-    const pFoilM = (foilPoolM.length>0)? P.FOIL_M / foilPoolM.length : 0;
-
-    // ---- Add MH3 rows
-    function addMH3(card){
+    // Add MH3 Base rows: nonfoil & land-slot foil only
+    function addMH3Base(card){
       const finishes = Array.isArray(card.finishes)? card.finishes : [];
       const rarity = card.rarity;
       const landBasic = isBasic(card);
 
-      // Nonfoil share
+      // Nonfoil share (normal R/C/U/M + wildcard contributions)
       let pNF = 0;
       if(landBasic){ pNF += pLandNF; }
       else if(rarity==='common'){   pNF += pCommonNF + pWcCommon; }
@@ -414,63 +426,105 @@ async function build(){
       else if(rarity==='mythic'){   pNF += pRslotMythic + pWcMythic; }
 
       if(pNF>0 && finishes.includes('nonfoil')){
-        pushRow(card,'MH3','normal',PM.point(pNF), priceUSD(card,'normal'), false, false);
+        pushRow(card,'MH3','normal',PM.point(pNF), priceUSD(card,'normal'), false,false,false);
       }
 
-      // Foil from land slot (for basics)
+      // Foil from land slot (for basics only)
       if(landBasic && pLandF>0){
-        pushRow(card,'MH3','foil',PM.point(pLandF), priceUSD(card,'foil'), false, false);
-      }
-
-      // Foil (guaranteed foil slot by rarity)
-      if(finishes.includes('foil')){
-        let pF = 0;
-        if(rarity==='common')   pF += pFoilC;
-        if(rarity==='uncommon') pF += pFoilU;
-        if(rarity==='rare')     pF += pFoilR;
-        if(rarity==='mythic')   pF += pFoilM;
-        if(pF>0){
-          pushRow(card,'MH3','foil',PM.point(pF), priceUSD(card,'foil'), false, false);
-        }
+        pushRow(card,'MH3','foil',PM.point(pLandF), priceUSD(card,'foil'), false,false,false);
       }
     }
+    mh3Base.forEach(addMH3Base);
 
-    // ---- Add SPG (MH3 wave only; nonfoil only; 1/64 split evenly)
-    const pSpg = (spgMH3.length>0) ? (P.SPG_PER_PACK / spgMH3.length) : 0;
-    function addSPG(card){
-      if(!(Array.isArray(card.finishes) && card.finishes.includes('nonfoil'))) return;
-      pushRow(card,'SPG','normal',PM.point(pSpg), priceUSD(card,'normal'), false, false);
+    // ===== RETRO (MH3 frame:1997 + H2R) =====
+    const retroAll = retroFetched.slice();
+    const retroMH3 = retroAll.filter(c => (c.set||'').toLowerCase()==='mh3'); // MH3 retro prints
+    const retroH2R = retroAll.filter(c => (c.set||'').toLowerCase()==='h2r'); // Horizons reprints (bonus sheet)
+
+    // Split by rarity, excluding lands
+    const filt = (arr,r) => arr.filter(c=>c.rarity===r && !isLand(c));
+    const retroMH3_C = filt(retroMH3,'common'),   retroMH3_U = filt(retroMH3,'uncommon'),
+          retroMH3_R = filt(retroMH3,'rare'),     retroMH3_M = filt(retroMH3,'mythic');
+    const retroH2R_C = filt(retroH2R,'common'),   retroH2R_U = filt(retroH2R,'uncommon'),
+          retroH2R_R = filt(retroH2R,'rare'),     retroH2R_M = filt(retroH2R,'mythic');
+
+    // --- Fixed retro shares
+    // R/M slot fixed total (2.1%) — apply to MH3 retro R/M only
+    if(incRETRO){
+      const rmTotal = MH3_ODDS.RETRO_RM_TOTAL;
+      const nRM = retroMH3_R.length + retroMH3_M.length || 1;
+      const shareR = rmTotal * (retroMH3_R.length / nRM);
+      const shareM = rmTotal * (retroMH3_M.length / nRM);
+      const perR_RM = retroMH3_R.length ? (shareR / retroMH3_R.length) : 0;
+      const perM_RM = retroMH3_M.length ? (shareM / retroMH3_M.length) : 0;
+      for(const c of retroMH3_R){ if(perR_RM>0) pushRow(c,'RETRO','retro-R/M', PM.fixed(perR_RM), priceUSD(c,'normal'), false,false,true); }
+      for(const c of retroMH3_M){ if(perM_RM>0) pushRow(c,'RETRO','retro-R/M', PM.fixed(perM_RM), priceUSD(c,'normal'), false,false,true); }
+
+      // Wildcard fixed total (4.2%) — split across MH3 retro (all rarities) + H2R (all rarities)
+      const wcTotal = MH3_ODDS.RETRO_WC_TOTAL;
+      const wcPool = [].concat(retroMH3_C,retroMH3_U,retroMH3_R,retroMH3_M, retroH2R_C,retroH2R_U,retroH2R_R,retroH2R_M);
+      const wcN = wcPool.length || 1;
+      const perWC = wcTotal / wcN;
+      for(const c of wcPool){ pushRow(c,'RETRO','retro-wildcard', PM.fixed(perWC), priceUSD(c,'normal'), false,false,true); }
+    }
+
+    // ===== Foil slot: distribute across UNION of base + retro =====
+    // Build union pools (exclude basics; foil basics are handled in land slot)
+    const unionC = commons.concat(retroMH3_C, retroH2R_C);
+    const unionU = uncommons.concat(retroMH3_U, retroH2R_U);
+    const unionR = rares.concat(retroMH3_R, retroH2R_R);
+    const unionM = mythics.concat(retroMH3_M, retroH2R_M);
+
+    const pFoilC = unionC.length? P.FOIL_C / unionC.length : 0;
+    const pFoilU = unionU.length? P.FOIL_U / unionU.length : 0;
+    const pFoilR = unionR.length? P.FOIL_R / unionR.length : 0;
+    const pFoilM = unionM.length? P.FOIL_M / unionM.length : 0;
+
+    // Add foil rows for base prints (guaranteed foil slot)
+    for(const c of commons){   if((c.finishes||[]).includes('foil') && pFoilC>0) pushRow(c,'MH3','foil', PM.point(pFoilC), priceUSD(c,'foil'), false,false,false); }
+    for(const c of uncommons){ if((c.finishes||[]).includes('foil') && pFoilU>0) pushRow(c,'MH3','foil', PM.point(pFoilU), priceUSD(c,'foil'), false,false,false); }
+    for(const c of rares){     if((c.finishes||[]).includes('foil') && pFoilR>0) pushRow(c,'MH3','foil', PM.point(pFoilR), priceUSD(c,'foil'), false,false,false); }
+    for(const c of mythics){   if((c.finishes||[]).includes('foil') && pFoilM>0) pushRow(c,'MH3','foil', PM.point(pFoilM), priceUSD(c,'foil'), false,false,false); }
+
+    // Add foil rows for retro prints (guaranteed foil slot; Special Guests excluded elsewhere)
+    const addFoilRetro = (arr, p, tag='RETRO') => { for(const c of arr){ if((c.finishes||[]).includes('foil') && p>0) pushRow(c,tag,'foil', PM.point(p), priceUSD(c,'foil'), false,false,false); } };
+    addFoilRetro(retroMH3_C, pFoilC); addFoilRetro(retroH2R_C, pFoilC);
+    addFoilRetro(retroMH3_U, pFoilU); addFoilRetro(retroH2R_U, pFoilU);
+    addFoilRetro(retroMH3_R, pFoilR); addFoilRetro(retroH2R_R, pFoilR);
+    addFoilRetro(retroMH3_M, pFoilM); addFoilRetro(retroH2R_M, pFoilM);
+
+    // ---- Add SPG (MH3 wave only; nonfoil only; ~1/64)
+    const pSpg = (spgMH3.length>0) ? (MH3_ODDS.SPG_PER_PACK / spgMH3.length) : 0;
+    for(const c of spgMH3){
+      if(!(Array.isArray(c.finishes) && c.finishes.includes('nonfoil'))) continue;
+      pushRow(c,'SPG','normal',PM.point(pSpg), priceUSD(c,'normal'), false,false,false);
     }
 
     // ---- Tokens (non‑game slot)
-    function addTOK(card){
-      const usd = priceUSD(card,'normal');
+    for(const c of tokAll){
+      const usd = priceUSD(c,'normal');
       const usedFallback = !Number.isFinite(usd) && Number.isFinite(tokenFallback);
       const n = Math.max(1, tokAll.length);
-      const p = P.NONGAME_TOKEN / n;
-      pushRow(card,'TMH3','normal',PM.point(p), usedFallback? tokenFallback : usd, true, usedFallback);
+      const p = MH3_ODDS.NONGAME_TOKEN / n;
+      pushRow(c,'TMH3','normal',PM.point(p), usedFallback? tokenFallback : usd, true, usedFallback, false);
     }
 
     // ---- Art series (non‑game slot): split normal vs gold‑signed
-    function addART(card){
-      const cn = String(card.collector_number||'');
+    const artN = Math.max(1, artAll.length||1);
+    for(const c of artAll){
+      const cn = String(c.collector_number||'');
       const isSigned = /[A-Za-z]$/.test(cn) && cn.toLowerCase().endsWith('s');
-      const usd = priceUSD(card,'normal'); // Scryfall uses 'usd' for art series too
+      const usd = priceUSD(c,'normal');
       const usedFallback = !Number.isFinite(usd) && Number.isFinite(artFallback);
-      const n = Math.max(1, artAll.length);
-      const pNorm  = P.NONGAME_ART / n;
-      const pSign  = P.NONGAME_ART_SIGNED / n;
-      pushRow(card,'AMH3', isSigned?'signed':'normal', PM.point(isSigned?pSign:pNorm), usedFallback?artFallback:usd, true, usedFallback);
+      const p = (isSigned ? MH3_ODDS.NONGAME_ART_SIGNED : MH3_ODDS.NONGAME_ART) / artN;
+      pushRow(c,'AMH3', isSigned?'signed':'normal', PM.point(p), usedFallback?artFallback:usd, true, usedFallback, false);
     }
 
-    mh3All.forEach(addMH3);
-    spgMH3.forEach(addSPG);
-    tokAll.forEach(addTOK);
-    artAll.forEach(addART);
-
-    // Normalize to 14 playing cards per pack (non‑game excluded)
-    const playingMass = __ROW_MODELS__.reduce((s,r)=> s + (r.nonGame? 0 : (probPoint(r.model)||0)), 0);
-    __NORM_SCALE__ = playingMass>0 ? (14 / playingMass) : 1;
+    // ===== Normalize playing cards to 14 per pack (reserve fixed first) =====
+    const fixedShare = __FIXED_SHARE__;
+    const nonFixedMass = __ROW_MODELS__.reduce((s,r)=> s + (!r.nonGame && !r.noScale ? (probPoint(r.model)||0) : 0), 0);
+    const target = Math.max(0, 14 - fixedShare);
+    __NORM_SCALE__ = nonFixedMass>0 ? (target / nonFixedMass) : 1;
 
     // Sort rows for display/CSV
     __META_ROWS__.sort((a,b)=>{
@@ -485,8 +539,9 @@ async function build(){
 
     // CSV
     const header=['Set','Number','Rarity','Name','Treatment','Pack Prob Min (%)','Pack Prob Max (%)','Card Value (USD)','Per 1000 Min','Per 1000 Max','Per 30000 Min','Per 30000 Max','Per 300000 Min','Per 300000 Max'];
-    const rows = __META_ROWS__.map(m=>{
-      const p = probPoint(m.model), pS = m.nonGame? p : (p*__NORM_SCALE__);
+    const rows = __META_ROWS__.map((m,idx)=>{
+      const r=__ROW_MODELS__[idx];
+      const p = probPoint(m.model), pS = (r.nonGame||r.noScale)? p : (p*__NORM_SCALE__);
       const c1k = pS*1000, c30k=pS*30000, c300k=pS*300000;
       return [
         m.setTag, m.cn, m.rarity, m.name, m.treatment,
@@ -510,13 +565,15 @@ async function build(){
 
     // Counts
     const cMH3 = __META_ROWS__.filter(r=>r.setTag==='MH3').length;
+    const cRET = __META_ROWS__.filter(r=>r.setTag==='RETRO').length;
     const cSPG = __META_ROWS__.filter(r=>r.setTag==='SPG').length;
     const cTOK = __META_ROWS__.filter(r=>r.setTag==='TMH3').length;
     const cART = __META_ROWS__.filter(r=>r.setTag==='AMH3').length;
     document.getElementById('counts').innerHTML =
-      `Built <b>${__META_ROWS__.length.toLocaleString()}</b> rows — MH3: <b>${cMH3}</b>, SPG: <b>${cSPG}</b>, TMH3: <b>${cTOK}</b>, AMH3: <b>${cART}</b>.`;
+      `Built <b>${__META_ROWS__.length.toLocaleString()}</b> rows — MH3: <b>${cMH3}</b>, RETRO: <b>${cRET}</b>, SPG: <b>${cSPG}</b>, TMH3: <b>${cTOK}</b>, AMH3: <b>${cART}</b>. ` +
+      `(Retro fixed share reserved: ${(100*fixedShare).toFixed(2)}%; normalization factor: ${__NORM_SCALE__.toFixed(5)})`;
 
-    document.getElementById('status').textContent = `Done. (Normalization factor: ${__NORM_SCALE__.toFixed(5)} to 14 cards/pack)`;
+    document.getElementById('status').textContent = `Done. Reserved retro shares (R/M 2.1% + Wildcard 4.2%); scaled remaining to 14 cards/pack.`;
 
     // Auto-apply Sift and initial EV render
     applySift(parseUSD(document.getElementById('siftMin').value) ?? 0.25);
@@ -542,10 +599,11 @@ async function build(){
 /* ========================= Sift table ========================= */
 function renderSiftTable(minUSD){
   const body=document.getElementById('siftBody'); body.innerHTML='';
-  for(const m of __META_ROWS__){
+  for(let i=0;i<__META_ROWS__.length;i++){
+    const m=__META_ROWS__[i], r=__ROW_MODELS__[i];
     const ok = Number.isFinite(m.price) && m.price>=minUSD;
     const cls = ok ? 'sift-ok' : 'sift-bad';
-    const p = probPoint(m.model), pS = m.nonGame ? p : (p*__NORM_SCALE__);
+    const p = probPoint(m.model), pS = (r.nonGame||r.noScale) ? p : (p*__NORM_SCALE__);
     const c1k=pS*1000, c30k=pS*30000, c300k=pS*300000;
 
     const tr=document.createElement('tr'); tr.className=cls;
@@ -561,18 +619,20 @@ function renderSiftTable(minUSD){
       else td.textContent=m.name;
     tr.appendChild(td);
     td=document.createElement('td'); td.textContent=cells[4]; tr.appendChild(td);
-    for(let i=5;i<cells.length;i++){ const x=document.createElement('td'); x.textContent=cells[i]; tr.appendChild(x); }
+    for(let j=5;j<cells.length;j++){ const x=document.createElement('td'); x.textContent=cells[j]; tr.appendChild(x); }
     body.appendChild(tr);
   }
   document.getElementById('siftTableWrap').style.display='';
+
   // Summary
-  const P=300000; let include=0,exclude=0,missing=0,estEV=0;
-  for(const r of __ROW_MODELS__){
-    const p=probPoint(r.model), pS=r.nonGame? p : (p*__NORM_SCALE__);
+  const P=300000; let include=0,exclude=0,missing=0;
+  for(let i=0;i<__ROW_MODELS__.length;i++){
+    const r=__ROW_MODELS__[i];
+    const p=probPoint(r.model), pS=(r.nonGame||r.noScale)? p : (p*__NORM_SCALE__);
     const ok = Number.isFinite(r.price) && r.price >= minUSD;
-    if(ok){ include++; estEV += (r.price||0)*pS*P; } else { exclude++; if(!Number.isFinite(r.price)) missing++; }
+    if(ok){ include++; } else { exclude++; if(!Number.isFinite(r.price)) missing++; }
   }
-  document.getElementById('siftSummary').innerHTML = `Sift ≥ <b>$${Number(minUSD).toFixed(2)}</b> — Included: <b>${include.toLocaleString()}</b> / Excluded: <b>${exclude.toLocaleString()}</b>` + (missing? ` (no USD on ${missing})`:'');
+  document.getElementById('siftSummary').innerHTML = `Sift ≥ <b>$${Number(minUSD).toFixed(2)}</b> — Included: <b>${include.toLocaleString()}</b> / Excluded: <b>${exclude.toLocaleString()}</b>` + (missing? ` (no USD on ${missing})`:``);
 }
 function applySift(minUSD){
   renderSiftTable(minUSD);
@@ -587,7 +647,7 @@ function applySift(minUSD){
 function statRange(packs, useSift, minUSD){
   let meanPerPack=0, varPerPack=0, missingPrice=0;
   for(const row of __ROW_MODELS__){
-    const p = probPoint(row.model), pS = row.nonGame? p : (p*__NORM_SCALE__);
+    const p = probPoint(row.model), pS = (row.nonGame||row.noScale)? p : (p*__NORM_SCALE__);
     const usd=row.price;
     if(useSift && !(Number.isFinite(usd) && usd>=minUSD)) continue;
     if(!Number.isFinite(usd)){ missingPrice++; continue; }
@@ -613,7 +673,7 @@ function renderPurchaseEV(){
     // Slot model point EV
     let est=0, miss=0;
     for(const row of __ROW_MODELS__){
-      const p=probPoint(row.model), pS=row.nonGame? p : (p*__NORM_SCALE__);
+      const p=probPoint(row.model), pS=(row.nonGame||row.noScale)? p : (p*__NORM_SCALE__);
       if(!Number.isFinite(pS)) continue;
       const usd=row.price;
       if(useSift && !(Number.isFinite(usd)&&usd>=minUSD)) continue;
@@ -638,7 +698,7 @@ function renderPurchaseEV(){
       <thead><tr><th>Metric</th><th>Low</th><th>Est.</th><th>High</th></tr></thead>
       <tbody>
         <tr><td>${tag} — across ${packs.toLocaleString()} packs</td><td>$${money(lowEV)}</td><td>$${money(estEV)}</td><td>$${money(highEV)}</td></tr>
-        <tr><td>${tag} — per ${PACKS_PER_BOX}-pack box</td><td>$${money(perBoxLow)}</td><td>$${money(perBoxEst)}</td><td>$${money(perBoxHigh)}</td></tr>
+        <tr><td>${PACKS_PER_BOX}-pack box</td><td>$${money(perBoxLow)}</td><td>$${money(perBoxEst)}</td><td>$${money(perBoxHigh)}</td></tr>
       </tbody>
     </table>`;
   evDiv.style.display='';
@@ -664,7 +724,7 @@ function renderTotalsTable(){
 
   let estCount=0, estEV=0, missingPrice=0, fallbackUsed=0;
   for(const row of __ROW_MODELS__){
-    const p = probPoint(row.model), pS = row.nonGame? p : (p*__NORM_SCALE__);
+    const p = probPoint(row.model), pS = (row.nonGame||row.noScale)? p : (p*__NORM_SCALE__);
     estCount += pS * P;
     const usd=row.price;
     if(Number.isFinite(usd)) estEV += usd * pS * P; else missingPrice++;
@@ -679,7 +739,7 @@ function renderTotalsTable(){
         <td>${fmtInt(P*15)}</td><td>${fmtInt(P*15)}</td><td>${fmtInt(P*15)}</td></tr>
     <tr><td>…of which non‑game (token/art)</td>
         <td>${fmtInt(P*1)}</td><td>${fmtInt(P*1)}</td><td>${fmtInt(P*1)}</td></tr>
-    <tr><td>…of which playing cards (normalized)</td>
+    <tr><td>…of which playing cards (normalized; retro fixed reserved)</td>
         <td>${fmtInt(P*14)}</td><td>${fmtInt(P*14)}</td><td>${fmtInt(P*14)}</td></tr>
     <tr><td>Total EV across ${P.toLocaleString()} packs</td>
         <td>$${money(estEV)}</td><td>$${money(estEV)}</td><td>$${money(estEV)}</td></tr>
@@ -690,7 +750,8 @@ function renderTotalsTable(){
   const notes=[];
   if(missingPrice>0) notes.push(`${missingPrice} rows had no USD price (fallbacks used where provided).`);
   if(fallbackUsed>0) notes.push(`${fallbackUsed} token/art rows used fallback values.`);
-  notes.push('Playing‑card probabilities are scaled to sum to 14 per pack; non‑game slot uses 65%/30%/5% split.');
+  if(__FIXED_SHARE__>0) notes.push(`Retro fixed share reserved: ${(100*__FIXED_SHARE__).toFixed(2)}% of playing cards (R/M 2.1% + Wildcard 4.2%).`);
+  notes.push('Remaining playing‑card probabilities are scaled to sum to 14 per pack; non‑game slot uses 65%/30%/5%.');
   document.getElementById('totalsNotes').textContent = 'Notes: ' + notes.join(' ');
 
   document.getElementById('totalsPanel').style.display='';
@@ -698,9 +759,7 @@ function renderTotalsTable(){
 
 /* ============================ CSV helpers ============================ */
 function rowsToCsv(rows){
-  return rows.map(r => r.map(v=>{
-    const s=String(v??''); return /[",\n]/.test(s)? '"'+s.replace(/"/g,'""')+'"' : s;
-  }).join(',')).join('\n');
+  return rows.map(r => r.map(v=>{ const s=String(v??''); return /[",\n]/.test(s)? '"'+s.replace(/"/g,'""')+'"' : s; }).join(',')).join('\n');
 }
 
 /* ============================== Hooks ============================== */
@@ -727,6 +786,25 @@ for(const r of document.querySelectorAll('input[name="rangeMode"]')) r.addEventL
 
 // Auto‑build
 window.addEventListener('DOMContentLoaded', build);
+</script>
+
+<!-- Clamp Sift to $0.01 (works when 0, negative, blank, NaN) -->
+<script>
+(function(){
+  function clampSiftMin(){
+    const el = document.getElementById('siftMin');
+    if(!el) return 0.01;
+    let v = parseFloat(String(el.value).replace(/[^0-9.]/g,'')); if(!Number.isFinite(v) || v <= 0) v = 0.01;
+    el.value = v.toFixed(2);
+    return v;
+  }
+  window.getSiftMinClamped = clampSiftMin;
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', clampSiftMin, { once:true }); else clampSiftMin();
+  document.addEventListener('click', function(e){
+    const id=e.target && e.target.id; if(id==='applySift' || id==='calcEV') clampSiftMin();
+  }, true);
+  document.getElementById('siftMin')?.addEventListener('change', clampSiftMin, true);
+})();
 </script>
 </body>
 </html>

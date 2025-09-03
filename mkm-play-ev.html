@@ -5,48 +5,42 @@
 <title>Murders at Karlov Manor — Play Booster EV</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
-  html {background-color:#0b0d10;}
-  /* All styles under .eoe-app for easy theming */
+  html{background-color:#0b0d10}
+  /* All styles scoped under .eoe-app for portability (match other pages) */
   .eoe-app{
     --bg:#0b0d10; --fg:#e8ecf1; --muted:#a7b0bb; --acc:#6ac1ff;
-    --card:#151a20; --ok:#1e7f3c; --err:#9b2c2c; --line:#222a33;
+    --card:#151a20; --line:#222a33; --ok:#1e7f3c; --warn:#9b2c2c;
     --hi-bg:rgba(106,193,255,.14); --hi-line:#6ac1ff;
     --est-bg:rgba(106,193,255,.18); --est-line:#6ac1ff;
-    min-height:100vh;background:var(--bg);color:var(--fg);
-    font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-    max-width:1120px;margin:32px auto;padding:0 16px;box-sizing:border-box;
+    max-width:1120px; margin:32px auto; padding:0 16px; box-sizing:border-box;
+    color:var(--fg); background:var(--bg); font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
   }
-  .eoe-app a{color:var(--acc);text-decoration:underline}
+  .eoe-app a{ color:var(--acc); text-decoration:underline }
   .eoe-app h1{font-size:22px;margin:0 0 12px}
   .eoe-app p.lede{color:var(--muted);margin:0 0 16px}
-  .eoe-app .panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin:16px 0}
-  .eoe-app label{display:block;margin:4px 0}
-  .eoe-app .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
-  .eoe-app input[type="number"],.eoe-app input[type="text"],.eoe-app select{
-    width:12ch;background:#0e1216;color:#cfe3f5;border:1px solid #2a3541;border-radius:6px;padding:6px
+  .panel{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; margin:16px 0}
+  .row{display:flex; flex-wrap:wrap; gap:12px; align-items:center}
+  label{display:flex; gap:6px; align-items:center}
+  input[type="number"], input[type="text"], select{
+    background:#0e1216; color:#cfe3f5; border:1px solid #2a3541; border-radius:6px; padding:6px;
   }
-  .eoe-app select{width:auto}
-  .eoe-app button{appearance:none;border:1px solid #2c3845;background:#1b232c;color:var(--fg);padding:10px 14px;border-radius:8px;cursor:pointer}
-  .eoe-app button[disabled]{opacity:.5;cursor:default}
-  .eoe-app .actions{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
-  .eoe-app #status{margin-top:8px;color:var(--muted)}
-  .eoe-app #counts b{color:#7ddc7a}
-  .eoe-app textarea{width:100%;min-height:200px;background:#0e1216;color:#cfe3f5;border:1px solid #2a3541;border-radius:8px;padding:10px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;box-sizing:border-box}
+  button{appearance:none;border:1px solid #2c3845;background:#1b232c;color:var(--fg);padding:10px 14px;border-radius:8px;cursor:pointer}
+  button[disabled]{opacity:.55;cursor:default}
+  .btn-primary{
+    border-color:var(--hi-line); background:linear-gradient(180deg,#203245,#1a2530);
+    color:#dff1ff; font-weight:600; position:relative;
+  }
+  .hi-inline{display:flex;align-items:center;gap:6px;border:1px solid var(--hi-line);background:var(--hi-bg);border-radius:8px;padding:6px 8px}
+  .hi-label{border:1px solid var(--hi-line);background:var(--hi-bg);border-radius:8px;padding:6px 8px}
 
   /* Banner header/footer */
   .freBanner{display:flex;justify-content:center;margin:8px 0 16px}
   .freBanner img{max-width:420px;width:100%;height:auto;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
   @media (max-width:640px){ .freBanner img{max-width:300px} }
 
-  /* Emphasis */
-  .btn-primary{border-color:var(--hi-line);background:linear-gradient(180deg,#203245,#1a2530);color:#dff1ff;font-weight:600}
-  .hi-label{border:1px solid var(--hi-line);background:var(--hi-bg);border-radius:8px;padding:6px 8px}
-  .hi-inline{display:flex;align-items:center;gap:6px;border:1px solid var(--hi-line);background:var(--hi-bg);border-radius:8px;padding:6px 8px}
-
-  /* Error panel */
-  .error-panel{border-color:#ff7a7a!important}
-  .error-panel h2{margin:0 0 8px;color:#ff7a7a;font-size:16px}
-  .error-panel pre{white-space:pre-wrap;background:#0e1216;border:1px solid #2a3541;padding:8px;border-radius:6px;color:#ffd4d4}
+  /* Vertical list for checkboxes — each on its own row */
+  .vert-list{margin-top:8px}
+  .vert-list label{display:flex; align-items:center; gap:8px; margin:6px 0}
 
   /* Tables */
   table{width:100%;border-collapse:collapse;margin-top:8px}
@@ -81,10 +75,11 @@
   details.eoe-collapse>summary::after{content:'▼';opacity:.8;transform:rotate(-90deg);transition:transform .18s;margin-left:12px;font-size:12px}
   details.eoe-collapse[open]>summary::after{transform:rotate(0deg)}
   details.eoe-collapse .content{margin-top:10px}
+  .note{color:#a7b0bb;font-size:12px;margin-top:6px}
 </style>
 </head>
 <body>
-<main class="eoe-app" aria-label="MKM Play Booster EV app">
+<main class="eoe-app" role="main" aria-label="Murders at Karlov Manor — Play Booster EV">
   <!-- Banner header (links home) -->
   <div class="freBanner">
     <a href="./index.html"><img src="freEV-banner.png" alt="FreEV — Spend your money on cards not calculators"></a>
@@ -92,40 +87,46 @@
 
   <h1>Murders at Karlov Manor — Play Booster EV</h1>
   <p class="lede">
-    Builds on load using Scryfall. Playing‑card odds are normalized to exactly <b>14 cards per pack</b>.
-    The non‑game slot uses <b>65% token/ad</b>, <b>30% art</b>, <b>5% signed art</b>. Per‑box math uses <b>36 packs</b>.
+    Builds on load using Scryfall. Playing‑card odds are normalized to exactly <strong>14 Magic cards per pack</strong>.
+    Non‑game slot (token/ad, helper punch‑out, or art) is modeled separately per MKM’s breakdown. Boxes are assumed to have
+    <strong>36 packs</strong>. Sources in code comments. 
   </p>
 
   <div class="panel">
     <strong>Refresh data</strong>
-    <label><input type="checkbox" id="englishOnly" checked> English‑only (avoid dupes)</label>
-    <div class="row">
-      <label><input type="checkbox" id="includeMKM" checked> Include <b>MKM</b> (main set, is:booster)</label>
+    <div class="vert-list">
+      <label><input type="checkbox" id="englishOnly" checked> English‑only</label>
+      <label><input type="checkbox" id="includeMKM" checked> Include <strong>MKM</strong> (main set, is:booster)</label>
+      <label><input type="checkbox" id="includeSPG" checked> Include <strong>SPG</strong> (Special Guests — nonfoil only)</label>
+      <label><input type="checkbox" id="includePLST" checked> Include <strong>The List</strong> (MKM edition only)</label>
     </div>
-    <div class="row">
-      <label><input type="checkbox" id="includeTOK" checked> Include <b>TMKM</b> Tokens/Emblems</label>
-      <label>Token fallback (USD): <input type="text" id="tokenFallback" value="0.05" title="Used if token price missing"></label>
-      <label><input type="checkbox" id="includeART" checked> Include <b>AMKM</b> Art Series (normal + signed)</label>
-      <label>Art fallback (USD): <input type="text" id="artFallback" value="0.00" title="Used if art price missing"></label>
+    <div class="vert-list" style="margin-top:4px">
+      <label><input type="checkbox" id="includeTOK"> Include <strong>TMKM</strong> tokens</label>
+      <label>Token fallback (USD): <input type="text" id="tokenFallback" value="0.05" size="6"></label>
+      <label>Token pool size: <input type="number" id="tokenPool" value="21" min="1" step="1" style="width:8ch" title="TMKM has 21 tokens on Scryfall"></label>
     </div>
-    <div class="actions">
-      <button id="buildBtn" class="btn-primary">Refresh List</button>
+    <div class="vert-list" style="margin-top:4px">
+      <label><input type="checkbox" id="includeART"> Include <strong>AMKM</strong> art (normal + signed)</label>
+      <label>Art fallback (USD): <input type="text" id="artFallback" value="0.00" size="6"></label>
+    </div>
+    <div class="row actions" style="margin-top:6px">
+      <button id="buildBtn" class="btn-primary" title="Fetch live Scryfall data and recompute everything">Refresh List</button>
       <button id="downloadCsv" disabled>Download CSV</button>
       <button id="copyCsv" disabled>Copy CSV</button>
     </div>
-    <div id="status" aria-live="polite">Preparing…</div>
-    <div id="counts"></div>
+    <div id="status" class="note" aria-live="polite">Preparing…</div>
+    <div id="counts" class="note"></div>
   </div>
 
   <!-- Purchase EV -->
   <div id="purchasePanel" class="panel" style="display:none">
     <strong>Purchase EV Calculator</strong>
     <div class="row" style="margin-top:6px">
-      <label class="hi-label">Boxes to buy: <input type="number" id="boxesToBuy" value="1" min="0" step="1"></label>
-      <span class="hi-inline" title="Only count prints with Card Value ≥ this amount">
+      <label class="hi-label">Boxes to buy: <input type="number" id="boxesToBuy" value="1" min="0" step="1" style="width:10ch"></label>
+      <span class="hi-inline" title="Only count prints with card value ≥ this amount">
         <input type="checkbox" id="useSiftForEV" checked>
-        <b>Use Sift (≥)</b>
-        <input type="text" id="siftMin" value="0.25">
+        <span><strong>Use Sift (≥)</strong></span>
+        <input type="text" id="siftMin" value="0.25" style="width:8ch">
       </span>
     </div>
     <div class="row" style="margin-top:6px">
@@ -148,7 +149,7 @@
 
   <!-- Sift table -->
   <div id="siftPanel" class="panel" style="display:none">
-    <strong>Row List (linked)</strong>
+    <strong>Row List (linked) — highlight by Sift threshold</strong>
     <div class="row">
       <span class="pill ok">≥ threshold</span>
       <span class="pill bad">&lt; threshold</span>
@@ -172,31 +173,30 @@
     </div>
   </div>
 
-  <!-- Errors -->
-  <div id="errorBox" class="panel error-panel" style="display:none">
-    <h2>Load failed</h2>
-    <div id="errorMsg"></div>
-    <pre id="errorDetails"></pre>
+  <!-- Error (non‑blocking; continues with any sets that loaded) -->
+  <div id="errorBox" class="panel" style="display:none; border-color:#ff7a7a">
+    <h2 style="color:#ff9a9a;margin:0 0 8px">Some sets failed to load</h2>
+    <div id="errorMsg" class="note"></div>
+    <pre id="errorDetails" style="white-space:pre-wrap;background:#0e1216;border:1px solid #2a3541;padding:8px;border-radius:6px;color:#ffd4d4"></pre>
   </div>
 
-  <!-- CSV -->
   <div class="panel">
     <strong>CSV preview</strong>
-    <textarea id="preview" placeholder="Your CSV will appear after the list builds…"></textarea>
+    <textarea id="preview" placeholder="Your CSV will appear after the list builds…" style="width:100%;min-height:220px;background:#0e1216;color:#cfe3f5;border:1px solid #2a3541;border-radius:8px;padding:10px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;"></textarea>
     <details>
       <summary>Advanced: Scryfall queries</summary>
-      <pre id="queries" style="white-space:pre-wrap;"></pre>
+      <pre id="queries" style="white-space:pre-wrap"></pre>
     </details>
   </div>
 
-  <!-- Totals (collapsible) -->
+  <!-- Totals (collapsible; default closed; no-sift) -->
   <div id="totalsPanel" class="panel" style="display:none">
     <details id="totalsDetails" class="eoe-collapse">
       <summary><strong>Totals for Your Purchase Size (No sift, Developer Model check)</strong></summary>
       <div class="content">
         <div class="note">
           Columns show <em>Low / Est. / High</em>. Totals <b>ignore Sift</b> and include token/art values via fallbacks when missing.
-          Playing‑card probabilities are normalized so EST sums to 14 per pack; non‑game items are not normalized. Box size uses <b>36 packs</b>.
+          Playing‑card probabilities are scaled so the EST column sums to exactly 14 per pack; the non‑game slot follows MKM’s 55% token/ad / 10% helper / 35% art (1 in 7 signed) split.
         </div>
         <table>
           <thead><tr><th>Metric</th><th>Low</th><th>Est.</th><th>High</th></tr></thead>
@@ -213,7 +213,7 @@
   </div>
 </main>
 
-<!-- Google tag (gtag.js) — placed before first custom script per your standard -->
+<!-- Google tag (gtag.js) — same placement as your other pages -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-LWMRXKNY5X"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -223,12 +223,21 @@
 </script>
 
 <script>
-/* ============================ Helpers ============================ */
-const rarityLetter = r => ({common:'C',uncommon:'U',rare:'R',mythic:'M'}[r] || (r?r[0].toUpperCase():''));
-const sleep = ms => new Promise(res=>setTimeout(res,ms));
+/* =====================================================================================
+   MKM — Play Booster EV
+   - Styling/structure and many helpers mirror your FDN page for consistency.  :contentReference[oaicite:5]{index=5}
+   - MKM-specific pack facts + rates (official):
+       • 14 Magic cards + 1 non-game (token/ad 55%, helper 10%, art 35%; 1/7 of art signed).  :contentReference[oaicite:6]{index=6}
+       • 1 in 8 (12.5%) replaces the 7th common with Special Guests (1.56%) or The List (C/U 9.38%, R/M 1.56%).  :contentReference[oaicite:7]{index=7}
+       • 36 Play Boosters per box.  :contentReference[oaicite:8]{index=8}
+   ===================================================================================== */
+
+/* ========= Helpers (same as your FDN) ========= */
+const rarityLetter = r => ({ common:'C', uncommon:'U', rare:'R', mythic:'M' }[r] || (r ? r[0].toUpperCase() : ''));
+const sleep = ms => new Promise(res => setTimeout(res, ms));
 const padCollector = s => { const m=String(s||'').match(/^(\d+)(.*)$/); return m?m[1].padStart(4,'0')+(m[2]||''):(s||''); };
 const baseCN = s => { const m=String(s||'').match(/^(\d+)/); return m?parseInt(m[1],10):NaN; };
-const parseUSD = s => { const n=parseFloat(String(s).replace(/[^0-9.]/g,'')); return Number.isFinite(n)?n:null; };
+const parseUSD = s => { if(s==null) return null; const n=parseFloat(String(s).replace(/[^0-9.]/g,'')); return Number.isFinite(n)?n:null; };
 const money = n => Number.isFinite(n)? n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) : '';
 const fmtUSD = n => money(n);
 const fmtCount = n => !Number.isFinite(n)? '' : (Math.abs(n-Math.round(n))<1e-9? String(Math.round(n)) : (n>=100?n.toFixed(1):n>=10?n.toFixed(2):n.toFixed(3)));
@@ -236,410 +245,354 @@ const fmtInt = n => Number.isFinite(n)? Math.round(n).toLocaleString() : '';
 const zFromConf = c => { c=Math.round(c); if(c>=99)return 2.576; if(c>=95)return 1.96; if(c>=90)return 1.645; if(c>=68)return 1.0; return 1.96; };
 const priceUSD = (card,treat) => { const p=(treat==='foil'?card?.prices?.usd_foil:card?.prices?.usd); const f=parseFloat(p); return Number.isFinite(f)?f:null; };
 
-/* ======================= MKM model constants =======================
-   - No Breaking News/Big Score/Special Guests for MKM.
-   - Non‑game slot: 65% token/ad, 30% art, 5% signed art.
-   - Land slot: basics only (80% nonfoil / 20% foil), 10 basics.
-   - Guaranteed 1 foil of any rarity (not a token/art). 36 packs per box.
+/* ========= Pack/odds model (Play Booster baseline) =========
+   - We'll normalize *non-fixed* playing-card odds so total EST = 14 − fixedShare (fixedShare is SPG + The List).
+   - Non‑game slot per MKM: 55% token/ad, 10% helper punch‑out, 35% art (1/7 signed).
+   - Rare-slot heuristic 85.7% Rare / 14.3% Mythic (nonfoil); foil rarity split like your other pages.
 */
-const PACKS_PER_BOX = 36;
-
-const MKM_ODDS = {
-  COMMON_SLOTS: 6.5 + 0.125,       // 6.5 commons + ~12.5% of wildcard to C
-  UNCOMMON_BASE: 3 + 0.625,        // 3 uncommons + ~62.5% of wildcard to U
-  WILDCARD_RM: 1/12,               // ~8.33% of wildcard goes to Rare/Mythic
-  RM_MYTHIC_RATE: 1/8,             // Rare slot split
-  RM_RARE_RATE: 7/8,
+const PACKS_PER_BOX = 36; // MKM Play Booster display.  :contentReference[oaicite:9]{index=9}
+const ODDS = {
+  E_COMMON_SLOTS: 6.5 + 0.125,    // heuristic baseline (kept for parity with your FDN page)
+  E_UNCOMMON_SLOTS: 3 + 0.625,    // heuristic baseline
+  RM_RARE: 0.857, RM_MYTHIC: 0.143,
   FOIL_C: 0.58, FOIL_U: 0.32, FOIL_R: 0.064, FOIL_M: 0.011,
-  LAND_BASIC_NF: 0.80, LAND_BASIC_F: 0.20,   // within land slot
-  NONGAME_TOKEN: 0.65, NONGAME_ART: 0.30, NONGAME_ART_SIGNED: 0.05
+  // Non‑game per MKM Collecting article (55/10/35; 1/7 signed art)  :contentReference[oaicite:10]{index=10}
+  NONGAME_TOKEN: 0.55, NONGAME_HELPER: 0.10, NONGAME_ART_TOTAL: 0.35,
+  NONGAME_ART_SIGNED_FRACTION: (1/7)
 };
+ODDS.NONGAME_ART_SIGNED = ODDS.NONGAME_ART_TOTAL * ODDS.NONGAME_ART_SIGNED_FRACTION;   // ≈ 0.05
+ODDS.NONGAME_ART = ODDS.NONGAME_ART_TOTAL - ODDS.NONGAME_ART_SIGNED;                   // ≈ 0.30
 
-/* ============================ State ============================ */
-let __ROW_MODELS__ = []; // { model, price, nonGame, fallback, url }
-let __META_ROWS__  = []; // { setTag, cn, rarity, name, treatment, model, price, nonGame, url }
+// Special Guests + The List (fixed shares; do not scale) — MKM officially:
+const SPG_RATE = 0.0156;               // 1.56%  :contentReference[oaicite:11]{index=11}
+const LIST_CU_RATE = 0.0938;           // 9.38%  :contentReference[oaicite:12]{index=12}
+const LIST_RM_RATE = 0.0156;           // 1.56%  :contentReference[oaicite:13]{index=13}
+const FIXED_TOTAL = SPG_RATE + LIST_CU_RATE + LIST_RM_RATE; // 0.125 (1 in 8)
+
+/* ========= Data state ========= */
+let __NORM_SCALE__ = 1;         // scales *non-fixed* playing-card probabilities
+let __TOKEN_POOL__ = 21;        // TMKM default pool size (Scryfall shows 21)  :contentReference[oaicite:14]{index=14}
+let __ART_POOL__ = 0;
+let __FIXED_SHARE__ = 0;        // sum of fixed no-scale probabilities (SPG + The List) — per pack
+let __ROW_MODELS__ = [];        // { model, price, isNonGame, fallback, noScale }
+let __META_ROWS__  = [];        // { setTag, cn, rarity, name, treatment, model, price, isNonGame, url }
 let __SIFT_CSV__   = '';
-let __NORM_SCALE__ = 1;
+let __ERRORS__     = [];
 
-/* ========================= Scryfall I/O ========================= */
-function buildQuery(setCode, englishOnly){
-  let q='';
-  if(setCode==='MKM')  q='e:mkm is:booster -finish:glossy -finish:etched -finish:textured';
-  if(setCode==='TMKM') q='e:tmkm (layout:token or layout:double_faced_token or layout:emblem)';
-  if(setCode==='AMKM') q='e:amkm';
-  if(englishOnly) q+=' lang:en';
-  return q;
-}
-async function fetchAllPages(q, setLabel, statusEl){
-  const base='https://api.scryfall.com/cards/search?unique=prints&order=set&dir=asc&q=';
-  let url=base+encodeURIComponent(q), out=[], page=1;
-  while(url){
-    statusEl.textContent=`Fetching ${setLabel}: page ${page}…`;
-    let resp;
-    try{ resp=await fetch(url); }catch(e){ throw {set:setLabel,query:q,status:'NETWORK',details:e?.message||String(e)}; }
-    if(!resp.ok){ const text=await resp.text().catch(()=> ''); throw {set:setLabel,query:q,status:resp.status,details:text}; }
-    const json=await resp.json();
-    out = out.concat(json.data||[]);
-    url = json.has_more ? json.next_page : null;
-    page++; if(url) await sleep(120);
-  }
-  return out;
-}
-
-/* ===================== Probability models ====================== */
+/* ========= Probability models per print ========= */
 const PM = {
   point: p => ({ type:'point', p }),
   range: (lo,hi) => ({ type:'range', lo, hi }),
-  max: max => ({ type:'max', max })
+  max: max => ({ type:'max', max }),
+  fixed: p => ({ type:'fixed', p })   // NEW: not subject to normalization
 };
 function countFromModelRaw(model, packs){
   if(!model) return null;
   if(model.type==='point') return { lo:model.p*packs, est:model.p*packs, hi:model.p*packs, max:model.p*packs };
   if(model.type==='range') return { lo:model.lo*packs, est:((model.lo+model.hi)/2)*packs, hi:model.hi*packs, max:model.hi*packs };
   if(model.type==='max')   return { lo:0, est:(model.max/2)*packs, hi:model.max*packs, max:model.max*packs };
+  if(model.type==='fixed') return { lo:model.p*packs, est:model.p*packs, hi:model.p*packs, max:model.p*packs };
   return null;
 }
-function countFromModel(model, packs, nonGame=false, useScaled=true){
-  const c=countFromModelRaw(model,packs);
-  if(!c || nonGame || !useScaled) return c;
+function probMinMaxRaw(model){
+  if(!model) return {min:null,max:null};
+  if(model.type==='point') return {min:model.p,max:model.p};
+  if(model.type==='range') return {min:model.lo,max:model.hi};
+  if(model.type==='max')   return {min:0,max:model.max};
+  if(model.type==='fixed') return {min:model.p,max:model.p};
+  return {min:null,max:null};
+}
+function countFromModel(model, packs, isNonGame=false, noScale=false){
+  const c=countFromModelRaw(model,packs); if(!c) return c;
+  if(isNonGame || noScale) return c;
+  // Scale only non-fixed, playing-card rows
   return { lo:c.lo*__NORM_SCALE__, est:c.est*__NORM_SCALE__, hi:c.hi*__NORM_SCALE__, max:c.max*__NORM_SCALE__ };
 }
-function probPoint(model){ return model?.type==='point'? model.p : model?.type==='range'? (model.lo+model.hi)/2 : model?.type==='max'? model.max/2 : null; }
+function probPoint(model){
+  if(!model) return null;
+  if(model.type==='point') return model.p;
+  if(model.type==='range') return (model.lo+model.hi)/2;
+  if(model.type==='max')   return model.max/2;
+  if(model.type==='fixed') return model.p;
+  return null;
+}
+function probMinMaxScaled(model,isNonGame=false,noScale=false){
+  const {min,max}=probMinMaxRaw(model);
+  if(min==null) return {min,max};
+  if(isNonGame || noScale) return {min,max};
+  return {min:min*__NORM_SCALE__, max:max*__NORM_SCALE__};
+}
 
-/* ========================= Build logic ========================= */
-async function build(){
-  document.getElementById('errorBox').style.display='none';
-  document.getElementById('purchasePanel').style.display='none';
-  document.getElementById('purchaseEVContainer').style.display='none';
-  document.getElementById('siftPanel').style.display='none';
-  document.getElementById('siftTableWrap').style.display='none';
-  document.getElementById('siftSummary').textContent='';
-  document.getElementById('preview').value='';
-  document.getElementById('status').textContent='Building list…';
-  const englishOnly=document.getElementById('englishOnly').checked;
-  const incMKM=document.getElementById('includeMKM').checked;
-  const incTOK=document.getElementById('includeTOK').checked;
-  const incART=document.getElementById('includeART').checked;
-  const tokenFallback=parseFloat(document.getElementById('tokenFallback').value);
-  const artFallback=parseFloat(document.getElementById('artFallback').value);
-
-  __ROW_MODELS__=[]; __META_ROWS__=[]; __SIFT_CSV__=''; __NORM_SCALE__=1;
-
-  const status=document.getElementById('status');
-  const queriesEl=document.getElementById('queries');
-  const countsEl=document.getElementById('counts');
-
-  const qList=[];
-  if(incMKM) qList.push(['MKM', buildQuery('MKM', englishOnly)]);
-  if(incTOK) qList.push(['TMKM', buildQuery('TMKM', englishOnly)]);
-  if(incART) qList.push(['AMKM', buildQuery('AMKM', englishOnly)]);
-  queriesEl.textContent = qList.map(([tag,q])=>`${tag}: ${q}`).join('\n');
-
-  let data={MKM:[],TMKM:[],AMKM:[]};
+/* ========= Scryfall I/O ========= */
+function buildQuery(which, englishOnly){
+  let q='';
+  if(which==='MKM')  q='e:mkm is:booster -finish:glossy -finish:etched -finish:textured';
+  if(which==='SPG')  q='e:spg';  // filtered to MKM’s 10 names below
+  if(which==='PLST') q='e:plst'; // filtered to MKM’s 40 names below
+  if(which==='TMKM') q='e:tmkm (layout:token or layout:double_faced_token or layout:emblem)';
+  if(which==='AMKM') q='e:amkm';
+  if(englishOnly) q+=' lang:en';
+  return q;
+}
+async function fetchAllPagesNonBlocking(q, setLabel, statusEl){
+  const base='https://api.scryfall.com/cards/search?unique=prints&order=set&dir=asc&q=';
+  let url=base+encodeURIComponent(q), out=[], page=1;
   try{
-    const results=[];
-    for(const [tag,q] of qList){ const cards=await fetchAllPages(q,tag,status); results.push([tag,cards]); }
-    for(const [tag,cards] of results){ data[tag]=cards||[]; }
-
-    const mainAll = (data.MKM||[]).filter(c=> (c.games||[]).includes('paper'));
-    const isBasic = c => /Basic/i.test(c.type_line||'');
-    const isLand  = c => /Land/i.test(c.type_line||'');
-
-    const mainBasics = mainAll.filter(c=> isBasic(c));
-    const mainCommons = mainAll.filter(c=> c.rarity==='common' && !isLand(c));
-    const mainUncommons = mainAll.filter(c=> c.rarity==='uncommon' && !isLand(c));
-    const mainRares = mainAll.filter(c=> c.rarity==='rare');
-    const mainMythics = mainAll.filter(c=> c.rarity==='mythic');
-
-    const tokAll = (data.TMKM||[]).filter(c=> (c.games||[]).includes('paper'));
-    const artAll = (data.AMKM||[]).filter(c=> (c.games||[]).includes('paper'));
-
-    const P = MKM_ODDS;
-
-    // Wildcard split
-    const wcRM = P.WILDCARD_RM, wcCU = 1 - wcRM;
-    const cuTotal = (mainCommons.length + mainUncommons.length) || 1;
-    const wcCommonShare   = wcCU * (mainCommons.length / cuTotal);
-    const wcUncommonShare = wcCU * (mainUncommons.length / cuTotal);
-
-    // Per-print contributions
-    const pCommonPerPrint   = (mainCommons.length>0)   ? (P.COMMON_SLOTS / mainCommons.length) : 0;
-    const pUncommonPerPrint = (mainUncommons.length>0) ? (P.UNCOMMON_BASE / mainUncommons.length) : 0;
-
-    const pWcPerCommon   = (mainCommons.length>0)   ? wcCommonShare   / mainCommons.length : 0;
-    const pWcPerUncommon = (mainUncommons.length>0) ? wcUncommonShare / mainUncommons.length : 0;
-
-    const pRareSlotPerRare   = (mainRares.length>0)   ? (P.RM_RARE_RATE)   / mainRares.length : 0;
-    const pRareSlotPerMythic = (mainMythics.length>0) ? (P.RM_MYTHIC_RATE) / mainMythics.length : 0;
-
-    const pWcPerRare   = (mainRares.length>0)   ? (wcRM*P.RM_RARE_RATE)   / mainRares.length : 0;
-    const pWcPerMythic = (mainMythics.length>0) ? (wcRM*P.RM_MYTHIC_RATE) / mainMythics.length : 0;
-
-    // Land slot basics
-    const nBasics = Math.max(1, mainBasics.length||10);
-    const pLandNF = P.LAND_BASIC_NF / nBasics;
-    const pLandF  = P.LAND_BASIC_F  / nBasics;
-
-    // Foil slot pools
-    const foilPoolC = mainCommons.slice();
-    const foilPoolU = mainUncommons.slice();
-    const foilPoolR = mainRares.slice();
-    const foilPoolM = mainMythics.slice();
-    const pFoilC = (foilPoolC.length>0)? P.FOIL_C / foilPoolC.length : 0;
-    const pFoilU = (foilPoolU.length>0)? P.FOIL_U / foilPoolU.length : 0;
-    const pFoilR = (foilPoolR.length>0)? P.FOIL_R / foilPoolR.length : 0;
-    const pFoilM = (foilPoolM.length>0)? P.FOIL_M / foilPoolM.length : 0;
-
-    function pushRow(card, setTag, treatment, model, price, nonGame=false, fallbackUsed=false){
-      const cn = padCollector(card.collector_number);
-      const rarity = card.rarity ? rarityLetter(card.rarity) : 'C';
-      const row = { setTag, cn, rarity, name: card.name, treatment, model, price, nonGame, url: card.scryfall_uri||'' };
-      __META_ROWS__.push(row);
-      __ROW_MODELS__.push({ model, price, nonGame, fallback: fallbackUsed });
-    }
-
-    function addMKM(card){
-      const rarity = card.rarity;
-      const finishes = Array.isArray(card.finishes)? card.finishes : [];
-      const tl = card.type_line || '';
-      const basic = /Basic/i.test(tl);
-      const land  = /Land/i.test(tl);
-
-      let pNF=0;
-
-      if(basic){
-        // Land slot
-        if(finishes.includes('nonfoil')){
-          const price = priceUSD(card,'normal');
-          pushRow(card,'MKM','normal',PM.point(pLandNF),price,false,false);
-        }
-        if(finishes.includes('foil')){
-          const price = priceUSD(card,'foil');
-          pushRow(card,'MKM','foil',PM.point(pLandF),price,false,false);
-        }
-        return;
+    while(url){
+      statusEl.textContent=`Fetching ${setLabel}: page ${page}…`;
+      const resp=await fetch(url);
+      if(!resp.ok){
+        const txt=await resp.text().catch(()=> '');
+        __ERRORS__.push({set:setLabel,query:q,status:resp.status,details:txt});
+        break;
       }
-
-      // Non-land main set
-      if(finishes.includes('nonfoil')){
-        if(rarity==='common')   pNF = pCommonPerPrint + pWcPerCommon;
-        if(rarity==='uncommon') pNF = pUncommonPerPrint + pWcPerUncommon;
-        if(rarity==='rare')     pNF = pRareSlotPerRare + pWcPerRare;
-        if(rarity==='mythic')   pNF = pRareSlotPerMythic + pWcPerMythic;
-        if(pNF>0){
-          const price = priceUSD(card,'normal');
-          pushRow(card,'MKM','normal',PM.point(pNF),price,false,false);
-        }
-      }
-      if(finishes.includes('foil')){
-        let pF=0;
-        if(rarity==='common')   pF+=pFoilC;
-        if(rarity==='uncommon') pF+=pFoilU;
-        if(rarity==='rare')     pF+=pFoilR;
-        if(rarity==='mythic')   pF+=pFoilM;
-        if(pF>0){
-          const price = priceUSD(card,'foil');
-          pushRow(card,'MKM','foil',PM.point(pF),price,false,false);
-        }
-      }
+      const json=await resp.json();
+      out = out.concat(json.data||[]);
+      url = json.has_more ? json.next_page : null;
+      page++; if(url) await sleep(120);
     }
+  }catch(e){
+    __ERRORS__.push({set:setLabel,query:q,status:'NETWORK',details:e?.message||String(e)});
+  }
+  return out;
+}
 
-    function addTOK(card){
-      const price = priceUSD(card,'normal');
-      const usedFallback = !Number.isFinite(price) && Number.isFinite(tokenFallback);
-      // Non‑game split: 65% tokens spread across the token pool
-      const p = (tokAll.length>0) ? (MKM_ODDS.NONGAME_TOKEN / tokAll.length) : 0;
-      pushRow(card,'TMKM','normal',PM.point(p), usedFallback?tokenFallback:price, true, usedFallback);
-    }
-
-    function addART(card){
-      const price = priceUSD(card,'normal');
-      const usedFallback = !Number.isFinite(price) && Number.isFinite(artFallback);
-      const n = artAll.length || 1;
-      const pNormal = MKM_ODDS.NONGAME_ART / n;
-      const pSigned = MKM_ODDS.NONGAME_ART_SIGNED / n;
-      // Signed vs normal via CN suffix 's' (Scryfall art-series convention)
-      const isSignedCN = /[A-Za-z]$/.test(card.collector_number||'') && (card.collector_number||'').toLowerCase().endsWith('s');
-      const treat = isSignedCN ? 'signed' : 'normal';
-      const pUse  = isSignedCN ? pSigned : pNormal;
-      pushRow(card,'AMKM',treat,PM.point(pUse), usedFallback?artFallback:price, true, usedFallback);
-    }
-
-    mainAll.forEach(addMKM);
-    tokAll.forEach(addTOK);
-    artAll.forEach(addART);
-
-    // Normalize playing cards to sum to exactly 14 per pack
-    const playingMass = __ROW_MODELS__.reduce((s,r)=> s + (r.nonGame? 0 : probPoint(r.model)||0), 0);
-    __NORM_SCALE__ = playingMass>0 ? (14 / playingMass) : 1;
-
-    // Sort rows: set, CN (numeric, then suffix), name, treatment
-    __META_ROWS__.sort((a,b)=>{
-      if(a.setTag!==b.setTag) return a.setTag.localeCompare(b.setTag);
-      const pa=(a.cn||'').match(/^(\d+)(.*)$/)||[], pb=(b.cn||'').match(/^(\d+)(.*)$/)||[];
-      const na=pa[1]?parseInt(pa[1],10):0, nb=pb[1]?parseInt(pb[1],10):0;
-      if(na!==nb) return na-nb; const sa=pa[2]||'', sb=pb[2]||'';
-      if(sa!==sb) return sa.localeCompare(sb);
-      if(a.name!==b.name) return a.name.localeCompare(b.name);
-      return a.treatment.localeCompare(b.treatment);
-    });
-
-    // CSV
-    const header=['Set','Number','Rarity','Name','Treatment','Pack Prob Min (%)','Pack Prob Max (%)','Card Value (USD)','Per 1000 Min','Per 1000 Max','Per 30000 Min','Per 30000 Max','Per 300000 Min','Per 300000 Max'];
-    const rows = __META_ROWS__.map(m=>{
-      const p = probPoint(m.model);
-      const pScaled = m.nonGame ? p : (p*__NORM_SCALE__);
-      const c1k=pScaled*1000, c30k=pScaled*30000, c300k=pScaled*300000;
-      return [ m.setTag, m.cn, m.rarity, m.name, m.treatment,
-        (pScaled*100).toFixed(5)+'%', (pScaled*100).toFixed(5)+'%',
-        fmtUSD(m.price),
-        fmtCount(c1k), fmtCount(c1k),
-        fmtCount(c30k), fmtCount(c30k),
-        fmtCount(c300k), fmtCount(c300k)
-      ];
-    });
-    const csv = [header, ...rows].map(r => r.map(v=>{
-      const s=String(v??''); return /[",\n]/.test(s)? '"'+s.replace(/"/g,'""')+'"' : s;
-    }).join(',')).join('\n');
-    window.__CSV__=csv;
-    document.getElementById('preview').value=csv.slice(0,300000);
-    document.getElementById('downloadCsv').disabled=false;
-    document.getElementById('copyCsv').disabled=false;
-
-    // Enable UI sections
-    document.getElementById('siftPanel').style.display='';
-    document.getElementById('applySift').disabled=false;
-    document.getElementById('purchasePanel').style.display='';
-    document.getElementById('calcEV').disabled=false;
-
-    // Apply default Sift
-    applySift(parseFloat(document.getElementById('siftMin').value) || 0.25);
-
-    // Counts
-    const cMKM = __META_ROWS__.filter(r=>r.setTag==='MKM').length;
-    const cTOK = __META_ROWS__.filter(r=>r.setTag==='TMKM').length;
-    const cART = __META_ROWS__.filter(r=>r.setTag==='AMKM').length;
-    countsEl.innerHTML = `Built <b>${__META_ROWS__.length.toLocaleString()}</b> rows — MKM: <b>${cMKM}</b>, TMKM: <b>${cTOK}</b>, AMKM: <b>${cART}</b>.`;
-
-    document.getElementById('status').textContent = `Done. (Normalization factor: ${__NORM_SCALE__.toFixed(5)} to 14 cards/pack)`;
-
-    renderPurchaseEV();
-    renderTotalsTable();
-    document.getElementById('totalsPanel').style.display='';
-    const det=document.getElementById('totalsDetails'); if(det) det.open=false;
-
-  }catch(err){
-    console.error(err);
-    document.getElementById('status').textContent='Error while building — see details below.';
-    document.getElementById('errorMsg').innerHTML = `<strong>Set:</strong> ${err?.set||'Unknown'} &nbsp; <strong>Status:</strong> ${err?.status??'ERROR'}`;
-    document.getElementById('errorDetails').textContent = `Query:\n${err?.query||'(no query)'}\n\nResponse snippet:\n${String(err?.details||'').slice(0,800)}`;
-    document.getElementById('downloadCsv').disabled=true;
-    document.getElementById('copyCsv').disabled=true;
-    document.getElementById('applySift').disabled=true;
-    document.getElementById('downloadSiftCsv').disabled=true;
-    document.getElementById('calcEV').disabled=true;
+/* ========= Row building ========= */
+function pushRow(card, setTag, treatment, model, price, isNonGame=false, fallback=false, noScale=false){
+  const cn = padCollector(card.collector_number);
+  const rarity = card.rarity ? rarityLetter(card.rarity) : 'C';
+  const name = card.name;
+  const url  = card.scryfall_uri || '';
+  __META_ROWS__.push({ setTag, cn, rarity, name, treatment, model, price, isNonGame, url });
+  __ROW_MODELS__.push({ model, price, isNonGame, fallback, noScale });
+  // Track fixed-share playing cards to reserve space before normalization
+  if(!isNonGame && noScale){
+    const p = probPoint(model);
+    if(Number.isFinite(p)) __FIXED_SHARE__ += p;
   }
 }
 
-/* ========================= Sift table ========================= */
+/* Main set (MKM) — normal + foil (non-fixed; subject to scaling) */
+function rowsFromMKM(cards){
+  const paper = cards.filter(c=> (c.games||[]).includes('paper'));
+  const commons  = paper.filter(c=>c.rarity==='common'  && !(c.layout||'').includes('token'));
+  const uncommons= paper.filter(c=>c.rarity==='uncommon'&& !(c.layout||'').includes('token'));
+  const rares    = paper.filter(c=>c.rarity==='rare');
+  const mythics  = paper.filter(c=>c.rarity==='mythic');
+
+  const nC=Math.max(1,commons.length), nU=Math.max(1,uncommons.length), nR=Math.max(1,rares.length), nM=Math.max(1,mythics.length);
+
+  for(const c of paper){
+    const finishes=Array.isArray(c.finishes)?c.finishes:[];
+    const r=c.rarity;
+    // Normal (nonfoil)
+    if(finishes.includes('nonfoil')){
+      let p=0;
+      if(r==='common')   p = ODDS.E_COMMON_SLOTS / nC;
+      if(r==='uncommon') p = ODDS.E_UNCOMMON_SLOTS / nU;
+      if(r==='rare')     p = ODDS.RM_RARE / nR;
+      if(r==='mythic')   p = ODDS.RM_MYTHIC / nM;
+      if(p>0) pushRow(c,'MKM','normal',PM.point(p), priceUSD(c,'normal'), false,false,false);
+    }
+    // Foil
+    if(finishes.includes('foil')){
+      let p=0;
+      if(r==='common')   p = ODDS.FOIL_C / nC;
+      if(r==='uncommon') p = ODDS.FOIL_U / nU;
+      if(r==='rare')     p = ODDS.FOIL_R / nR;
+      if(r==='mythic')   p = ODDS.FOIL_M / nM;
+      if(p>0) pushRow(c,'MKM','foil',PM.point(p), priceUSD(c,'foil'), false,false,false);
+    }
+  }
+}
+
+/* Special Guests — MKM’s 10 names; nonfoil only; fixed 1.56% total */
+const SPG_NAMES = [
+  'Ghostly Prison','Fabricate','Show and Tell','Tragic Slip','Victimize','Gamble',
+  'Crashing Footfalls','Tireless Tracker','Drown in the Loch','Field of the Dead'
+];
+function rowsFromSPG(cards){
+  const paper=cards.filter(c=> (c.games||[]).includes('paper') && SPG_NAMES.includes(c.name));
+  const nf=paper.filter(c=> (c.finishes||[]).includes('nonfoil'));
+  const n=Math.max(1,nf.length); // should be 10
+  const perPrint = SPG_RATE / n;
+  for(const c of nf){
+    pushRow(c,'SPG','normal',PM.fixed(perPrint), priceUSD(c,'normal'), false,false,true);
+  }
+}
+
+/* The List (MKM edition) — 40 names + split rates (C/U vs R/M); nonfoil only; fixed shares */
+const PLST_NAMES = [
+  'Baleful Mastery','Bishop of the Bloodstained','Burden of Guilt','Cavalier of Thorns',
+  'Combine Chrysalis','Consign // Oblivion','Death Cloud','Duskmantle, House of Shadow',
+  'Enlisted Wurm','Ghost Quarter','Gnaw to the Bone','Goblin Warchief','Hard Evidence','High Alert',
+  'Ixidor, Reality Sculptor','Jace, Wielder of Mysteries','Krosan Tusker','Kuldotha Rebirth','Laid to Rest',
+  'Leonin Relic-Warder','Magmaw','Mass Hysteria','Maverick Thopterist','Mentor of the Meek',
+  'Metalspinner\'s Puzzleknot','Millstone','Mistveil Plains','Molten Psyche','Monologue Tax',
+  'Mystery Key','Nyx Weaver','Putrid Warrior','Quintorius, Field Historian','Ranger-Captain of Eos',
+  'Shard of Broken Glass','Spell Snare','Stromkirk Captain','Syr Konrad, the Grim','Treacherous Terrain','Worldspine Wurm'
+];
+function rowsFromPLST(cards){
+  const paper=cards.filter(c=> (c.games||[]).includes('paper') && PLST_NAMES.includes(c.name));
+  const nf=paper.filter(c=> (c.finishes||[]).includes('nonfoil'));
+  const cu = nf.filter(c=> (c.rarity==='common' || c.rarity==='uncommon'));
+  const rm = nf.filter(c=> (c.rarity==='rare'   || c.rarity==='mythic'));
+  const nCU = Math.max(1, cu.length);         // expected 30
+  const nRM = Math.max(1, rm.length);         // expected 10
+  const perCU = LIST_CU_RATE / nCU;
+  const perRM = LIST_RM_RATE / nRM;
+  for(const c of cu) pushRow(c,'PLST','normal',PM.fixed(perCU), priceUSD(c,'normal'), false,false,true);
+  for(const c of rm) pushRow(c,'PLST','normal',PM.fixed(perRM), priceUSD(c,'normal'), false,false,true);
+}
+
+/* Non‑game: Tokens (TMKM) + Art (AMKM) + Helper placeholder */
+function rowsFromTMKM(cards, tokenFallback){
+  const paper=cards.filter(c=> (c.games||[]).includes('paper'));
+  const n=Math.max(1, __TOKEN_POOL__);
+  for(const c of paper){
+    const val = priceUSD(c,'normal');
+    const usedFallback = !Number.isFinite(val) && Number.isFinite(tokenFallback);
+    pushRow(c,'TMKM','normal',PM.point(ODDS.NONGAME_TOKEN/n), usedFallback?tokenFallback:val, true, usedFallback, false);
+  }
+}
+// Art: signed vs normal split by collector number suffix 's' (common convention)
+function rowsFromAMKM(cards, artFallback){
+  const paper=cards.filter(c=> (c.games||[]).includes('paper'));
+  __ART_POOL__ = paper.length || 1;
+  for(const c of paper){
+    const isSigned = /[A-Za-z]$/.test(c.collector_number||'') && c.collector_number.toLowerCase().endsWith('s');
+    const p = (isSigned ? ODDS.NONGAME_ART_SIGNED : ODDS.NONGAME_ART) / Math.max(1,__ART_POOL__);
+    const val = priceUSD(c,'normal');
+    const usedFallback = !Number.isFinite(val) && Number.isFinite(artFallback);
+    pushRow(c,'AMKM', isSigned?'signed':'normal', PM.point(p), usedFallback?artFallback:val, true, usedFallback, false);
+  }
+}
+// Helper punch‑out (non‑game; placeholder row so totals reflect the exact 10%)
+function pushHelperPlaceholder(){
+  const dummy = { collector_number:'—', rarity:'common', name:'Helper Punch‑Out (placeholder)', scryfall_uri:'' };
+  pushRow(dummy,'MKM','helper', PM.point(ODDS.NONGAME_HELPER), 0.00, true, false, false);
+}
+
+/* ========= Aggregation & EV ========= */
+function aggregateFor(packs, includeNonGame=true){
+  let lowCount=0,estCount=0,highCount=0, lowEV=0,estEV=0,highEV=0, missingPrice=0, fallbackUsed=0;
+  for(const r of __ROW_MODELS__){
+    if(!includeNonGame && r.isNonGame) continue;
+    const cnt=countFromModel(r.model,packs,r.isNonGame,r.noScale); if(!cnt) continue;
+    lowCount+=cnt.lo; estCount+=cnt.est; highCount+=cnt.hi;
+    if(Number.isFinite(r.price)){ lowEV+=r.price*cnt.lo; estEV+=r.price*cnt.est; highEV+=r.price*cnt.hi; } else missingPrice++;
+    if(r.fallback) fallbackUsed++;
+  }
+  return {lowCount,estCount,highCount,lowEV,estEV,highEV,missingPrice,fallbackUsed};
+}
+function aggregateSift(packs,minUSD){
+  let include=0,exclude=0,missingPrice=0,nonGameIncluded=0;
+  let lowEV=0,estEV=0,highEV=0, lowCount=0,estCount=0,highCount=0;
+  for(const r of __ROW_MODELS__){
+    const ok = Number.isFinite(r.price) && r.price>=minUSD;
+    if(ok){
+      include++; if(r.isNonGame) nonGameIncluded++;
+      const cnt=countFromModel(r.model,packs,r.isNonGame,r.noScale); if(!cnt) continue;
+      lowCount+=cnt.lo; estCount+=cnt.est; highCount+=cnt.hi;
+      lowEV+=r.price*cnt.lo; estEV+=r.price*cnt.est; highEV+=r.price*cnt.hi;
+    }else{
+      exclude++; if(!Number.isFinite(r.price)) missingPrice++;
+    }
+  }
+  return {include,exclude,nonGameIncluded,lowCount,estCount,highCount,lowEV,estEV,highEV,missingPrice};
+}
+function statRange(packs, useSift, minUSD){
+  let meanPerPack=0, varPerPack=0, missingPrice=0;
+  for(const r of __ROW_MODELS__){
+    if(useSift && !(Number.isFinite(r.price) && r.price>=minUSD)) continue;
+    if(!Number.isFinite(r.price)){ missingPrice++; continue; }
+    const p = probPoint(r.model); if(!Number.isFinite(p)) continue;
+    const pS = (r.isNonGame || r.noScale) ? p : (p*__NORM_SCALE__);
+    meanPerPack += pS * r.price;
+    varPerPack  += pS * (1-pS) * r.price * r.price;
+  }
+  const mean=meanPerPack*packs, sd=Math.sqrt(Math.max(0,varPerPack*packs));
+  return {mean,sd,missingPrice};
+}
+
+/* ========= Sift table rendering ========= */
+function toCsv(rows){
+  return rows.map(r => r.map(v => {
+    const s=String(v??'');
+    return /[",\n]/.test(s)? '"'+s.replace(/"/g,'""')+'"' : s;
+  }).join(',')).join('\n');
+}
 function renderSiftTable(minUSD){
   const body=document.getElementById('siftBody'); body.innerHTML='';
   for(const m of __META_ROWS__){
     const ok = Number.isFinite(m.price) && m.price>=minUSD;
-    const cls = ok ? 'sift-ok' : 'sift-bad';
-    const p = probPoint(m.model);
-    const pScaled = m.nonGame ? p : (p*__NORM_SCALE__);
-    const c1k = pScaled*1000, c30k=pScaled*30000, c300k=pScaled*300000;
+    const cls= ok ? 'sift-ok' : 'sift-bad';
+    const {min:pMin,max:pMax}=probMinMaxScaled(m.model,m.isNonGame, /*noScale=*/__ROW_MODELS__[__META_ROWS__.indexOf(m)]?.noScale);
+    const c1k  = countFromModel(m.model,1000,   m.isNonGame, __ROW_MODELS__[__META_ROWS__.indexOf(m)].noScale);
+    const c30k = countFromModel(m.model,30000,  m.isNonGame, __ROW_MODELS__[__META_ROWS__.indexOf(m)].noScale);
+    const c300k= countFromModel(m.model,300000, m.isNonGame, __ROW_MODELS__[__META_ROWS__.indexOf(m)].noScale);
 
     const tr=document.createElement('tr'); tr.className=cls;
-    const cells=[ m.setTag, m.cn, m.rarity, /* name link */, m.treatment,
-      (pScaled*100).toFixed(5)+'%', (pScaled*100).toFixed(5)+'%', fmtUSD(m.price),
-      fmtCount(c1k), fmtCount(c1k),
-      fmtCount(c30k), fmtCount(c30k),
-      fmtCount(c300k), fmtCount(c300k)
+    const tds = [
+      m.setTag, m.cn, m.rarity, /* link cell */, m.treatment,
+      Number.isFinite(pMin)?(pMin*100).toFixed(5)+'%':'', Number.isFinite(pMax)?(pMax*100).toFixed(5)+'%':'', fmtUSD(m.price),
+      fmtCount(c1k?c1k.lo:NaN), fmtCount(c1k?c1k.hi:NaN),
+      fmtCount(c30k?c30k.lo:NaN), fmtCount(c30k?c30k.hi:NaN),
+      fmtCount(c300k?c300k.lo:NaN), fmtCount(c300k?c300k.hi:NaN)
     ];
-    let td=document.createElement('td'); td.textContent=cells[0]; tr.appendChild(td);
-    td=document.createElement('td'); td.textContent=cells[1]; tr.appendChild(td);
-    td=document.createElement('td'); td.textContent=cells[2]; tr.appendChild(td);
+    let td=document.createElement('td'); td.textContent=tds[0]; tr.appendChild(td);
+    td=document.createElement('td'); td.textContent=tds[1]; tr.appendChild(td);
+    td=document.createElement('td'); td.textContent=tds[2]; tr.appendChild(td);
     td=document.createElement('td');
-    if(m.url){ const a=document.createElement('a'); a.href=m.url; a.target='_blank'; a.rel='noopener noreferrer'; a.textContent=m.name; td.appendChild(a); }
-    else td.textContent=m.name;
+      if(m.url){ const a=document.createElement('a'); a.href=m.url; a.target='_blank'; a.rel='noopener noreferrer'; a.textContent=m.name; td.appendChild(a); }
+      else td.textContent=m.name;
     tr.appendChild(td);
-    td=document.createElement('td'); td.textContent=cells[4]; tr.appendChild(td);
-    for(let i=5;i<cells.length;i++){ const t=document.createElement('td'); t.textContent=cells[i]; tr.appendChild(t); }
+    td=document.createElement('td'); td.textContent=tds[4]; tr.appendChild(td);
+    for(let i=5;i<tds.length;i++){ const t=document.createElement('td'); t.textContent=tds[i]; tr.appendChild(t); }
     body.appendChild(tr);
   }
-
-  const P=300000;
-  const min = parseFloat(document.getElementById('siftMin').value) || 0.25;
-  let include=0,exclude=0,missing=0,estEV=0;
-  for(const r of __ROW_MODELS__){
-    const p = probPoint(r.model), pS = r.nonGame? p : (p*__NORM_SCALE__);
-    if(!Number.isFinite(pS)) continue;
-    const usd = r.price;
-    const ok = Number.isFinite(usd) && usd >= min;
-    if(ok){ include++; estEV += usd * pS * P; }
-    else { exclude++; if(!Number.isFinite(usd)) missing++; }
-  }
   document.getElementById('siftTableWrap').style.display='';
-  document.getElementById('siftSummary').innerHTML =
-    `Sift ≥ <b>$${Number(min).toFixed(2)}</b> — Included: <b>${include.toLocaleString()}</b> / Excluded: <b>${exclude.toLocaleString()}</b>` +
-    (missing? ` (no USD on ${missing})`:``);
 }
 function applySift(minUSD){
   renderSiftTable(minUSD);
   const header=['Set','Number','Rarity','Name','Treatment','Pack Prob Min (%)','Pack Prob Max (%)','Card Value (USD)','Per 1000 Min','Per 1000 Max','Per 30000 Min','Per 30000 Max','Per 300000 Min','Per 300000 Max'];
   const rows=[], tbody=document.getElementById('siftBody');
   for(const tr of tbody.querySelectorAll('tr')) rows.push(Array.from(tr.querySelectorAll('td')).map(td=>td.textContent));
-  __SIFT_CSV__ = [header, ...rows].map(r=>r.join(',')).join('\n');
+  __SIFT_CSV__=toCsv([header,...rows]);
   document.getElementById('downloadSiftCsv').disabled=false;
-}
 
-/* ==================== Purchase EV & Totals ==================== */
-function statRange(packs, useSift, minUSD){
-  let meanPerPack=0, varPerPack=0, missingPrice=0;
-  for(const row of __ROW_MODELS__){
-    const p = probPoint(row.model); if(!Number.isFinite(p)) continue;
-    const pS = row.nonGame? p : (p*__NORM_SCALE__);
-    const usd = row.price;
-    const ok = (!useSift) || (Number.isFinite(usd) && usd >= minUSD);
-    if(!ok) continue;
-    if(!Number.isFinite(usd)){ missingPrice++; continue; }
-    meanPerPack += pS * usd;
-    varPerPack  += pS * (1-pS) * usd * usd;
+  // Summary
+  let include=0,exclude=0,missing=0; const min = parseUSD(document.getElementById('siftMin').value) ?? 0.00;
+  for(const r of __ROW_MODELS__){
+    if(!Number.isFinite(r.price)) { exclude++; missing++; continue; }
+    if(r.price>=min) include++; else exclude++;
   }
-  const mean = meanPerPack * packs;
-  const sd = Math.sqrt(Math.max(0, varPerPack * packs));
-  return { mean, sd, missingPrice };
+  document.getElementById('siftSummary').innerHTML =
+    `Sift ≥ <b>$${(min).toFixed(2)}</b> — Included: <b>${include.toLocaleString()}</b> / Excluded: <b>${exclude.toLocaleString()}</b>` +
+    (missing? ` (no USD on ${missing})`:``);
 }
 
+/* ========= Purchase EV & Totals ========= */
 function renderPurchaseEV(){
-  const boxes = Math.max(0, parseFloat(document.getElementById('boxesToBuy').value)||0);
-  const packs = boxes * PACKS_PER_BOX;
-  const useSift = document.getElementById('useSiftForEV').checked;
-  const minUSD = parseFloat(document.getElementById('siftMin').value) || 0.25;
-  const mode = (document.querySelector('input[name="rangeMode"]:checked')||{}).value || 'stat';
-  const conf = parseFloat(document.getElementById('confLevel').value)||95;
-  const z = zFromConf(conf);
+  const boxes=Math.max(0, parseFloat(document.getElementById('boxesToBuy').value)||0);
+  const packs=boxes*PACKS_PER_BOX;
+  const useSift=document.getElementById('useSiftForEV').checked;
+  const minUSD=parseUSD(document.getElementById('siftMin').value) ?? 0.00; // works at 0
+  const mode=(document.querySelector('input[name="rangeMode"]:checked')||{}).value || 'stat';
+  const conf=parseFloat(document.getElementById('confLevel').value)||95;
+  const z=zFromConf(conf);
 
-  let lowEV, estEV, highEV, tag, missingNote='';
-
+  let lowEV,estEV,highEV,tag,missingNote='';
   if(mode==='struct'){
-    let est=0, missing=0;
-    for(const row of __ROW_MODELS__){
-      const p = probPoint(row.model), pS = row.nonGame? p : (p*__NORM_SCALE__);
-      if(!Number.isFinite(pS)) continue;
-      const usd=row.price;
-      if(useSift && !(Number.isFinite(usd)&&usd>=minUSD)) continue;
-      if(!Number.isFinite(usd)){ missing++; continue; }
-      est += usd * pS * packs;
-    }
-    estEV=est; lowEV=est; highEV=est; tag='Structural model (slot mix)';
-    if(missing>0) missingNote=`${missing} rows had no USD price and were excluded.`;
+    const agg = useSift ? aggregateSift(packs,minUSD) : aggregateFor(packs,true);
+    lowEV=agg.lowEV; estEV=agg.estEV; highEV=agg.highEV;
+    if(agg.missingPrice>0) missingNote=`${agg.missingPrice} rows without USD were excluded.`;
+    tag='Structural model band (slot‑odds uncertainty)';
   }else{
-    const { mean, sd, missingPrice } = statRange(packs, useSift, minUSD);
-    estEV=mean; lowEV=Math.max(0, mean - z*sd); highEV=mean + z*sd; tag=`Statistical ${conf}% interval (CLT)`;
-    if(missingPrice>0) missingNote=`${missingPrice} rows had no USD price and were excluded.`;
+    const {mean,sd,missingPrice}=statRange(packs,useSift,minUSD);
+    estEV=mean; lowEV=Math.max(0, mean - z*sd); highEV=mean + z*sd;
+    if(missingPrice>0) missingNote=`${missingPrice} rows without USD were excluded.`;
+    tag=`Statistical ${conf}% interval (CLT)`;
   }
 
   const perBoxLow  = boxes>0 ? lowEV/boxes : 0;
@@ -647,96 +600,261 @@ function renderPurchaseEV(){
   const perBoxHigh = boxes>0 ? highEV/boxes : 0;
 
   const evDiv=document.getElementById('purchaseEVContainer');
-  evDiv.innerHTML = `
+  evDiv.innerHTML=`
     <table>
       <thead><tr><th>Metric</th><th>Low</th><th>Est.</th><th>High</th></tr></thead>
       <tbody>
         <tr><td>${tag} — across ${packs.toLocaleString()} packs</td><td>$${money(lowEV)}</td><td>$${money(estEV)}</td><td>$${money(highEV)}</td></tr>
         <tr><td>${tag} — per ${PACKS_PER_BOX}-pack box</td><td>$${money(perBoxLow)}</td><td>$${money(perBoxEst)}</td><td>$${money(perBoxHigh)}</td></tr>
       </tbody>
-    </table>
-  `;
+    </table>`;
   evDiv.style.display='';
 
   const notes=[];
   notes.push(`Boxes: ${boxes.toLocaleString()} × ${PACKS_PER_BOX} = ${packs.toLocaleString()} packs.`);
-  notes.push(`Using ${useSift ? `Sift ≥ $${(Number.isFinite(minUSD)?minUSD:0.25).toFixed(2)}` : 'all prints'}.`);
-  if(mode==='stat') notes.push('Variance method: Σ p·(1−p)·value² per pack (independence approximation).');
+  notes.push(`Using ${useSift ? `Sift ≥ $${(Number.isFinite(minUSD)?minUSD:0).toFixed(2)}` : 'all prints'}.`);
+  if(mode==='stat') notes.push('Variance: Σ p·(1−p)·value² per pack (independence approximation).');
   if(missingNote) notes.push(missingNote);
-  document.getElementById('purchaseSummary').textContent = notes.join(' ');
-
-  const rangeNotes=document.getElementById('rangeNotes');
-  rangeNotes.textContent = (mode==='struct')
-    ? 'Structural range reflects uncertainty from slot mixes; it scales ~linearly with packs.'
-    : 'Statistical range reflects random pull variance and narrows ~1/√n with more boxes.';
+  document.getElementById('purchaseSummary').textContent=notes.join(' ');
+  document.getElementById('rangeNotes').textContent = (mode==='struct')
+    ? 'Structural range reflects slot‑odds uncertainty; scales roughly linearly with packs.'
+    : 'Statistical range reflects random pack variance; narrows with more boxes (~1/√n).';
 
   renderTotalsTable();
 }
-
 function renderTotalsTable(){
-  const boxes = Math.max(0, parseFloat(document.getElementById('boxesToBuy').value)||0);
+  const boxes=Math.max(0, parseFloat(document.getElementById('boxesToBuy').value)||0);
   if(boxes<=0){ document.getElementById('totalsPanel').style.display='none'; return; }
   const P = boxes * PACKS_PER_BOX;
-  let estCount=0, estEV=0, missingPrice=0, fallbackUsed=0;
 
-  for(const row of __ROW_MODELS__){
-    const p = probPoint(row.model), pS = row.nonGame? p : (p*__NORM_SCALE__);
-    const cnt = pS*P;
-    estCount += cnt;
-    const usd = row.price;
-    if(Number.isFinite(usd)) estEV += usd*cnt; else missingPrice++;
-    if(row.fallback) fallbackUsed++;
-  }
+  // Exact items per pack: 14 playing + 1 non‑game (per MKM)  :contentReference[oaicite:15]{index=15}
+  const exactItems = 15 * P, exactTokens = 1 * P, exactPlaying = 14 * P;
+
+  // EV for totals (ignore Sift)
+  const {lowEV,estEV,highEV,lowCount,estCount,highCount,missingPrice,fallbackUsed} = (() => {
+    const all = aggregateFor(P,true);
+    const cardsOnly = aggregateFor(P,false);
+    return { ...all, lowCount:cardsOnly.lowCount, estCount:cardsOnly.estCount, highCount:cardsOnly.highCount };
+  })();
 
   const perBoxEst = boxes>0 ? estEV/boxes : 0;
 
   const body=document.getElementById('totalsBody');
-  body.innerHTML = `
-    <tr><td>Total expected items @ ${P.toLocaleString()} packs (14 cards + 1 non‑game)</td>
-        <td>${fmtInt(P*15)}</td><td>${fmtInt(P*15)}</td><td>${fmtInt(P*15)}</td></tr>
-    <tr><td>…of which non‑game (token/art)</td>
-        <td>${fmtInt(P*1)}</td><td>${fmtInt(P*1)}</td><td>${fmtInt(P*1)}</td></tr>
-    <tr><td>…of which playing cards (normalized)</td>
-        <td>${fmtInt(P*14)}</td><td>${fmtInt(P*14)}</td><td>${fmtInt(P*14)}</td></tr>
+  body.innerHTML=`
+    <tr><td>Total expected cards + tokens @ ${P.toLocaleString()} packs (exact)</td>
+        <td>${fmtInt(exactItems)}</td><td>${fmtInt(exactItems)}</td><td>${fmtInt(exactItems)}</td></tr>
+    <tr><td>…of which non‑game (token/ad, helper, art) — exact</td>
+        <td>${fmtInt(exactTokens)}</td><td>${fmtInt(exactTokens)}</td><td>${fmtInt(exactTokens)}</td></tr>
+    <tr><td>…of which playing cards — exact</td>
+        <td>${fmtInt(exactPlaying)}</td><td>${fmtInt(exactPlaying)}</td><td>${fmtInt(exactPlaying)}</td></tr>
+    <tr><td>Model‑check: sum across per‑print playing cards (normalized; fixed shares reserved)</td>
+        <td>${fmtInt(lowCount)}</td><td>${fmtInt(estCount)}</td><td>${fmtInt(highCount)}</td></tr>
     <tr><td>Total EV across ${P.toLocaleString()} packs</td>
-        <td>$${money(estEV)}</td><td>$${money(estEV)}</td><td>$${money(estEV)}</td></tr>
+        <td>$${money(lowEV)}</td><td>$${money(estEV)}</td><td>$${money(highEV)}</td></tr>
     <tr><td>EV per ${PACKS_PER_BOX}-pack box (${boxes.toLocaleString()} boxes)</td>
-        <td>$${money(perBoxEst)}</td><td>$${money(perBoxEst)}</td><td>$${money(perBoxEst)}</td></tr>
-  `;
+        <td>$${money(perBoxEst)}</td><td>$${money(perBoxEst)}</td><td>$${money(perBoxEst)}</td></tr>`;
 
   const notes=[];
   if(missingPrice>0) notes.push(`${missingPrice} rows had no USD price (fallbacks used where provided).`);
-  if(fallbackUsed>0) notes.push(`${fallbackUsed} token/art rows used fallback values.`);
-  notes.push('Playing‑card probabilities are scaled to sum to 14 per pack; non‑game slot uses 65%/30%/5% split.');
+  const tokenFallback=parseUSD(document.getElementById('tokenFallback').value);
+  if(__ROW_MODELS__.some(r=>r.fallback)) notes.push(`Some token/art rows used fallback values (token fallback = $${(tokenFallback??0).toFixed(2)}).`);
+  notes.push('Playing‑card probabilities are scaled so EST sums to exactly 14 per pack; fixed (no‑scale) shares cover SPG and The List (total 12.5%).');
   document.getElementById('totalsNotes').textContent = 'Notes: ' + notes.join(' ');
+  document.getElementById('totalsPanel').style.display='';
+  const det=document.getElementById('totalsDetails'); if(det) det.open=false;
 }
 
-/* ============================== Hooks ============================== */
+/* ========= Build flow ========= */
+async function build(){
+  // Reset UI/state
+  document.getElementById('errorBox').style.display='none';
+  document.getElementById('errorMsg').textContent='';
+  document.getElementById('errorDetails').textContent='';
+  document.getElementById('purchasePanel').style.display='none';
+  document.getElementById('purchaseEVContainer').style.display='none';
+  document.getElementById('siftPanel').style.display='none';
+  document.getElementById('siftTableWrap').style.display='none';
+  document.getElementById('preview').value='';
+  document.getElementById('status').textContent='Building list…';
+  document.getElementById('totalsPanel').style.display='none';
+  __ROW_MODELS__=[]; __META_ROWS__=[]; __SIFT_CSV__=''; __ERRORS__=[]; __FIXED_SHARE__=0;
+
+  const englishOnly=document.getElementById('englishOnly').checked;
+  const incMKM=document.getElementById('includeMKM').checked;
+  const incSPG=document.getElementById('includeSPG').checked;
+  const incPLST=document.getElementById('includePLST').checked;
+  const incTOK=document.getElementById('includeTOK').checked;
+  const incART=document.getElementById('includeART').checked;
+  __TOKEN_POOL__=Math.max(1, parseInt(document.getElementById('tokenPool').value,10)||21);
+  const tokenFallback=parseUSD(document.getElementById('tokenFallback').value);
+  const artFallback=parseUSD(document.getElementById('artFallback').value);
+
+  const status=document.getElementById('status');
+  const counts=document.getElementById('counts');
+  const queriesEl=document.getElementById('queries');
+
+  // Build queries list
+  const qList=[];
+  if(incMKM) qList.push(['MKM',  buildQuery('MKM',  englishOnly)]);
+  if(incSPG) qList.push(['SPG',  buildQuery('SPG',  englishOnly)]);
+  if(incPLST)qList.push(['PLST', buildQuery('PLST', englishOnly)]);
+  if(incTOK) qList.push(['TMKM', buildQuery('TMKM', englishOnly)]);
+  if(incART) qList.push(['AMKM', buildQuery('AMKM', englishOnly)]);
+  queriesEl.textContent = qList.map(([tag,q])=>`${tag}: ${q}`).join('\n');
+
+  // Fetch (non‑blocking per set)
+  const results=[];
+  for(const [tag,q] of qList){
+    const cards=await fetchAllPagesNonBlocking(q,tag,status);
+    results.push([tag,cards]);
+  }
+
+  // Build rows
+  for(const [tag,cards] of results){
+    if(tag==='MKM')  rowsFromMKM(cards);
+    if(tag==='SPG')  rowsFromSPG(cards);
+    if(tag==='PLST') rowsFromPLST(cards);
+    if(tag==='TMKM') rowsFromTMKM(cards, tokenFallback);
+    if(tag==='AMKM') rowsFromAMKM(cards, artFallback);
+  }
+  // Always include helper placeholder (non‑game 10%)
+  pushHelperPlaceholder();
+
+  // Compute normalization so *non-fixed* playing cards sum to 14 − fixedShare (EST)
+  const rawNonFixed = __ROW_MODELS__
+    .map((r,i)=> ({r,meta:__META_ROWS__[i]}))
+    .filter(x=> !x.r.isNonGame && !x.r.noScale)
+    .reduce((acc,x)=> acc + (probPoint(x.r.model)||0), 0);
+  const target = Math.max(0, 14 - __FIXED_SHARE__);
+  __NORM_SCALE__ = rawNonFixed>0 ? (target / rawNonFixed) : 1;
+
+  // Sort rows (set → CN → name → treatment)
+  __META_ROWS__.sort((a,b)=>{
+    if(a.setTag!==b.setTag) return a.setTag.localeCompare(b.setTag);
+    const pa=(a.cn||'').match(/^(\d+)(.*)$/)||[], pb=(b.cn||'').match(/^(\d+)(.*)$/)||[];
+    const na=pa[1]?parseInt(pa[1],10):0, nb=pb[1]?parseInt(pb[1],10):0;
+    if(na!==nb) return na-nb; const sa=pa[2]||'', sb=pb[2]||''; if(sa!==sb) return sa.localeCompare(sb);
+    if(a.name!==b.name) return a.name.localeCompare(b.name);
+    return a.treatment.localeCompare(b.treatment);
+  });
+
+  // CSV (all rows)
+  const header=['Set','Number','Rarity','Name','Treatment','Pack Prob Min (%)','Pack Prob Max (%)','Card Value (USD)','Per 1000 Min','Per 1000 Max','Per 30000 Min','Per 30000 Max','Per 300000 Min','Per 300000 Max'];
+  const allRows = __META_ROWS__.map((m,idx)=>{
+    const modelObj = __ROW_MODELS__[idx];
+    const {min:pMin,max:pMax}=probMinMaxScaled(m.model,m.isNonGame,modelObj.noScale);
+    const c1k=countFromModel(m.model,1000,m.isNonGame,modelObj.noScale);
+    const c30k=countFromModel(m.model,30000,m.isNonGame,modelObj.noScale);
+    const c300k=countFromModel(m.model,300000,m.isNonGame,modelObj.noScale);
+    return [
+      m.setTag, m.cn, m.rarity, m.name, m.treatment,
+      Number.isFinite(pMin)?(pMin*100).toFixed(5)+'%':'', Number.isFinite(pMax)?(pMax*100).toFixed(5)+'%':'', fmtUSD(m.price),
+      fmtCount(c1k?c1k.lo:NaN), fmtCount(c1k?c1k.hi:NaN),
+      fmtCount(c30k?c30k.lo:NaN), fmtCount(c30k?c30k.hi:NaN),
+      fmtCount(c300k?c300k.lo:NaN), fmtCount(c300k?c300k.hi:NaN)
+    ];
+  });
+  const csv = toCsv([header, ...allRows]); window.__CSV__=csv; document.getElementById('preview').value=csv.slice(0,250000);
+  document.getElementById('downloadCsv').disabled=false;
+  document.getElementById('copyCsv').disabled=false;
+
+  // Enable Sift + Purchase EV
+  document.getElementById('siftPanel').style.display='';
+  document.getElementById('applySift').disabled=false;
+  document.getElementById('purchasePanel').style.display='';
+  document.getElementById('calcEV').disabled=false;
+
+  // Auto‑apply Sift at default and render EV
+  const minUSD=parseUSD(document.getElementById('siftMin').value) ?? 0.00;
+  applySift(minUSD);
+  renderPurchaseEV();
+
+  // Counts
+  const mkmCount = __META_ROWS__.filter(r=>r.setTag==='MKM').length;
+  const spgCount = __META_ROWS__.filter(r=>r.setTag==='SPG').length;
+  const plstCount= __META_ROWS__.filter(r=>r.setTag==='PLST').length;
+  const tokCount = __META_ROWS__.filter(r=>r.setTag==='TMKM').length;
+  const artCount = __META_ROWS__.filter(r=>r.setTag==='AMKM').length;
+  document.getElementById('counts').innerHTML =
+    `Built <b>${__META_ROWS__.length.toLocaleString()}</b> rows — MKM: <b>${mkmCount}</b>, SPG: <b>${spgCount}</b>, PLST: <b>${plstCount}</b>, TMKM: <b>${tokCount}</b>, AMKM: <b>${artCount}</b>. ` +
+    `(Fixed share reserved: ${(100*__FIXED_SHARE__).toFixed(2)}%; normalization factor: ${__NORM_SCALE__.toFixed(5)})`;
+
+  // Errors (if any)
+  if(__ERRORS__.length){
+    document.getElementById('errorBox').style.display='';
+    document.getElementById('errorMsg').innerHTML = `${__ERRORS__.length} fetch issue(s) occurred; other sets were loaded successfully.`;
+    const detail = __ERRORS__.map(e => `Set: ${e.set}\nStatus: ${e.status}\nQuery: ${e.query}\n—\n${String(e.details||'').slice(0,800)}\n`).join('\n\n');
+    document.getElementById('errorDetails').textContent = detail;
+  }
+
+  document.getElementById('status').textContent = `Done. Sift auto‑applied at $${(Number.isFinite(minUSD)?minUSD:0).toFixed(2)}.`;
+}
+
+/* ========= Hooks ========= */
 document.getElementById('buildBtn').addEventListener('click', build);
 document.getElementById('downloadCsv').addEventListener('click', ()=>{ if(window.__CSV__) {
   const blob=new Blob(["\uFEFF"+window.__CSV__],{type:'text/csv;charset=utf-8'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='MKM_PlayBooster_List.csv';
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='MKM_PlayBooster_List_Normalized.csv';
   document.body.appendChild(a); a.click(); URL.revokeObjectURL(a.href); a.remove();
 }});
-document.getElementById('copyCsv').addEventListener('click', async ()=>{
-  if(!window.__CSV__) return;
+document.getElementById('copyCsv').addEventListener('click', async ()=>{ if(!window.__CSV__) return;
   try{ await navigator.clipboard.writeText(window.__CSV__); alert('CSV copied to clipboard.'); }
   catch{ const t=document.getElementById('preview'); t.focus(); t.select(); alert('Select all (Ctrl/Cmd+A) and copy (Ctrl/Cmd+C).'); }
 });
-
 document.getElementById('applySift').addEventListener('click', ()=>{
-  applySift(parseFloat(document.getElementById('siftMin').value) || 0.25);
+  const minUSD=parseUSD(document.getElementById('siftMin').value) ?? 0.00;
+  applySift(minUSD); renderPurchaseEV();
 });
-
+document.getElementById('downloadSiftCsv').addEventListener('click', ()=>{ if(__SIFT_CSV__) {
+  const blob=new Blob(["\uFEFF"+__SIFT_CSV__],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='MKM_PlayBooster_SiftTable.csv';
+  document.body.appendChild(a); a.click(); URL.revokeObjectURL(a.href); a.remove();
+}});
 document.getElementById('calcEV').addEventListener('click', renderPurchaseEV);
-document.getElementById('boxesToBuy').addEventListener('change', ()=>{ renderPurchaseEV(); renderTotalsTable(); });
+document.getElementById('boxesToBuy').addEventListener('change', renderPurchaseEV);
 document.getElementById('useSiftForEV').addEventListener('change', renderPurchaseEV);
-document.getElementById('siftMin').addEventListener('change', ()=>{ applySift(parseFloat(document.getElementById('siftMin').value) || 0.25); renderPurchaseEV(); });
+document.getElementById('siftMin').addEventListener('change', ()=>{ const v=parseUSD(document.getElementById('siftMin').value) ?? 0.00; applySift(v); renderPurchaseEV(); });
 document.getElementById('confLevel').addEventListener('change', renderPurchaseEV);
 for(const r of document.querySelectorAll('input[name="rangeMode"]')) r.addEventListener('change', renderPurchaseEV);
 
-// Auto‑build
+// Auto‑build on page load
 window.addEventListener('DOMContentLoaded', build);
+</script>
+<script>
+/* === SIFT MIN CLAMP ($0.01) — drop‑in for FDN ===
+   Paste anywhere after parseUSD() is defined.
+   Enforces $0.01 whenever Sift is 0, negative, blank, or NaN.
+*/
+(function(){
+  function clampSiftMin(){
+    const el = document.getElementById('siftMin');
+    if(!el) return 0.01;
+    let v = parseUSD(el.value);
+    if(!Number.isFinite(v) || v <= 0) v = 0.01;
+    el.value = v.toFixed(2);   // keep UI in sync with the enforced value
+    return v;
+  }
+
+  // Expose in case you want to call it explicitly elsewhere.
+  window.getSiftMinClamped = clampSiftMin;
+
+  // Clamp once on load.
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', clampSiftMin, { once:true });
+  } else {
+    clampSiftMin();
+  }
+
+  // Clamp *before* your existing click handlers for Apply Sift / Calculate EV.
+  // (capture = true ensures this runs first)
+  document.addEventListener('click', function(e){
+    const id = e.target && e.target.id;
+    if (id === 'applySift' || id === 'calcEV') clampSiftMin();
+  }, true);
+
+  // Also clamp when the Sift field is committed.
+  document.getElementById('siftMin')?.addEventListener('change', clampSiftMin, true);
+})();
 </script>
 </body>
 </html>
