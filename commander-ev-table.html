@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Commander Precons — EV at Sift $0.25 (All Sets, 15s Scryfall Delay)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  html{background:#0b0d10}
+  /* Scoped styles to match your other pages */
+  .app{
+    --bg:#0b0d10; --fg:#e8ecf1; --muted:#a7b0bb; --acc:#6ac1ff;
+    --card:#151a20; --line:#222a33; --ok:#1e7f3c; --bad:#9b2c2c;
+    color:var(--fg); background:var(--bg);
+    font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    max-width:1120px; margin:32px auto; padding:0 16px; box-sizing:border-box;
+  }
+  .app a{color:var(--acc); text-decoration:underline}
+  .app h1{font-size:22px; margin:0 0 10px}
+  .lede{color:var(--muted); margin:0 0 12px}
+  .panel{background:var(--card); border:1px solid #2a3541; border-radius:10px; padding:16px; margin:14px 0}
+  .row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+  label{display:flex; gap:6px; align-items:center}
+  input[type="number"], input[type="text"]{
+    background:#0e1216; color:#cfe3f5; border:1px solid #2a3541; border-radius:8px; padding:8px 10px
+  }
+  button{appearance:none; border:1px solid #2c3845; background:#1b232c; color:var(--fg); padding:10px 14px; border-radius:8px; cursor:pointer}
+  button[disabled]{opacity:.55; cursor:default}
+  .btn-primary{border-color:#6ac1ff; background:linear-gradient(180deg,#203245,#1a2530); color:#dff1ff; font-weight:600}
+
+  /* Banner header/footer (same 420px cap) */
+  .freBanner{display:flex; justify-content:center; margin:8px 0 16px}
+  .freBanner img{max-width:420px; width:100%; height:auto; border-radius:10px; box-shadow:0 8px 30px rgba(0,0,0,.35)}
+  @media (max-width:640px){ .freBanner img{max-width:300px} }
+
+  /* Table */
+  table{width:100%; border-collapse:collapse}
+  th,td{border:1px solid #2a3541; padding:8px 10px; text-align:right}
+  th:first-child, td:first-child{ text-align:left }
+  thead th{background:#0e1216; position:sticky; top:0; z-index:1; cursor:pointer}
+  tbody tr:nth-child(even){ background:#12171d }
+  .right{ text-align:right }
+  .muted{ color:#a7b0bb; font-size:12px }
+  .pill{display:inline-block; padding:2px 8px; border-radius:999px; border:1px solid #2a3541}
+  .pill.ok{background:rgba(30,127,60,.20); color:#d9ffe3; border-color:#1e7f3c}
+  .pill.bad{background:rgba(155,44,44,.16); color:#ffdede; border-color:#9b2c2c}
+
+  .kpis{display:grid; grid-template-columns: repeat(4, 1fr); gap:12px}
+  .kpi .label{color:#a7b0bb; font-size:12px}
+  .kpi .val{font-weight:700; font-size:20px}
+
+  .status{white-space:pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background:#0e1216; padding:10px; border-radius:8px; border:1px solid #2a3541; color:#cfe3f5; min-height:44px}
+  .actions{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+</style>
+</head>
+<body>
+<main class="app" role="main" aria-label="Commander Precons — EV at Sift $0.25">
+  <div class="freBanner">
+    <a href="./index.html"><img src="freEV-banner.png" alt="FreEV — Spend your money on cards not calculators"></a>
+  </div>
+
+  <h1>Commander Precons — EV at Sift $0.25 (All Sets)</h1>
+  <p class="lede">
+    Lists every <b>preconstructed Commander deck</b> (MTGJSON) and computes
+    <b>Sifted EV</b> (cards with unit price ≥ Sift) using live Scryfall USD prices. Lands included.<br>
+    <b>Rate limiting:</b> Scryfall calls are <b>serialized</b> with a <b>15‑second delay between requests</b> (first call is immediate).
+  </p>
+
+  <div class="panel">
+    <div class="row">
+      <label class="pill">Sift (≥):
+        <input id="sift" type="number" step="0.01" min="0" value="0.25" title="Values ≤ 0 are forced to 0.01"/>
+      </label>
+      <button id="buildBtn" class="btn-primary">Build / Refresh</button>
+      <button id="recalcBtn">Re‑Apply Sift</button>
+      <button id="downloadCsv" disabled>Download CSV</button>
+      <button id="copyCsv" disabled>Copy CSV</button>
+      <span class="muted" id="stamp">—</span>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <span class="pill ok">Sifted EV shown</span>
+      <span class="pill">All‑in EV (for reference)</span>
+      <span class="muted">Click headers to sort • Default sort: Sifted EV (desc)</span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="kpis">
+      <div class="kpi">
+        <div class="label">Commander sets</div>
+        <div class="val" id="kSets">—</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Decks processed</div>
+        <div class="val" id="kDecks">—</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Avg Sifted EV / deck</div>
+        <div class="val" id="kAvg">—</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Last compute (America/Chicago)</div>
+        <div class="val" id="kWhen">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="status" id="status">Ready.</div>
+  </div>
+
+  <div class="panel" id="tablePanel" style="display:none">
+    <table id="tbl">
+      <thead>
+        <tr>
+          <th data-k="releaseDate" title="Release date (set)">Release</th>
+          <th data-k="setName">Commander Product</th>
+          <th data-k="deckName">Deck</th>
+          <th data-k="deckSize" class="right">Deck Size</th>
+          <th data-k="countGreen" class="right">Cards ≥ Sift</th>
+          <th data-k="evSift" class="right">Sifted EV (USD)</th>
+          <th data-k="evAll" class="right">All‑in EV</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr><td colspan="7" class="muted">Click <b>Build / Refresh</b> to start. Scryfall calls are queued with a 15‑second delay.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="freBanner">
+    <a href="./index.html"><img src="freEV-banner.png" alt="FreEV — Spend your money on cards not calculators"></a>
+  </div>
+</main>
+
+<!-- Google Analytics (same ID/placement as your other pages) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LWMRXKNY5X"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-LWMRXKNY5X');
+</script>
+
+<script>
+(function(){
+  /* ===== Config & Endpoints ===== */
+  const TZ = 'America/Chicago';
+  const SETLIST_URL = 'https://mtgjson.com/api/v5/SetList.json';
+  const SET_URL = code => `https://mtgjson.com/api/v5/${encodeURIComponent(code)}.json`;
+  const SCRY_CARD = id   => `https://api.scryfall.com/cards/${encodeURIComponent(id)}`;
+  const SCRY_NAMED = (name,set) => `https://api.scryfall.com/cards/named?${set?('set='+encodeURIComponent(set)+'&'):''}exact=${encodeURIComponent(name)}`;
+  const SCRY_SEARCH = q  => `https://api.scryfall.com/cards/search?q=${encodeURIComponent(q)}`;
+
+  /* ===== Scryfall strict rate limiter (15s between requests) ===== */
+  const SCRY_RATE_MS = 15000;                                  // <— change here if needed
+  let __scryChain = Promise.resolve();                          // serialized queue
+  let __scryFirst = true;                                       // first call is immediate
+  const sleep = ms => new Promise(r=>setTimeout(r,ms));
+  async function scryJson(url){
+    // enqueue this call after the previous one in the chain
+    const run = __scryChain.then(async () => {
+      if (!__scryFirst) { await sleep(SCRY_RATE_MS); }
+      __scryFirst = false;
+      try{
+        const resp = await fetch(url, {headers:{'accept':'application/json'}});
+        if(!resp.ok) return null;
+        return await resp.json();
+      }catch{ return null; }
+    });
+    // ensure the chain continues even if consumer doesn't await
+    __scryChain = run.then(()=>{}, ()=>{});
+    return run;
+  }
+
+  /* ===== Elements ===== */
+  const $sift = document.getElementById('sift');
+  const $build = document.getElementById('buildBtn');
+  const $recalc = document.getElementById('recalcBtn');
+  const $status = document.getElementById('status');
+  const $tbody = document.getElementById('tbody');
+  const $tablePanel = document.getElementById('tablePanel');
+  const $kSets  = document.getElementById('kSets');
+  const $kDecks = document.getElementById('kDecks');
+  const $kAvg   = document.getElementById('kAvg');
+  const $kWhen  = document.getElementById('kWhen');
+  const $stamp  = document.getElementById('stamp');
+  const $dlCsv  = document.getElementById('downloadCsv');
+  const $cpCsv  = document.getElementById('copyCsv');
+  const $tbl    = document.getElementById('tbl');
+
+  /* ===== State ===== */
+  let SETS = [];                // [{code, name, releaseDate}]
+  let RESULTS = [];             // deck rows
+  let SET_CACHE = {};           // code -> set json
+  const CARD_CACHE = new Map(); // scryId -> {usd, uri, name}
+  const NAMED_CACHE = new Map();// 'name|set' -> {usd, uri, name}
+  const ORACLE_CACHE= new Map();// 'oracle:uuid' -> {usd, uri, name}
+  let CSV = '';
+
+  /* ===== Utilities ===== */
+  const fmtUSD = n => isFinite(n) ? '$'+Number(n).toFixed(2) : '—';
+  function nowCT(){
+    try{ return new Intl.DateTimeFormat('en-US',{ timeZone: TZ, dateStyle:'medium', timeStyle:'short' }).format(new Date()); }
+    catch{ return new Date().toLocaleString(); }
+  }
+  function clampSift(){
+    const n = Number($sift.value);
+    const v = (!isFinite(n) || n <= 0) ? 0.01 : Number(n.toFixed(2));
+    $sift.value = v.toFixed(2);
+    return v;
+  }
+  function toCsv(rows){
+    return rows.map(r => r.map(v => {
+      const s=String(v??''); return /[",\n]/.test(s)? '"'+s.replace(/"/g,'""')+'"' : s;
+    }).join(',')).join('\n');
+  }
+  function sortByKey(arr, key, desc=false){
+    const s = [...arr].sort((a,b)=>{
+      const va=a[key], vb=b[key];
+      if(va==null && vb==null) return 0;
+      if(va==null) return 1;
+      if(vb==null) return -1;
+      if(typeof va === 'number' && typeof vb === 'number') return va - vb;
+      return String(va).localeCompare(String(vb));
+    });
+    return desc ? s.reverse() : s;
+  }
+
+  /* ===== Scryfall resolvers (use 15s-queued scryJson) ===== */
+  function toNum(x){ const n=Number(x); return isFinite(n)? n : 0; }
+  function pickBestPrint(list){
+    if(!Array.isArray(list) || !list.length) return null;
+    const isPaper = c => (c.games||[]).includes('paper');
+    const hasUsd  = c => Number.isFinite(parseFloat(c?.prices?.usd));
+    const nf      = c => (c.finishes||[]).includes('nonfoil');
+    const en      = c => (c.lang||'')==='en';
+    return list.find(c=>isPaper(c)&&en(c)&&nf(c)&&hasUsd(c))
+        || list.find(c=>isPaper(c)&&nf(c)&&hasUsd(c))
+        || list.find(c=>isPaper(c)&&hasUsd(c))
+        || list.find(isPaper)
+        || list[0];
+  }
+  async function resolveById(scryId, fallbackName){
+    const key='id:'+scryId;
+    if(CARD_CACHE.has(key)) return CARD_CACHE.get(key);
+    const j = await scryJson(SCRY_CARD(scryId));
+    const out = j ? { usd: toNum(j?.prices?.usd), uri: String(j?.scryfall_uri||''), name: j?.name||fallbackName||'' } : { usd:0, uri:'', name:fallbackName||'' };
+    CARD_CACHE.set(key,out); return out;
+  }
+  async function resolveByOracle(oracleId){
+    const key='oracle:'+oracleId;
+    if(ORACLE_CACHE.has(key)) return ORACLE_CACHE.get(key);
+    const j = await scryJson(SCRY_SEARCH(`oracleid:${oracleId} game:paper`));
+    const card = j && Array.isArray(j.data) ? pickBestPrint(j.data) : null;
+    const out = card ? { usd: toNum(card?.prices?.usd), uri: String(card?.scryfall_uri||''), name: card?.name||'' } : { usd:0, uri:'', name:'' };
+    ORACLE_CACHE.set(key,out); return out;
+  }
+  async function resolveByNamed(name, setHint){
+    const key = 'named:'+name+'|'+(setHint||'');
+    if(NAMED_CACHE.has(key)) return NAMED_CACHE.get(key);
+    let j = await scryJson(SCRY_NAMED(name, setHint));
+    if(!j) j = await scryJson(SCRY_NAMED(name, null));
+    const out = j ? { usd: toNum(j?.prices?.usd), uri: String(j?.scryfall_uri||''), name: j?.name||name } : { usd:0, uri:'', name };
+    NAMED_CACHE.set(key,out); return out;
+  }
+  async function priceForCard(cardObj, deckItem, setCode){
+    const scryId   = cardObj?.identifiers?.scryfallId || deckItem?.identifiers?.scryfallId || null;
+    const oracleId = cardObj?.identifiers?.scryfallOracleId || deckItem?.identifiers?.scryfallOracleId || null;
+    const name     = cardObj?.name || deckItem?.name || '';
+    const setHint  = cardObj?.setCode || deckItem?.setCode || setCode || null;
+    if(scryId){ const r=await resolveById(scryId, name); if(r) return r; }
+    if(oracleId){ const r=await resolveByOracle(oracleId); if(r) return r; }
+    return await resolveByNamed(name, setHint);
+  }
+
+  /* ===== Data flow ===== */
+  async function loadCommanderSets(){
+    $status.textContent='Fetching Commander set list…';
+    const r=await fetch(SETLIST_URL, {headers:{'accept':'application/json'}});
+    const j= await r.json();
+    const sets=(j?.data||[]).filter(s => (s.type||'').toLowerCase()==='commander');
+    sets.sort((a,b)=> String(b.releaseDate||'').localeCompare(String(a.releaseDate||'')));
+    SETS = sets.map(s => ({ code:s.code, name:s.name, releaseDate:s.releaseDate||'' }));
+    return SETS;
+  }
+  async function loadSetJson(code){
+    if(SET_CACHE[code]) return SET_CACHE[code];
+    const r=await fetch(SET_URL(code), {headers:{'accept':'application/json'}});
+    const j=await r.json();
+    SET_CACHE[code]=j?.data||{};
+    return SET_CACHE[code];
+  }
+  function deckCardList(deck){
+    const rows=[];
+    const add=(arr)=>{ if(Array.isArray(arr)) for(const it of arr){ if(it && typeof it.count==='number') rows.push({uuid: it.uuid, count: it.count, orig: it}); } };
+    add(deck.commander); add(deck.mainBoard); add(deck.sideBoard);
+    return rows;
+  }
+
+  async function computeDeckEV(setCode, setCardsByUuid, deck, siftMin){
+    const cards = deckCardList(deck);
+    let evAll=0, evSift=0, countGreen=0, totalSize=0;
+    totalSize = cards.reduce((s,x)=> s + (Number(x.count)||0), 0);
+
+    // Process STRICTLY SEQUENTIALLY to preserve 15s spacing
+    let i=0;
+    for(const item of cards){
+      i++;
+      $status.textContent = `Pricing deck “${deck.name}” — ${i}/${cards.length} (15s Scryfall pacing)`;
+      const cardObj = setCardsByUuid[item.uuid] || null;
+      const info = await priceForCard(cardObj, item.orig, setCode);
+      const usd = Number(info.usd)||0;
+      const line = usd * (item.count||1);
+      evAll += line;
+      if(usd >= siftMin){ evSift += line; countGreen += (item.count||1); }
+    }
+    return { evAll, evSift, countGreen, deckSize: totalSize };
+  }
+
+  function renderTable(rows){
+    if(!rows.length){
+      $tbody.innerHTML = `<tr><td colspan="7" class="muted">No decks found.</td></tr>`;
+      return;
+    }
+    $tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td>${r.releaseDate||''}</td>
+        <td>${r.setName||r.setCode}</td>
+        <td>${r.deckName}</td>
+        <td class="right">${r.deckSize}</td>
+        <td class="right">${r.countGreen}</td>
+        <td class="right">${fmtUSD(r.evSift)}</td>
+        <td class="right">${fmtUSD(r.evAll)}</td>
+      </tr>
+    `).join('');
+  }
+  function updateKpis(rows){
+    const sets = new Set(rows.map(r=>r.setCode)).size;
+    const decks = rows.length;
+    const avg = decks ? rows.reduce((s,r)=> s + r.evSift, 0)/decks : 0;
+    $kSets.textContent = sets.toLocaleString();
+    $kDecks.textContent= decks.toLocaleString();
+    $kAvg.textContent  = fmtUSD(avg);
+    const now = nowCT(); $kWhen.textContent = now; $stamp.textContent = `Last build: ${now} (${TZ})`;
+  }
+  function buildCsv(rows){
+    const header = ['Release','Commander Product','Deck','Deck Size','Cards ≥ Sift','Sifted EV (USD)','All‑in EV','Set Code'];
+    const body = rows.map(r => [r.releaseDate||'', r.setName||r.setCode, r.deckName, r.deckSize, r.countGreen, r.evSift.toFixed(2), r.evAll.toFixed(2), r.setCode]);
+    CSV = toCsv([header, ...body]);
+    $dlCsv.disabled = $cpCsv.disabled = !CSV;
+  }
+
+  /* ===== Sorting (click headers) ===== */
+  let sortKey = 'evSift', sortDesc = true;
+  function sortByKey(arr, key, desc=false){
+    const s = [...arr].sort((a,b)=>{
+      const va=a[key], vb=b[key];
+      if(va==null && vb==null) return 0;
+      if(va==null) return 1;
+      if(vb==null) return -1;
+      if(typeof va === 'number' && typeof vb === 'number') return va - vb;
+      return String(va).localeCompare(String(vb));
+    });
+    return desc ? s.reverse() : s;
+  }
+  function applySort(){
+    if(!RESULTS.length) return;
+    const sorted = sortByKey(RESULTS, sortKey, sortDesc);
+    renderTable(sorted);
+  }
+  $tbl.querySelectorAll('thead th').forEach(th=>{
+    th.addEventListener('click', ()=>{
+      const k = th.getAttribute('data-k'); if(!k) return;
+      if(sortKey===k){ sortDesc = !sortDesc; } else { sortKey=k; sortDesc = (k==='evSift'||k==='evAll'||k==='releaseDate'||k==='deckSize'||k==='countGreen'); }
+      applySort();
+    });
+  });
+
+  /* ===== Build flow ===== */
+  async function buildAll(){
+    const siftMin = clampSift();
+    RESULTS = []; CARD_CACHE.clear(); NAMED_CACHE.clear(); ORACLE_CACHE.clear();
+    $tablePanel.style.display='none';
+    $tbody.innerHTML = `<tr><td colspan="7" class="muted">Loading…</td></tr>`;
+    $status.textContent = 'Loading Commander sets… (Scryfall calls will be paced at 15s)';
+    try{
+      await loadCommanderSets();
+      $kSets.textContent = SETS.length.toLocaleString();
+      let deckCounter=0, rowCounter=0, setCounter=0;
+      for(const s of SETS){
+        setCounter++;
+        $status.textContent = `(${setCounter}/${SETS.length}) Fetching ${s.name} (${s.code})…`;
+        const setData = await loadSetJson(s.code);
+        const decks = setData.decks || [];
+        const cards = setData.cards || [];
+        const mapByUuid={}; for(const c of cards) mapByUuid[c.uuid]=c;
+
+        for(const deck of decks){
+          deckCounter++;
+          $status.textContent = `Set ${s.code}: Processing deck “${deck.name}” — Scryfall queued at 15s per request`;
+          const ev = await computeDeckEV(s.code, mapByUuid, deck, siftMin);
+          RESULTS.push({
+            setCode: s.code,
+            setName: s.name,
+            releaseDate: s.releaseDate||'',
+            deckName: deck.name,
+            deckSize: ev.deckSize,
+            countGreen: ev.countGreen,
+            evSift: ev.evSift,
+            evAll: ev.evAll
+          });
+          rowCounter++;
+          // progressive render
+          if(rowCounter % 1 === 0){
+            const sorted = sortByKey(RESULTS, sortKey, sortDesc);
+            renderTable(sorted);
+            $tablePanel.style.display='';
+          }
+        }
+      }
+      const sorted = sortByKey(RESULTS, 'evSift', true);
+      sortKey='evSift'; sortDesc=true;
+      renderTable(sorted);
+      $tablePanel.style.display='';
+      updateKpis(RESULTS);
+      buildCsv(sorted);
+      $status.textContent = `Done. Scryfall calls were serialized with a 15s delay.`;
+    }catch(e){
+      console.error(e);
+      $status.textContent = 'Build failed. Please try again.';
+    }
+  }
+
+  async function recalc(){
+    if(!RESULTS.length){ return buildAll(); }
+    const siftMin = clampSift();
+    $status.textContent = 'Re‑computing EV with new Sift (no new Scryfall calls)…';
+    // Recompute EV using cached prices; no additional Scryfall calls
+    const setMap = {}; for(const s of SETS) setMap[s.code]=s;
+    const newRows=[];
+    for(const r of RESULTS){
+      const setData = SET_CACHE[r.setCode];
+      const deck = (setData.decks||[]).find(d => d.name===r.deckName);
+      const cards = setData.cards||[]; const mapByUuid={}; for(const c of cards) mapByUuid[c.uuid]=c;
+      // Re-use cached per-card USDs by summing again via priceForCard only if needed.
+      // Here we avoid Scryfall: we can’t recompute without prices, so we just recompute sums
+      // from cached lines by re-running computeDeckEV with the SAME cached data. For simplicity:
+      const ev = await computeDeckEVNoFetch(r.setCode, mapByUuid, deck, siftMin);
+      newRows.push({ ...r, deckSize: ev.deckSize, countGreen: ev.countGreen, evSift: ev.evSift, evAll: ev.evAll });
+    }
+    RESULTS = newRows;
+    applySort();
+    updateKpis(RESULTS);
+    buildCsv(sortByKey(RESULTS, sortKey, sortDesc));
+    $status.textContent = 'Sift updated.';
+  }
+
+  // Lightweight recompute using cached prices only (no Scryfall)
+  async function computeDeckEVNoFetch(setCode, setCardsByUuid, deck, siftMin){
+    const cards = deckCardList(deck);
+    let evAll=0, evSift=0, countGreen=0, totalSize=0;
+    totalSize = cards.reduce((s,x)=> s + (Number(x.count)||0), 0);
+    for(const item of cards){
+      const cardObj = setCardsByUuid[item.uuid] || null;
+      const name     = cardObj?.name || item?.orig?.name || '';
+      const scryId   = cardObj?.identifiers?.scryfallId || item?.orig?.identifiers?.scryfallId || null;
+      const oracleId = cardObj?.identifiers?.scryfallOracleId || item?.orig?.identifiers?.scryfallOracleId || null;
+
+      // Try cache lookups in same order we fetch
+      let info = null;
+      if(scryId && CARD_CACHE.has('id:'+scryId)) info = CARD_CACHE.get('id:'+scryId);
+      else if(oracleId && ORACLE_CACHE.has('oracle:'+oracleId)) info = ORACLE_CACHE.get('oracle:'+oracleId);
+      else if(name){
+        const key1 = 'named:'+name+'|'+(setCode||'');
+        const key2 = 'named:'+name+'|';
+        info = NAMED_CACHE.get(key1) || NAMED_CACHE.get(key2) || null;
+      }
+      const usd = Number(info?.usd)||0;
+      const line = usd * (item.count||1);
+      evAll += line;
+      if(usd >= siftMin){ evSift += line; countGreen += (item.count||1); }
+    }
+    return { evAll, evSift, countGreen, deckSize: totalSize };
+  }
+
+  /* ===== CSV buttons ===== */
+  $dlCsv.addEventListener('click', ()=>{
+    if(!CSV) return;
+    const blob=new Blob(["\uFEFF"+CSV],{type:'text/csv;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='CommanderPrecons_EVatSift.csv';
+    document.body.appendChild(a); a.click(); URL.revokeObjectURL(a.href); a.remove();
+  });
+  $cpCsv.addEventListener('click', async ()=>{
+    if(!CSV) return;
+    try{ await navigator.clipboard.writeText(CSV); alert('CSV copied to clipboard.'); }
+    catch{ alert('Copy failed. Use Download instead.'); }
+  });
+
+  /* ===== Hooks ===== */
+  function initStamp(){ const n=nowCT(); $kWhen.textContent=n; $stamp.textContent=`Last build: ${n} (${TZ})`; }
+  $build.addEventListener('click', buildAll);
+  $recalc.addEventListener('click', recalc);
+  $sift.addEventListener('change', ()=>{ clampSift(); });
+
+  // Auto-build on load (will be slow with 15s pacing)
+  window.addEventListener('DOMContentLoaded', async ()=>{
+    clampSift(); initStamp();
+    buildAll();
+  });
+})();
+</script>
+</body>
+</html>
