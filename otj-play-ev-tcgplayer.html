@@ -98,8 +98,8 @@
   <h1>Outlaws of Thunder Junction — Play Booster EV</h1>
   <p class="lede">
     Scryfall pricing on load. Playable cards renormalized to <b>14 cards/pack</b>.
-    <br>OTP (Breaking News) is modeled as a <b>dedicated 1/pack slot</b>; The List is <b>20% of packs</b> with <b>SPG = 1/64 packs</b>;
-    the non‑foil wildcard produces Rare/Mythic about <b>1/12</b> of the time (R:M ≈ 2:1). Foil slot is split across eligible prints.
+    <br>OTP (Breaking News) modeled as a <b>dedicated 1/pack slot</b>; The List is <b>20% of packs</b> with <b>SPG = 1/64 packs</b>;
+    non‑foil wildcard produces Rare/Mythic about <b>1/12</b> of the time (R:M ≈ 2:1). Foil slot share is divided across eligible prints.
   </p>
 
   <div class="panel">
@@ -334,7 +334,7 @@ const OTJ_ODDS = {
 
   /* The List & Special Guests (OTJ): List in 20% of packs; SPG in 1/64 packs (of all packs) */
   LIST_RATE: 1/5,        // 0.20 packs
-  SPG_PER_PACK: 1/64,    // ~0.015625 per pack (not of the 20%)
+  SPG_PER_PACK: 1/64,    // ~0.015625 per pack (not "of the 20%")
 
   /* Lands (OTJ) */
   LAND_COMMON_DUALS: 1/2,
@@ -365,14 +365,17 @@ let __CSV__        = '';
 
 async function build(){
   // Reset UI
+  const statusEl = document.getElementById('status');
+  statusEl.textContent='Building list…';
   document.getElementById('errorBox').style.display='none';
+  document.getElementById('errorMsg').textContent='';
+  document.getElementById('errorDetails').textContent='';
   document.getElementById('purchasePanel').style.display='none';
   document.getElementById('purchaseEVContainer').style.display='none';
   document.getElementById('siftPanel').style.display='none';
   document.getElementById('siftTableWrap').style.display='none';
   document.getElementById('dlRow').style.display='none';
   document.getElementById('siftSummary').textContent='';
-  document.getElementById('status').textContent='Building list…';
   document.getElementById('counts').textContent='';
 
   const englishOnly=document.getElementById('englishOnly').checked;
@@ -407,30 +410,36 @@ async function build(){
   const qEl = document.getElementById('queries');
   if (qEl) qEl.textContent = queries.map(q=> `${q.code}: ${q.q}`).join('\n');
 
+  if(queries.length===0){
+    statusEl.textContent='Select at least one source and click Refresh List.';
+    return;
+  }
+
   let fetched = {};
   async function fetchAll(){
     for(const {code,q} of queries){
+      statusEl.textContent = `Fetching ${code}…`;
       const url = `https://api.scryfall.com/cards/search?q=${encodeURIComponent(q)}`;
       const r = await fetch(url);
-      if(!r.ok){ throw new Error(`Scryfall fetch failed for ${code} — ${r.status}`); }
+      if(!r.ok){ throw new Error(`Scryfall fetch failed for ${code} — HTTP ${r.status}`); }
       const j = await r.json();
       let all = Array.isArray(j.data)? j.data : [];
       let next = j.next_page;
       while(next){
+        statusEl.textContent = `Fetching ${code} — ${all.length.toLocaleString()} so far…`;
         const r2=await fetch(next); if(!r2.ok) break;
         const j2=await r2.json(); all = all.concat(Array.isArray(j2.data)? j2.data : []); next=j2.next_page;
       }
       fetched[code]=all;
-      document.getElementById('status').textContent = `Fetched ${code} (${all.length.toLocaleString()} prints)…`;
-      await sleep(60);
+      statusEl.textContent = `Fetched ${code} (${all.length.toLocaleString()} prints)…`;
+      await sleep(120); // tiny throttle
     }
   }
 
-  try{ await fetchAll(); }catch(e){
-    document.getElementById('errorBox').style.display='';
-    document.getElementById('errorMsg').textContent = 'Load failed';
-    document.getElementById('errorDetails').textContent = String(e&&e.message?e.message:e);
-    document.getElementById('status').textContent='Build failed.';
+  try{ await fetchAll(); }
+  catch(e){
+    showError('Load failed', e);
+    statusEl.textContent='Build failed.';
     return;
   }
 
@@ -444,8 +453,4 @@ async function build(){
   const isBasic = c => /Basic/i.test(c.type_line||'');
   const isLand = c => /Land/i.test(c.type_line||'');
   const isFullArt = c => !!c.full_art;
-  const isCommonDual = c => (c.rarity==='common') && isLand(c) && !isBasic(c);
-
-  const otjCommons = otjAll.filter(c=> c.rarity==='common' && !isLand(c));
-  const otjUncommons = otjAll.filter(c=> c.rarity==='uncommon' && !isLand(c));
-  const otjRares = otjA
+  const isCommonDual = c => (c.rarity==='common') && isLand
