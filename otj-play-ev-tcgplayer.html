@@ -55,7 +55,7 @@
   tbody tr:nth-child(even){background:#12171d}
 
   .pill{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid #2a3541}
-  .pill.ok{background:rgba(30,127,60,.20);color:#d9ffe3;border-color:#1e7f3c}
+  .pill.ok{background:rgba(30,127,60,.20);color:#dff3e3;border-color:#1e7f3c}
   .pill.bad{background:rgba(155,44,44,.16);color:#ffdede;border-color:#9b2c2c}
 
   /* EV box highlight */
@@ -95,7 +95,7 @@
     <a href="./index.html"><img src="freEV-banner.png" alt="FreEV — Spend your money on cards not calculators"></a>
   </div>
 
-  <h1>Outlaws of Thunder Junction — Play Booster EV</h1>
+  <h1>Outlaws of Thunder Junction — Play Booster EV 1</h1>
   <p class="lede">
     Scryfall pricing on load. Playable cards renormalized to <b>14 cards/pack</b>.
     <br>OTP (Breaking News) modeled as a <b>dedicated 1/pack slot</b>; The List is <b>20% of packs</b> with <b>SPG = 1/64 packs</b>;
@@ -269,7 +269,6 @@
 const rarityLetter = r => ({common:'C',uncommon:'U',rare:'R',mythic:'M'}[r] || (r?r[0].toUpperCase():''));
 const sleep = ms => new Promise(res=>setTimeout(res,ms));
 const padCollector = s => { const m=String(s||'').match(/^(\d+)(.*)$/); return m?m[1].padStart(4,'0')+(m[2]||''):(s||''); };
-const baseCN = s => { const m=String(s||'').match(/^(\d+)/); return m?parseInt(m[1],10):NaN; };
 const parseUSD = s => { const n=parseFloat(String(s).replace(/[^0-9.]/g,'')); return Number.isFinite(n)?n:null; };
 const money = n => Number.isFinite(n)? n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) : '';
 const fmtUSD = n => money(n);
@@ -363,8 +362,68 @@ let __NORM_SCALE__ = 1;
 let __SIFT_CSV__   = '';
 let __CSV__        = '';
 
+/* ---------- NEW: Scryfall fetch with throttle & 429 backoff ---------- */
+const REQUEST_GAP_MS = 250;      // space every request to ~4 req/s (well under 10 req/s)
+const MAX_RETRIES = 6;           // on 429 or transient network errors
+let __backoffUntil = 0;          // shared "Retry-After until" wall-clock time
+
+async function waitForBackoff(){
+  const now = Date.now();
+  if (__backoffUntil > now) {
+    const wait = __backoffUntil - now;
+    document.getElementById('status').textContent = `Respecting Retry-After… waiting ${(wait/1000).toFixed(1)}s`;
+    await sleep(wait);
+  }
+}
+
+async function fetchWithBackoff(url, attempt=1){
+  await waitForBackoff();
+  let r;
+  try {
+    r = await fetch(url, { cache: 'no-store' });
+  } catch (e) {
+    if (attempt < MAX_RETRIES) {
+      const jitter = 300 + Math.random()*400;
+      await sleep(jitter);
+      return fetchWithBackoff(url, attempt+1);
+    }
+    throw new Error(`Network error contacting Scryfall (${e && e.message ? e.message : e})`);
+  }
+
+  if (r.status === 429) {
+    const ra = parseInt(r.headers.get('Retry-After')) || (2 ** Math.min(attempt, 6)); // seconds
+    __backoffUntil = Date.now() + (ra * 1000);
+    if (attempt < MAX_RETRIES) {
+      document.getElementById('status').textContent = `Rate-limited by Scryfall (429). Retrying in ${ra}s…`;
+      await sleep(ra * 1000);
+      return fetchWithBackoff(url, attempt+1);
+    }
+    throw new Error(`Scryfall rate limit (429). Waited up to ${ra}s; giving up.`);
+  }
+
+  if (!r.ok) {
+    throw new Error(`Scryfall fetch failed — HTTP ${r.status} ${r.statusText || ''}`.trim());
+  }
+
+  // Small friendly gap between *every* request (including pagination)
+  await sleep(REQUEST_GAP_MS);
+  return r.json();
+}
+
+async function fetchScryfallAll(url){
+  let j = await fetchWithBackoff(url);
+  let all = Array.isArray(j.data) ? j.data : [];
+  let next = j.next_page;
+  while (next) {
+    document.getElementById('status').textContent = `Fetching (page ${all.length}-${all.length+175} approx)…`;
+    j = await fetchWithBackoff(next);
+    all = all.concat(Array.isArray(j.data) ? j.data : []);
+    next = j.next_page;
+  }
+  return all;
+}
+
 async function build(){
-  // Reset UI
   const statusEl = document.getElementById('status');
   statusEl.textContent='Building list…';
   document.getElementById('errorBox').style.display='none';
@@ -401,56 +460,4 @@ async function build(){
 
   const queries = [];
   if(incOTJ) queries.push({ code:'OTJ', q:buildQuery('OTJ',englishOnly) });
-  if(incOTP) queries.push({ code:'OTP', q:buildQuery('OTP',englishOnly) });
-  if(incBIG) queries.push({ code:'BIG', q:buildQuery('BIG',englishOnly) });
-  if(incSPG) queries.push({ code:'SPG', q:buildQuery('SPG',englishOnly) });
-  if(incTOK) queries.push({ code:'TOTJ', q:buildQuery('TOTJ',englishOnly) });
-  if(incART) queries.push({ code:'AOTJ', q:buildQuery('AOTJ',englishOnly) });
-
-  const qEl = document.getElementById('queries');
-  if (qEl) qEl.textContent = queries.map(q=> `${q.code}: ${q.q}`).join('\n');
-
-  if(queries.length===0){
-    statusEl.textContent='Select at least one source and click Refresh List.';
-    return;
-  }
-
-  let fetched = {};
-  async function fetchAll(){
-    for(const {code,q} of queries){
-      statusEl.textContent = `Fetching ${code}…`;
-      const url = `https://api.scryfall.com/cards/search?q=${encodeURIComponent(q)}`;
-      const r = await fetch(url);
-      if(!r.ok){ throw new Error(`Scryfall fetch failed for ${code} — HTTP ${r.status}`); }
-      const j = await r.json();
-      let all = Array.isArray(j.data)? j.data : [];
-      let next = j.next_page;
-      while(next){
-        statusEl.textContent = `Fetching ${code} — ${all.length.toLocaleString()} so far…`;
-        const r2=await fetch(next); if(!r2.ok) break;
-        const j2=await r2.json(); all = all.concat(Array.isArray(j2.data)? j2.data : []); next=j2.next_page;
-      }
-      fetched[code]=all;
-      statusEl.textContent = `Fetched ${code} (${all.length.toLocaleString()} prints)…`;
-      await sleep(120); // tiny throttle
-    }
-  }
-
-  try{ await fetchAll(); }
-  catch(e){
-    showError('Load failed', e);
-    statusEl.textContent='Build failed.';
-    return;
-  }
-
-  const data = fetched;
-
-  /* --- Normalize & model rows --- */
-  let rows = [];
-  let meta = [];
-
-  const otjAll = (data.OTJ||[]).filter(c=> (c.games||[]).includes('paper'));
-  const isBasic = c => /Basic/i.test(c.type_line||'');
-  const isLand = c => /Land/i.test(c.type_line||'');
-  const isFullArt = c => !!c.full_art;
-  const isCommonDual = c => (c.rarity==='common') && isLand
+  if(incOTP) queries.
