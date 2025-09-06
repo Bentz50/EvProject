@@ -5,7 +5,7 @@
 <title>Outlaws of Thunder Junction — Play Booster EV</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
-  html {background:#0b0d10}
+  html {background-color:#0b0d10;}
   .eoe-app{
     --bg:#0b0d10; --fg:#e8ecf1; --muted:#a7b0bb; --acc:#6ac1ff;
     --card:#151a20; --ok:#1e7f3c; --err:#9b2c2c; --line:#222a33;
@@ -13,26 +13,35 @@
     --est-bg:rgba(106,193,255,.18); --est-line:#6ac1ff;
     min-height:100vh;background:var(--bg);color:var(--fg);
     font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-    max-width:1120px;margin:32px auto;padding:0 16px;box-sizing:border-box
+    max-width:1120px;margin:32px auto;padding:0 16px;box-sizing:border-box;
   }
   .eoe-app a{color:var(--acc);text-decoration:underline}
   .eoe-app h1{font-size:22px;margin:0 0 12px}
   .eoe-app p.lede{color:var(--muted);margin:0 0 16px}
-  .panel{background:var(--card);border:1px solid #2a3541;border-radius:10px;padding:16px;margin:16px 0}
-  .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
-  label{display:block;margin:4px 0}
-  input[type="number"],input[type="text"],select{
+  .eoe-app .panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin:16px 0}
+  .eoe-app label{display:block;margin:4px 0}
+  .eoe-app .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .eoe-app input[type="number"],.eoe-app input[type="text"],.eoe-app select{
     width:12ch;background:#0e1216;color:#cfe3f5;border:1px solid #2a3541;border-radius:6px;padding:6px
   }
-  input[type="number"]#costPerBox{width:14ch}
-  select{width:auto}
-  button{appearance:none;border:1px solid #2c3845;background:#1b232c;color:var(--fg);padding:10px 14px;border-radius:8px;cursor:pointer}
-  button[disabled]{opacity:.5;cursor:default}
+  .eoe-app input[type="number"]#costPerBox{width:14ch}
+  .eoe-app select{width:auto}
+  .eoe-app button{appearance:none;border:1px solid #2c3845;background:#1b232c;color:var(--fg);padding:10px 14px;border-radius:8px;cursor:pointer}
+  .eoe-app button[disabled]{opacity:.5;cursor:default}
+  .eoe-app .actions{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
+  .eoe-app #status{margin-top:8px;color:var(--muted)}
+  .eoe-app #counts b{color:#7ddc7a}
+
+  .freBanner{display:flex;justify-content:center;margin:8px 0 16px}
+  .freBanner img{max-width:420px;width:100%;height:auto;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+
   .btn-primary{border-color:var(--hi-line);background:linear-gradient(180deg,#203245,#1a2530);color:#dff1ff;font-weight:600}
   .hi-label{border:1px solid var(--hi-line);background:var(--hi-bg);border-radius:8px;padding:6px 8px}
   .hi-inline{display:flex;align-items:center;gap:6px;border:1px solid var(--hi-line);background:var(--hi-bg);border-radius:8px;padding:6px 8px}
-  .freBanner{display:flex;justify-content:center;margin:8px 0 16px}
-  .freBanner img{max-width:420px;width:100%;height:auto;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+
+  .error-panel{border-color:#ff7a7a!important}
+  .error-panel h2{margin:0 0 8px;color:#ff7a7a;font-size:16px}
+  .error-panel pre{white-space:pre-wrap;background:#0e1216;border:1px solid #2a3541;padding:8px;border-radius:6px;color:#ffd4d4}
 
   table{width:100%;border-collapse:collapse;margin-top:8px}
   th,td{border:1px solid #2a3541;padding:8px 10px;text-align:right}
@@ -41,18 +50,20 @@
   tbody tr:nth-child(even){background:#12171d}
 
   .pill{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid #2a3541}
-  .pill.ok{background:rgba(30,127,60,.20);color:#dff3e3;border-color:#1e7f3c}
+  .pill.ok{background:rgba(30,127,60,.20);color:#d9ffe3;border-color:#1e7f3c}
   .pill.bad{background:rgba(155,44,44,.16);color:#ffdede;border-color:#9b2c2c}
-
-  .sift-ok  { background:rgba(30,127,60,.18) !important; border-left:2px solid #1e7f3c }
-  .sift-bad { background:rgba(155,44,44,.16) !important; border-left:2px solid #9b2c2c }
 
   .evbox table{margin:8px 0}
   .evbox table th,.evbox table td{border:1px solid #2a3541;padding:8px 10px}
   .evbox table thead th{background:#0e1216}
-  .evbox table th:nth-child(3),.evbox table td:nth-child(3){
-    background:var(--est-bg);border-color:var(--est-line);border-left-color:var(--est-line);color:#eaf6ff;font-weight:700
+  .evbox table th:nth-child(3), .evbox table td:nth-child(3){
+    background:var(--est-bg); border-color:var(--est-line); border-left-color:var(--est-line);
+    color:#eaf6ff; font-weight:700;
   }
+  .evbox table th:nth-child(2), .evbox table td:nth-child(2){border-right-color:var(--est-line)}
+
+  .sift-ok  { background:rgba(30,127,60,.18) !important; border-left:2px solid #1e7f3c; }
+  .sift-bad { background:rgba(155,44,44,.16) !important; border-left:2px solid #9b2c2c; }
 
   details.eoe-collapse>summary{
     cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;
@@ -60,60 +71,52 @@
   }
   details.eoe-collapse>summary::-webkit-details-marker{display:none}
   details.eoe-collapse>summary::after{content:'▼';opacity:.8;transform:rotate(-90deg);transition:transform .18s;margin-left:12px;font-size:12px}
-  details.eoe-collapse[open]>summary::after{transform:rotate(0)}
-  #debugLog{font:12px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;color:#a7b0bb;background:#0e1216;border:1px dashed #2a3541;border-radius:8px;padding:8px;max-height:160px;overflow:auto}
-
-  .error-panel{border-color:#ff7a7a!important}
-  .error-panel h2{margin:0 0 8px;color:#ff7a7a;font-size:16px}
-  .error-panel pre{white-space:pre-wrap;background:#0e1216;border:1px solid #2a3541;padding:8px;border-radius:6px;color:#ffd4d4}
+  details.eoe-collapse[open]>summary::after{transform:rotate(0deg)}
+  details.eoe-collapse .content{margin-top:10px}
 </style>
 </head>
 <body>
-<noscript>
-  <div class="panel error-panel"><h2>JavaScript disabled</h2>
-    <p>This page needs JavaScript to load Scryfall data.</p>
-  </div>
-</noscript>
-
 <main class="eoe-app" aria-label="OTJ Play Booster EV app">
   <div class="freBanner">
     <a href="./index.html"><img src="freEV-banner.png" alt="FreEV — Spend your money on cards not calculators"></a>
   </div>
 
-  <h1>Outlaws of Thunder Junction — Play Booster EV 2</h1>
+  <h1>Outlaws of Thunder Junction — Play Booster EV</h1>
   <p class="lede">
-    Scryfall pricing on load. Playable cards renormalized to <b>14 cards/pack</b>.<br>
-    OTP is a <b>dedicated 1/pack slot</b>; The List appears in <b>20%</b> of packs with <b>SPG = 1/64</b> packs; wildcard R/M ~ <b>1/12</b> (R:M ≈ 2:1). Foil slot rarity shares 70/22/7/1.
+    Uses Scryfall pricing on load. Playing‑card odds are normalized to <b>14 cards per pack</b>. One foil wildcard per pack + Land is foil in ~20% of packs.
   </p>
-
-  <!-- DEBUG -->
-  <div class="panel">
-    <strong>Debug log</strong>
-    <div id="debugLog">Booting…</div>
-  </div>
 
   <div class="panel">
     <strong>Refresh data</strong>
     <label><input type="checkbox" id="englishOnly" checked> English‑only (avoid dupes)</label>
 
-    <!-- Each checkbox has its own row -->
-    <div class="row"><label><input type="checkbox" id="includeOTJ" checked> Include <b>OTJ</b> main set (normal + foil)</label></div>
-    <div class="row"><label><input type="checkbox" id="includeOTP" checked> Include <b>OTP</b> Breaking News (normal only)</label></div>
-    <div class="row"><label><input type="checkbox" id="includeSPG" checked> Include <b>SPG</b> Special Guests (normal only)</label></div>
-    <div class="row"><label><input type="checkbox" id="includeBIG" checked> Include <b>BIG</b> The Big Score (The List)</label></div>
+    <div class="row">
+      <label><input type="checkbox" id="includeOTJ" checked> Include <b>OTJ</b> main set (normal + foil)</label>
+    </div>
+    <div class="row">
+      <label><input type="checkbox" id="includeOTP" checked> Include <b>OTP</b> Breaking News (normal only)</label>
+    </div>
+    <div class="row">
+      <label><input type="checkbox" id="includeSPG" checked> Include <b>SPG</b> Special Guests (normal only)</label>
+    </div>
+    <div class="row">
+      <label><input type="checkbox" id="includeBIG" checked> Include <b>BIG</b> The Big Score (The List)</label>
+    </div>
 
-    <div id="status" aria-live="polite" style="margin-top:6px;color:#a7b0bb">Preparing…</div>
+    <div id="status" aria-live="polite" style="margin-top:6px">Preparing…</div>
     <div id="counts" style="margin-top:4px"></div>
+
     <div class="actions" style="margin-top:10px">
       <button id="buildBtn" class="btn-primary">Refresh List</button>
     </div>
+
     <details style="margin-top:8px">
       <summary>Advanced: Scryfall queries</summary>
       <pre id="queries" style="white-space:pre-wrap;"></pre>
     </details>
   </div>
 
-  <!-- Tokens (separate; unchecked by default) -->
+  <!-- Tokens (separate section; UNCHECKED by default) -->
   <div class="panel">
     <strong>Tokens (TOTJ)</strong>
     <div class="row">
@@ -122,7 +125,7 @@
     </div>
   </div>
 
-  <!-- Art Series (separate; unchecked by default) -->
+  <!-- Art Series (separate section; UNCHECKED by default) -->
   <div class="panel">
     <strong>Art Series (AOTJ)</strong>
     <div class="row">
@@ -158,8 +161,8 @@
       <label class="hi-label" title="Order-level transaction fees">
         Expected transactions:
         <input type="number" id="expectedTx" value="0" min="0" step="1">
-        <span style="color:#a7b0bb;font-size:12px;margin-left:6px">
-          Used to calculate the /transaction fee. Leave 0 if you consider this part of your shipping cost.
+        <span style="color:var(--muted);font-size:12px;margin-left:6px">
+          “For now”: set N=0 to treat both transaction fees as $0; set N&gt;0 to include 2.5% and $0.30/order.
         </span>
       </label>
     </div>
@@ -174,9 +177,8 @@
           <option value="99">99% (~2.576σ)</option>
         </select>
       </label>
-      <button id="calcEV">Recalculate</button>
+      <button id="calcEV" disabled>Calculate EV</button>
     </div>
-
     <div id="purchaseSummary" class="note"></div>
     <div id="purchaseEVContainer" class="evbox" style="display:none"></div>
     <div id="rangeNotes" class="note"></div>
@@ -188,7 +190,7 @@
     <div class="row">
       <span class="pill ok">≥ threshold</span>
       <span class="pill bad">&lt; threshold</span>
-      <button id="applySift">Re‑Apply Sift</button>
+      <button id="applySift" disabled>Re‑Apply Sift</button>
     </div>
     <div id="siftSummary" class="note" aria-live="polite"></div>
     <div class="sift-tablewrap" id="siftTableWrap" style="display:none">
@@ -210,14 +212,12 @@
     </div>
   </div>
 
-  <!-- Errors -->
   <div id="errorBox" class="panel error-panel" style="display:none">
     <h2>Load failed</h2>
     <div id="errorMsg"></div>
     <pre id="errorDetails"></pre>
   </div>
 
-  <!-- Totals (collapsible) -->
   <div id="totalsPanel" class="panel" style="display:none">
     <details id="totalsDetails" class="eoe-collapse" open>
       <summary>Totals (estimates)</summary>
@@ -240,173 +240,196 @@
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-LWMRXKNY5X"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
-  function gtag(){window.dataLayer.push(arguments);}
+  function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
   gtag('config', 'G-LWMRXKNY5X');
 </script>
-
 <script>
-(function(){
-  'use strict';
-  /* ================= Basics & Helpers ================= */
-  var PACKS_PER_BOX = 36;
-  var REQUEST_GAP_MS = 250;  // ~4 req/s overall
-  var MAX_RETRIES = 6;
-  var __backoffUntil = 0;
+/* ============================ Helpers ============================ */
+const rarityLetter = r => ({common:'C',uncommon:'U',rare:'R',mythic:'M'}[r] || (r?r[0].toUpperCase():''));
+const sleep = ms => new Promise(res=>setTimeout(res,ms));
+const padCollector = s => { const m=String(s||'').match(/^(\d+)(.*)$/); return m?m[1].padStart(4,'0')+(m[2]||''):(s||''); };
+const parseUSD = s => { const n=parseFloat(String(s).replace(/[^0-9.]/g,'')); return Number.isFinite(n)?n:null; };
+const money = n => Number.isFinite(n)? n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) : '';
+const fmtUSD = n => money(n);
+const fmtCount = n => !Number.isFinite(n)? '' : (Math.abs(n-Math.round(n))<1e-9? Math.round(n).toLocaleString() : (n>=100?n.toFixed(1):n>=10?n.toFixed(2):n.toFixed(3)));
+const fmtInt = n => Number.isFinite(n)? Math.round(n).toLocaleString() : '';
+const zFromConf = c => { c=Math.round(c); if(c>=99)return 2.576; if(c>=95)return 1.96; if(c>=90)return 1.645; if(c>=68)return 1.0; return 1.96; };
+const priceUSD = (card,treat) => { const p=(treat==='foil'?card?.prices?.usd_foil:card?.prices?.usd); const f=parseFloat(p); return Number.isFinite(f)?f:null; };
 
-  function $(id){ return document.getElementById(id); }
-  function log(msg){ var el=$('debugLog'); if(el){ el.textContent += "\n" + String(msg); el.scrollTop=el.scrollHeight; } }
-  function showError(title, err){
-    var box=$('errorBox'), msg=$('errorMsg'), det=$('errorDetails');
-    if(msg) msg.textContent = title || 'Error';
-    var detail = (err && err.stack) ? err.stack : (err && err.message ? err.message : String(err||'Unknown error'));
-    if(det) det.textContent = detail;
-    if(box){ box.style.display=''; try{ box.scrollIntoView({behavior:'smooth',block:'start'});}catch(_){ } }
-    var st=$('status'); if(st) st.textContent='Build failed.';
-    log('ERROR: ' + (title||'') + ' — ' + detail);
+/* ============================ TCGplayer Fees ============================ */
+/* Marketplace (Level 1–4): 10.25% commission; Pro Seller: 9.25% commission + 2.5% Pro fee;
+   Transaction fee: 2.5% + $0.30 per order (we split these in UI now).
+   Commission+Pro capped at $50 per product. */
+function getSellerPolicy(){
+  const sel = document.getElementById('sellerTier');
+  const v = sel && sel.value ? sel.value : 'mkt-l4';
+  // Transaction fee constants (kept here for a single source of truth)
+  const txPct = 0.025, txFixed = 0.30;
+  if(v === 'pro') return { key:v, label:'Pro Seller', commission:0.0925, pro:0.025, txPct, txFixed };
+  return { key:v, label:'Marketplace Seller', commission:0.1025, pro:0, txPct, txFixed };
+}
+function perCardFeeUSD(price, policy){
+  if(!Number.isFinite(price) || price<=0) return 0;
+  const preCap = price * (policy.commission + policy.pro);
+  return Math.min(preCap, 50.0);
+}
+function computeFeesSummary(packs, useSift, minUSD, policy){
+  let gross=0, commPro=0;
+  for(const row of __ROW_MODELS__){
+    const p = probPoint(row.model); if(!Number.isFinite(p)) continue;
+    const pS = row.nonGame? p : (p*__NORM_SCALE__);
+    const usd = row.price;
+    const ok = (!useSift) || (Number.isFinite(usd) && usd >= minUSD);
+    if(!ok || !Number.isFinite(usd)) continue;
+    const expected = pS * packs;
+    gross  += usd * expected;                     // "gross EV" across packs
+    commPro += perCardFeeUSD(usd, policy) * expected; // commission+pro per expected card
   }
-  window.addEventListener('error', function(e){ showError('Runtime error', e && (e.error||e.message||e)); });
-  window.addEventListener('unhandledrejection', function(e){ showError('Unhandled promise rejection', e && (e.reason||e)); });
+  return { gross, commPro };
+}
 
-  function isNum(n){ return typeof n==='number' && isFinite(n); }
-  function sleep(ms){ return new Promise(function(res){ setTimeout(res, ms); }); }
-  function rarityLetter(r){ return r==='common'?'C':r==='uncommon'?'U':r==='rare'?'R':r==='mythic'?'M':(r?(r.charAt(0).toUpperCase()):''); }
-  function padCollector(s){ s=String(s||''); var m=s.match(/^(\d+)(.*)$/); return m? (m[1].padStart?m[1].padStart(4,'0'):('0000'+m[1]).slice(-4))+(m[2]||'') : s; }
-  function parseUSD(s){ var n=parseFloat(String(s).replace(/[^0-9.]/g,'')); return isNum(n)? n : null; }
-  function money(n){ return isNum(n)? n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) : ''; }
-  function fmtUSD(n){ return money(n); }
-  function fmtCount(n){ if(!isNum(n)) return ''; var d=Math.abs(n-Math.round(n)); if(d<1e-9) return String(Math.round(n).toLocaleString()); return n>=100?n.toFixed(1):n>=10?n.toFixed(2):n.toFixed(3); }
-  function fmtInt(n){ return isNum(n)? String(Math.round(n).toLocaleString()) : ''; }
-  function zFromConf(c){ c=Math.round(c); if(c>=99)return 2.576; if(c>=95)return 1.96; if(c>=90)return 1.645; if(c>=68)return 1.0; return 1.96; }
-  function priceUSD(card,treat){ var p=(treat==='foil'?(card&&card.prices&&card.prices.usd_foil):(card&&card.prices&&card.prices.usd)); var f=parseFloat(p); return isNum(f)?f:null; }
-  function linkOf(card){ return (card && card.scryfall_uri) ? card.scryfall_uri : ''; }
+/* ======================= OTJ model constants (unchanged core EV math) ======================= */
+const PACKS_PER_BOX = 36;
+const OTJ_ODDS = {
+  COMMON_SLOTS: 6,
+  UNCOMMON_BASE: 3,
+  RARE_SLOT: 1,
+  WILDCARD: 1,
+  RM_MYTHIC_RATE: 1/7.4,
+  RM_RARE_RATE: 1 - (1/7.4),
+  WILDCARD_RM: 1/12,
+  WILDCARD_R_SHARE: 2/3,
+  WILDCARD_M_SHARE: 1/3,
+  OTP_U: 2/3,
+  OTP_RM: 1/3,
+  OTP_R_SHARE: 2/3,
+  OTP_M_SHARE: 1/3,
+  LIST_RATE: 1/5,
+  SPG_PER_PACK: 1/64,
+  LAND_COMMON_DUALS: 1/2,
+  LAND_WESTERN: 1/6,
+  LAND_REGULAR: 1/3,
+  LAND_FOIL_RATE: 0.20,
+  FOIL_SLOT: 1.0,
+  FOIL_RARITY: { common:0.70, uncommon:0.22, rare:0.07, mythic:0.01 },
+  NONGAME_TOKEN: 0.65, NONGAME_ART: 0.30, NONGAME_ART_SIGNED: 0.05
+};
 
-  /* ============== Fees (TCGplayer tiers) ============== */
-  function getSellerPolicy(){
-    var v = ($('sellerTier')&&$('sellerTier').value)||'mkt-l4';
-    var txPct = 0.025, txFixed = 0.30;
-    if(v==='pro') return {commission:0.0925, pro:0.025, txPct:txPct, txFixed:txFixed};
-    return {commission:0.1025, pro:0, txPct:txPct, txFixed:txFixed};
+/* ========================= Derived odds helpers ========================= */
+const PM = { point(p){ return { type:'point', p } } };
+function probPoint(model){ return model?.type==='point'? model.p : null; }
+
+/* ========================= Build logic (unchanged) ========================= */
+let __ROW_MODELS__ = [];
+let __META_ROWS__  = [];
+let __NORM_SCALE__ = 1;
+let __SIFT_CSV__   = '';
+let __CSV__        = '';
+
+async function build(){
+  document.getElementById('errorBox').style.display='none';
+  document.getElementById('purchasePanel').style.display='none';
+  document.getElementById('purchaseEVContainer').style.display='none';
+  document.getElementById('siftPanel').style.display='none';
+  document.getElementById('siftTableWrap').style.display='none';
+  document.getElementById('dlRow').style.display='none';
+  document.getElementById('siftSummary').textContent='';
+  document.getElementById('status').textContent='Building list…';
+  document.getElementById('counts').textContent='';
+
+  const englishOnly=document.getElementById('englishOnly').checked;
+  const incOTJ=document.getElementById('includeOTJ').checked;
+  const incOTP=document.getElementById('includeOTP').checked;
+  const incBIG=document.getElementById('includeBIG').checked;
+  const incSPG=document.getElementById('includeSPG').checked;
+  const incTOK=document.getElementById('includeTOK').checked;
+  const incART=document.getElementById('includeART').checked;
+
+  function buildQuery(setCode, englishOnly){
+    let q='';
+    if(setCode==='OTJ') q='e:otj is:booster';
+    if(setCode==='OTP') q='e:otp';
+    if(setCode==='BIG') q='e:big';
+    if(setCode==='SPG') q='e:spg';
+    if(setCode==='TOTJ') q='e:totj';
+    if(setCode==='AOTJ') q='e:aotj';
+    if(englishOnly) q+=' lang:en';
+    return q.trim();
   }
-  function perCardFeeUSD(price, policy){
-    if(!isNum(price)||price<=0) return 0;
-    var preCap = price*(policy.commission+policy.pro);
-    return Math.min(preCap, 50.0);
-  }
+  function linkOf(card){ return card?.scryfall_uri || ''; }
 
-  /* ============== OTJ Play Booster model ============== */
-  var OD = {
-    COMMON_SLOTS:6, UNCOMMON_BASE:3, RARE_SLOT:1, WILDCARD:1,
-    RM_MYTHIC_RATE:1/7.4, RM_RARE_RATE:1-(1/7.4),
-    WILDCARD_RM:1/12, WILDCARD_R_SHARE:2/3, WILDCARD_M_SHARE:1/3,
-    OTP_U:2/3, OTP_RM:1/3, OTP_R_SHARE:2/3, OTP_M_SHARE:1/3,
-    LIST_RATE:1/5, SPG_PER_PACK:1/64,
-    LAND_COMMON_DUALS:1/2, LAND_WESTERN:1/6, LAND_REGULAR:1/3, LAND_FOIL_RATE:0.20,
-    FOIL_SLOT:1.0, FOIL_RARITY:{common:0.70,uncommon:0.22,rare:0.07,mythic:0.01},
-    NONGAME_TOKEN:0.65, NONGAME_ART:0.30, NONGAME_ART_SIGNED:0.05
-  };
+  const queries = [];
+  if(incOTJ) queries.push({ code:'OTJ', q:buildQuery('OTJ',englishOnly) });
+  if(incOTP) queries.push({ code:'OTP', q:buildQuery('OTP',englishOnly) });
+  if(incBIG) queries.push({ code:'BIG', q:buildQuery('BIG',englishOnly) });
+  if(incSPG) queries.push({ code:'SPG', q:buildQuery('SPG',englishOnly) });
+  if(incTOK) queries.push({ code:'TOTJ', q:buildQuery('TOTJ',englishOnly) });
+  if(incART) queries.push({ code:'AOTJ', q:buildQuery('AOTJ',englishOnly) });
 
-  function PM_point(p){ return {type:'point', p:p}; }
-  function probPoint(m){ return m&&m.type==='point'? m.p : null; }
+  const qEl = document.getElementById('queries');
+  if (qEl) qEl.textContent = queries.map(q=> `${q.code}: ${q.q}`).join('\n');
 
-  var __ROW_MODELS__=[], __META_ROWS__=[], __NORM_SCALE__=1, __SIFT_CSV__='', __CSV__='';
-
-  /* ============== Scryfall fetch (backoff + combined) ============== */
-  function nowMs(){ return (new Date()).getTime(); }
-  function waitForBackoff(){ var n=nowMs(); if(__backoffUntil>n){ var w=__backoffUntil-n; $('status').textContent='Respecting Retry‑After… '+(w/1000).toFixed(1)+'s'; return sleep(w);} return Promise.resolve(); }
-  function fetchWithBackoff(url, attempt){
-    attempt=attempt||1;
-    return waitForBackoff().then(function(){
-      return fetch(url, {cache:'no-store'}).then(function(r){
-        if(r.status===429){
-          var ra=parseInt(r.headers.get('Retry-After'),10); if(!isNum(ra)||ra<=0) ra=Math.pow(2, Math.min(attempt,6));
-          __backoffUntil=nowMs()+ra*1000;
-          $('status').textContent='Rate‑limited (429). Retrying in '+ra+'s…';
-          if(attempt<MAX_RETRIES) return sleep(ra*1000).then(function(){ return fetchWithBackoff(url, attempt+1); });
-          throw new Error('Scryfall 429 after retries');
-        }
-        if(!r.ok) throw new Error('HTTP '+r.status+' '+(r.statusText||''));
-        return r.json();
-      }).catch(function(e){
-        if(attempt<MAX_RETRIES){
-          var j=300+Math.random()*400; log('Fetch error; retrying in '+j+'ms: '+(e&&e.message?e.message:e));
-          return sleep(j).then(function(){ return fetchWithBackoff(url, attempt+1); });
-        }
-        throw e;
-      }).then(function(j){ return sleep(REQUEST_GAP_MS).then(function(){ return j; }); });
-    });
-  }
-  function fetchScryfallAll(url){
-    return fetchWithBackoff(url,1).then(function(j){
-      var all=(j&&j.data&&j.data.slice)? j.data.slice():[];
-      var next=j&&j.next_page;
-      function loop(nu){
-        if(!nu) return Promise.resolve(all);
-        $('status').textContent='Fetching (page '+all.length+'+)…';
-        return fetchWithBackoff(nu,1).then(function(j2){
-          if(j2&&j2.data&&j2.data.length){ Array.prototype.push.apply(all, j2.data); }
-          return loop(j2 && j2.next_page);
-        });
+  let fetched = {};
+  async function fetchAll(){
+    for(const {code,q} of queries){
+      const url = `https://api.scryfall.com/cards/search?q=${encodeURIComponent(q)}`;
+      const r = await fetch(url);
+      if(!r.ok){ throw new Error(`Scryfall fetch failed for ${code} — ${r.status}`); }
+      const j = await r.json();
+      let all = Array.isArray(j.data)? j.data : [];
+      let next = j.next_page;
+      while(next){
+        const r2=await fetch(next); if(!r2.ok) break;
+        const j2=await r2.json(); all = all.concat(Array.isArray(j2.data)? j2.data : []); next=j2.next_page;
       }
-      return loop(next);
-    });
-  }
-  function scryfallProbe(){
-    $('status').textContent='Probing Scryfall…';
-    return fetch('https://api.scryfall.com/sets/otj',{cache:'no-store'}).then(function(r){
-      if(!r.ok) throw new Error('Probe HTTP '+r.status);
-      return r.json();
-    }).then(function(j){
-      log('Probe OK: '+(j&&j.name?j.name:'(no name)'));
-      return true;
-    }).catch(function(e){
-      showError('Network probe failed',
-        String((e&&e.message)||e) + '\nIf this persists, a privacy extension or network policy may be blocking api.scryfall.com.');
-      return false;
-    });
-  }
-  function buildQueryCombined(englishOnly, sel){
-    var parts=[];
-    if(sel.otj) parts.push('(e:otj is:booster)');
-    if(sel.otp) parts.push('e:otp');
-    if(sel.big) parts.push('e:big');
-    if(sel.spg) parts.push('e:spg');
-    if(sel.tok) parts.push('e:totj');
-    if(sel.art) parts.push('e:aotj');
-    var q = parts.join(' or ');
-    if(englishOnly && q) q = '('+q+') lang:en';
-    return q;
+      fetched[code]=all;
+      document.getElementById('status').textContent = `Fetched ${code} (${all.length.toLocaleString()} prints)…`;
+      await sleep(60);
+    }
   }
 
-  /* ================= Build ================= */
-  function build(){
-    try{
-      var st=$('status');
-      st.textContent='Building list…';
-      $('errorBox').style.display='none'; $('errorMsg').textContent=''; $('errorDetails').textContent='';
-      $('purchasePanel').style.display='none'; $('purchaseEVContainer').style.display='none';
-      $('siftPanel').style.display='none'; $('siftTableWrap').style.display='none'; $('dlRow').style.display='none';
-      $('siftSummary').textContent=''; $('counts').textContent='';
-      log('Build start');
+  try{ await fetchAll(); }catch(e){
+    document.getElementById('errorBox').style.display='';
+    document.getElementById('errorMsg').textContent = 'Load failed';
+    document.getElementById('errorDetails').textContent = String(e&&e.message?e.message:e);
+    document.getElementById('status').textContent='Build failed.';
+    return;
+  }
 
-      var englishOnly=$('englishOnly').checked;
-      var sel = {
-        otj:$('includeOTJ').checked, otp:$('includeOTP').checked,
-        big:$('includeBIG').checked, spg:$('includeSPG').checked,
-        tok:$('includeTOK').checked, art:$('includeART').checked
-      };
-      var qCombined = buildQueryCombined(englishOnly, sel);
-      $('queries').textContent = qCombined ? ('Combined: '+qCombined) : '(nothing selected)';
-      if(!qCombined){ st.textContent='Select a source and click Refresh List.'; log('No sources selected'); return; }
+  const data = fetched;
 
-      scryfallProbe().then(function(ok){
-        if(!ok){ st.textContent='Probe failed — see error panel.'; return; }
+  let rows = [];
+  let meta = [];
 
-        st.textContent='Fetching cards…';
-        var url='https://api.scryfall.com/cards/search?q='+encodeURIComponent(qCombined);
-        log('GET '+url);
-        return fetchScryfallAll(url).then(function(all){
-          var dataBySet = { OTJ:[], OTP:[], BIG:[], SPG:[], TOTJ:[], AOTJ:[] };
-          for(var i=0;i<all.length;i++){
-            var c=all[i], s=(c&&c.set||'').toUpperCase();
-            if(s=
+  const otjAll = (data.OTJ||[]).filter(c=> (c.games||[]).includes('paper'));
+  const isBasic = c => /Basic/i.test(c.type_line||'');
+  const isLand = c => /Land/i.test(c.type_line||'');
+  const isFullArt = c => !!c.full_art;
+  const isCommonDual = c => (c.rarity==='common') && isLand(c) && !isBasic(c);
+
+  const otjCommons = otjAll.filter(c=> c.rarity==='common' && !isLand(c));
+  const otjUncommons = otjAll.filter(c=> c.rarity==='uncommon' && !isLand(c));
+  const otjRares = otjAll.filter(c=> c.rarity==='rare');
+  const otjMythics = otjAll.filter(c=> c.rarity==='mythic');
+
+  const landCommonDuals   = otjAll.filter(isCommonDual);
+  const landBasicsRegular = otjAll.filter(c=> isBasic(c) && !isFullArt(c));
+  const landBasicsWestern = otjAll.filter(c=> isBasic(c) && isFullArt(c));
+
+  const foilElig = otjAll.filter(c=> !isLand(c) && (c.finishes||[]).includes('foil'));
+  const foilEligC = foilElig.filter(c=> c.rarity==='common');
+  const foilEligU = foilElig.filter(c=> c.rarity==='uncommon');
+  const foilEligR = foilElig.filter(c=> c.rarity==='rare');
+  const foilEligM = foilElig.filter(c=> c.rarity==='mythic');
+
+  const otpAll = (data.OTP||[]).filter(c=> (c.games||[]).includes('paper'));
+  const otpU = otpAll.filter(c=> c.rarity==='uncommon');
+  const otpR = otpAll.filter(c=> c.rarity==='rare');
+  const otpM = otpAll.filter(c=> c.rarity==='mythic');
+
+  const bigAll = (data.BIG||[]).filter(c=> (c.games||[]).includes('paper'));
+  const spgAllRaw = (data.SPG||[]).filter(c=> (c.games||[]).includes('paper'));
+  const spgForOTJ = spgAllRaw.filter(c=> c.released_at && c.released_at.startsWith('2024-04-19'));
+
+  const tokAll = (data.TOTJ||[]).filter(c=> (c.games||[]).includes('paper'
