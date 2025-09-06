@@ -64,7 +64,7 @@
     <a href="./index.html"><img src="freEV-banner.png" alt="FreEV — Spend your money on cards not calculators"></a>
   </div>
 
-  <h1>Outlaws of Thunder Junction — Play Booster EV 23</h1>
+  <h1>Outlaws of Thunder Junction — Play Booster EV</h1>
   <p class="lede">
     Builds on load using Scryfall. Playing‑card odds are normalized to exactly <b>14 cards per pack</b> (non‑game items modeled separately).  
     This version adds a <b>TCGplayer fee calculator</b> and simplifies the row view.
@@ -113,7 +113,7 @@
     <div class="note">
       Fees follow TCGplayer’s Help Center tables: Marketplace L1–4 = <b>10.25%</b> commission + <b>2.5%</b> processing + <b>$0.30/transaction</b>;
       Pro Seller adds a <b>2.5% Pro</b> fee and reduces commission to <b>9.25%</b>. Commission and Pro components are each <b>capped at $50 per product</b>;
-      $0.30 is multiplied by your “Expected transactions.” (Examples & rounding per TCGplayer docs.) :contentReference[oaicite:3]{index=3}
+      $0.30 is multiplied by your “Expected transactions.” (Examples & rounding per TCGplayer docs.) 3
     </div>
   </div>
 
@@ -179,7 +179,7 @@ function bankersRound(n, decimals=2){
 }
 
 /* ====================== Fee profiles (TCGplayer) ======================
-   Source: TCGplayer Fees (Help Center). Commission/Pro capped at $50/product. Processing 2.5% + $0.30/txn. :contentReference[oaicite:4]{index=4}
+   Source: TCGplayer Fees (Help Center). Commission/Pro capped at $50/product. Processing 2.5% + $0.30/txn. 4
 */
 const FeeProfiles = {
   l4: { commission:0.1025, pro:0.0,   processing:0.025, txnFixed:0.30 },
@@ -448,4 +448,4 @@ async function build(){
     counts.innerHTML = `Built <b>${tot.toLocaleString()}</b> rows — Playing cards: <b>${(tot-nonGame).toLocaleString()}</b>, Non‑game: <b>${nonGame.toLocaleString()}</b>.`;
     document.getElementById('siftPanel').style.display='';
     document.getElementById('applySift').disabled=false;
-    document.getElementById('status').textContent=`D
+    document.getElementById('status').textContent=`Done. (Normalization: ${__NORM_SCALE__.toFixed(5)} to 14 cards/pack)`
