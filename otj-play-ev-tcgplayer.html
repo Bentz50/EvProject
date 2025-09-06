@@ -2,241 +2,158 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Outlaws of Thunder Junction — Play Booster EV</title>
+<title>Outlaws of Thunder Junction — Play Booster EV (with TCGplayer Fees)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
-  html {background-color:#0b0d10;}
+  html{background-color:#0b0d10}
+  /* Scoped theme */
   .eoe-app{
     --bg:#0b0d10; --fg:#e8ecf1; --muted:#a7b0bb; --acc:#6ac1ff;
-    --card:#151a20; --ok:#1e7f3c; --err:#9b2c2c; --line:#222a33;
+    --card:#151a20; --line:#222a33; --ok:#1e7f3c; --warn:#9b2c2c;
     --hi-bg:rgba(106,193,255,.14); --hi-line:#6ac1ff;
-    --est-bg:rgba(106,193,255,.18); --est-line:#6ac1ff;
-    min-height:100vh;background:var(--bg);color:var(--fg);
+    max-width:1120px; margin:32px auto; padding:0 16px; color:var(--fg); background:var(--bg);
     font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-    max-width:1120px;margin:32px auto;padding:0 16px;box-sizing:border-box;
   }
-  .eoe-app a{color:var(--acc);text-decoration:underline}
-  .eoe-app h1{font-size:22px;margin:0 0 12px}
-  .eoe-app p.lede{color:var(--muted);margin:0 0 16px}
-  .eoe-app .panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin:16px 0}
-  .eoe-app label{display:block;margin:4px 0}
-  .eoe-app .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
-  .eoe-app input[type="number"],.eoe-app input[type="text"],.eoe-app select{
-    width:12ch;background:#0e1216;color:#cfe3f5;border:1px solid #2a3541;border-radius:6px;padding:6px
+  .eoe-app a{ color:var(--acc); text-decoration:underline }
+  h1{font-size:22px;margin:0 0 12px}
+  p.lede{color:var(--muted);margin:0 0 12px}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin:16px 0}
+  label{display:block;margin:6px 0}
+  .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  input[type="number"],input[type="text"],select{
+    background:#0e1216;color:#cfe3f5;border:1px solid #2a3541;border-radius:6px;padding:6px
   }
-  .eoe-app input[type="number"]#costPerBox{width:14ch}
-  .eoe-app select{width:auto}
-  .eoe-app button{appearance:none;border:1px solid #2c3845;background:#1b232c;color:var(--fg);padding:10px 14px;border-radius:8px;cursor:pointer}
-  .eoe-app button[disabled]{opacity:.5;cursor:default}
-  .eoe-app .actions{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0}
-  .eoe-app #status{margin-top:8px;color:var(--muted)}
-  .eoe-app #counts b{color:#7ddc7a}
+  button{appearance:none;border:1px solid #2c3845;background:#1b232c;color:var(--fg);
+    padding:10px 14px;border-radius:8px;cursor:pointer}
+  button[disabled]{opacity:.55;cursor:default}
+  .btn-primary{
+    border-color:var(--hi-line);background:linear-gradient(180deg,#203245,#1a2530);
+    color:#dff1ff;font-weight:600;animation:pulse 2.2s infinite;
+  }
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(106,193,255,.45)}70%{box-shadow:0 0 0 10px rgba(106,193,255,0)}100%{box-shadow:0 0 0 0 rgba(106,193,255,0)}}
+  .hi-inline{display:flex;align-items:center;gap:6px;border:1px solid var(--hi-line);background:var(--hi-bg);border-radius:8px;padding:6px 8px}
+  .hi-label{border:1px solid var(--hi-line);background:var(--hi-bg);border-radius:8px;padding:6px 8px}
 
   .freBanner{display:flex;justify-content:center;margin:8px 0 16px}
   .freBanner img{max-width:420px;width:100%;height:auto;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
 
-  .btn-primary{border-color:var(--hi-line);background:linear-gradient(180deg,#203245,#1a2530);color:#dff1ff;font-weight:600}
-  .hi-label{border:1px solid var(--hi-line);background:var(--hi-bg);border-radius:8px;padding:6px 8px}
-  .hi-inline{display:flex;align-items:center;gap:6px;border:1px solid var(--hi-line);background:var(--hi-bg);border-radius:8px;padding:6px 8px}
+  table{width:100%;border-collapse:collapse;margin-top:8px}
+  th,td{border:1px solid #2a3541;padding:6px 8px;text-align:right}
+  th:first-child,td:first-child{text-align:left}
+  thead th{background:#0e1216;position:sticky;top:0;z-index:1}
+  tbody tr:nth-child(even){background:#12171d}
+  .pill{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid #2a3541}
+  .pill.ok{background:rgba(30,127,60,.20);color:#d9ffe3;border-color:#1e7f3c}
+  .pill.bad{background:rgba(155,44,44,.16);color:#ffdede;border-color:#9b2c2c}
+  .sift-ok{background:rgba(30,127,60,.12)!important}
+  .sift-bad{background:rgba(155,44,44,.10)!important}
 
+  .note{color:#a7b0bb;font-size:12px;margin-top:6px}
   .error-panel{border-color:#ff7a7a!important}
   .error-panel h2{margin:0 0 8px;color:#ff7a7a;font-size:16px}
   .error-panel pre{white-space:pre-wrap;background:#0e1216;border:1px solid #2a3541;padding:8px;border-radius:6px;color:#ffd4d4}
 
-  table{width:100%;border-collapse:collapse;margin-top:8px}
-  th,td{border:1px solid #2a3541;padding:8px 10px;text-align:right}
-  th:first-child,td:first-child{text-align:left}
-  thead th{background:#0e1216;position:sticky;top:0;z-index:1}
-  tbody tr:nth-child(even){background:#12171d}
-
-  .pill{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid #2a3541}
-  .pill.ok{background:rgba(30,127,60,.20);color:#d9ffe3;border-color:#1e7f3c}
-  .pill.bad{background:rgba(155,44,44,.16);color:#ffdede;border-color:#9b2c2c}
-
-  .evbox table{margin:8px 0}
-  .evbox table th,.evbox table td{border:1px solid #2a3541;padding:8px 10px}
-  .evbox table thead th{background:#0e1216}
-  .evbox table th:nth-child(3), .evbox table td:nth-child(3){
-    background:var(--est-bg); border-color:var(--est-line); border-left-color:var(--est-line);
-    color:#eaf6ff; font-weight:700;
-  }
-  .evbox table th:nth-child(2), .evbox table td:nth-child(2){border-right-color:var(--est-line)}
-
-  .sift-ok  { background:rgba(30,127,60,.18) !important; border-left:2px solid #1e7f3c; }
-  .sift-bad { background:rgba(155,44,44,.16) !important; border-left:2px solid #9b2c2c; }
-
-  details.eoe-collapse>summary{
-    cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;
-    padding:8px 10px;border:1px solid #2a3541;border-radius:8px;background:#0e1216;color:#dfeeff;font-weight:600
-  }
-  details.eoe-collapse>summary::-webkit-details-marker{display:none}
-  details.eoe-collapse>summary::after{content:'▼';opacity:.8;transform:rotate(-90deg);transition:transform .18s;margin-left:12px;font-size:12px}
-  details.eoe-collapse[open]>summary::after{transform:rotate(0deg)}
-  details.eoe-collapse .content{margin-top:10px}
+  /* Compact table for your simplified columns */
+  .compact th,.compact td{white-space:nowrap}
+  .feeHint{cursor:help;border-bottom:1px dotted #6ac1ff}
 </style>
 </head>
 <body>
-<main class="eoe-app" aria-label="OTJ Play Booster EV app">
+<main class="eoe-app" aria-label="OTJ Play Booster EV">
+  <!-- Banner -->
   <div class="freBanner">
     <a href="./index.html"><img src="freEV-banner.png" alt="FreEV — Spend your money on cards not calculators"></a>
   </div>
 
   <h1>Outlaws of Thunder Junction — Play Booster EV</h1>
   <p class="lede">
-    Uses Scryfall pricing on load. Playing‑card odds are normalized to <b>14 cards per pack</b>. One foil wildcard per pack + Land is foil in ~20% of packs.
+    Builds on load using Scryfall. Playing‑card odds are normalized to exactly <b>14 cards per pack</b> (non‑game items modeled separately). This view adds a <b>TCGplayer fee calculator</b> with a seller‑type dropdown.
   </p>
 
+  <!-- Refresh & Options -->
   <div class="panel">
     <strong>Refresh data</strong>
     <label><input type="checkbox" id="englishOnly" checked> English‑only (avoid dupes)</label>
 
-    <div class="row">
-      <label><input type="checkbox" id="includeOTJ" checked> Include <b>OTJ</b> main set (normal + foil)</label>
-    </div>
-    <div class="row">
-      <label><input type="checkbox" id="includeOTP" checked> Include <b>OTP</b> Breaking News (normal only)</label>
-    </div>
-    <div class="row">
-      <label><input type="checkbox" id="includeSPG" checked> Include <b>SPG</b> Special Guests (normal only)</label>
-    </div>
-    <div class="row">
-      <label><input type="checkbox" id="includeBIG" checked> Include <b>BIG</b> The Big Score (The List)</label>
-    </div>
+    <label><input type="checkbox" id="includeOTJ" checked> Include <b>OTJ</b> (main set, <code>is:booster</code>)</label>
+    <label><input type="checkbox" id="includeOTP" checked> Include <b>OTP</b> (Breaking News — approx. 1 per pack)</label>
+    <label><input type="checkbox" id="includeBIG" checked> Include <b>BIG</b> (The Big Score — “List” slot)</label>
+    <label><input type="checkbox" id="includeSPG" checked> Include <b>SPG</b> (Special Guests — nonfoil only)</label>
 
-    <div id="status" aria-live="polite" style="margin-top:6px">Preparing…</div>
-    <div id="counts" style="margin-top:4px"></div>
+    <label><input type="checkbox" id="includeTOK"> Include <b>TOTJ</b> tokens</label>
+    <label>Token fallback (USD): <input type="text" id="tokenFallback" value="0.05"></label>
+    <label><input type="checkbox" id="includeART"> Include <b>AOTJ</b> Art Series (normal + signed)</label>
+    <label>Art fallback (USD): <input type="text" id="artFallback" value="0.00"></label>
 
-    <div class="actions" style="margin-top:10px">
+    <div class="actions">
       <button id="buildBtn" class="btn-primary">Refresh List</button>
     </div>
-
-    <details style="margin-top:8px">
-      <summary>Advanced: Scryfall queries</summary>
-      <pre id="queries" style="white-space:pre-wrap;"></pre>
-    </details>
+    <div id="status" class="note" aria-live="polite">Preparing…</div>
+    <div id="counts" class="note"></div>
   </div>
 
-  <!-- Tokens (separate section; UNCHECKED by default) -->
+  <!-- Seller Fee Settings -->
   <div class="panel">
-    <strong>Tokens (TOTJ)</strong>
-    <div class="row">
-      <label><input type="checkbox" id="includeTOK"> Include <b>TOTJ</b> Tokens</label>
-      <label>Token fallback (USD): <input type="text" id="tokenFallback" value="0.05" title="Used if token price missing"></label>
-    </div>
-  </div>
-
-  <!-- Art Series (separate section; UNCHECKED by default) -->
-  <div class="panel">
-    <strong>Art Series (AOTJ)</strong>
-    <div class="row">
-      <label><input type="checkbox" id="includeART"> Include <b>AOTJ</b> Art Series (normal + signed)</label>
-      <label>Art fallback (USD): <input type="text" id="artFallback" value="0.00" title="Used if art price missing"></label>
-    </div>
-  </div>
-
-  <!-- Purchase EV -->
-  <div id="purchasePanel" class="panel" style="display:none">
-    <strong>Purchase EV Calculator</strong>
+    <strong>TCGplayer Seller Fees</strong>
     <div class="row" style="margin-top:6px">
-      <label class="hi-label">Boxes to buy: <input type="number" id="boxesToBuy" value="1" min="0" step="1"></label>
-      <span class="hi-inline" title="Only count prints with Card Value ≥ this amount">
-        <input type="checkbox" id="useSiftForEV" checked>
+      <label>Seller type:
+        <select id="sellerType">
+          <option value="l4">Marketplace (Level 4)</option>
+          <option value="pro">Marketplace (Pro Seller)</option>
+        </select>
+      </label>
+      <span class="hi-inline">
+        <input type="checkbox" id="useSift" checked>
         <b>Use Sift (≥)</b>
-        <input type="text" id="siftMin" value="0.25">
+        <input type="text" id="siftMin" value="0.25" style="width:8ch">
       </span>
-      <label class="hi-label" title="Your buy price per 36-pack box">
-        Cost per box (USD): <input type="number" id="costPerBox" value="0" min="0" step="0.01">
-      </label>
+      <button id="applySift" disabled>Apply</button>
     </div>
-    <div class="row" style="margin-top:6px">
-      <label>TCGplayer seller
-        <select id="sellerTier" title="Fee policy for EV/fees">
-          <option value="mkt-l1">Marketplace Seller Level 1</option>
-          <option value="mkt-l2">Marketplace Seller Level 2</option>
-          <option value="mkt-l3">Marketplace Seller Level 3</option>
-          <option value="mkt-l4" selected>Marketplace Seller Level 4</option>
-          <option value="pro">Pro Seller</option>
-        </select>
-      </label>
-      <label class="hi-label" title="Order-level transaction fees">
-        Expected transactions:
-        <input type="number" id="expectedTx" value="0" min="0" step="1">
-        <span style="color:var(--muted);font-size:12px;margin-left:6px">
-          “For now”: set N=0 to treat both transaction fees as $0; set N&gt;0 to include 2.5% and $0.30/order.
-        </span>
-      </label>
+    <div class="note">
+      Fees follow TCGplayer’s current tables: **Level 1–4: 10.25% commission + 2.5% processing + $0.30**; **Pro: 9.25% commission + 2.5% Pro fee + 2.5% processing + $0.30**.
+      Each commission/Pro component is capped at **$50 per product**. Per‑row estimates treat order subtotal/total ≈ card price and apply banker’s rounding to cents. :contentReference[oaicite:2]{index=2}
     </div>
-    <div class="row" style="margin-top:6px">
-      <label><input type="radio" name="rangeMode" value="stat" checked> Statistical range (CLT)</label>
-      <label><input type="radio" name="rangeMode" value="struct"> Structural range (slot band)</label>
-      <label>Confidence:
-        <select id="confLevel">
-          <option value="68">68% (~1σ)</option>
-          <option value="90">90% (~1.645σ)</option>
-          <option value="95" selected>95% (~1.96σ)</option>
-          <option value="99">99% (~2.576σ)</option>
-        </select>
-      </label>
-      <button id="calcEV" disabled>Calculate EV</button>
-    </div>
-    <div id="purchaseSummary" class="note"></div>
-    <div id="purchaseEVContainer" class="evbox" style="display:none"></div>
-    <div id="rangeNotes" class="note"></div>
   </div>
 
-  <!-- Sift table -->
+  <!-- Row list (simplified columns) -->
   <div id="siftPanel" class="panel" style="display:none">
     <strong>Row List (linked)</strong>
     <div class="row">
       <span class="pill ok">≥ threshold</span>
       <span class="pill bad">&lt; threshold</span>
-      <button id="applySift" disabled>Re‑Apply Sift</button>
     </div>
-    <div id="siftSummary" class="note" aria-live="polite"></div>
-    <div class="sift-tablewrap" id="siftTableWrap" style="display:none">
-      <table id="siftTable">
+    <div id="siftSummary" class="note"></div>
+    <div class="sift-tablewrap" id="siftTableWrap" style="display:none; border:1px solid #2a3541;border-radius:8px;max-height:560px;overflow:auto">
+      <table id="siftTable" class="compact">
         <thead>
           <tr>
-            <th>Set</th><th>No.</th><th>R</th><th>Name</th><th>Treatment</th>
-            <th>Pack Prob Min (%)</th>
-            <th>Card Value (USD)</th><th>Fees/card (USD)</th>
-            <th>Expected cards per 1000</th>
+            <th>Name</th>
+            <th>Treatment</th>
+            <th>Drop %</th>
+            <th>Value</th>
+            <th>Seller Fee</th>
+            <th>Expected / 10,000</th>
           </tr>
         </thead>
         <tbody id="siftBody"></tbody>
       </table>
     </div>
-    <div class="actions" id="dlRow" style="display:none">
-      <button id="downloadCsv" disabled>Download CSV</button>
-      <button id="downloadSiftCsv" disabled>Download Sift CSV</button>
-    </div>
   </div>
 
+  <!-- Error box -->
   <div id="errorBox" class="panel error-panel" style="display:none">
     <h2>Load failed</h2>
     <div id="errorMsg"></div>
     <pre id="errorDetails"></pre>
   </div>
 
-  <div id="totalsPanel" class="panel" style="display:none">
-    <details id="totalsDetails" class="eoe-collapse" open>
-      <summary>Totals (estimates)</summary>
-      <div class="content">
-        <table>
-          <thead><tr><th>Metric</th><th>Across packs</th><th>Per 36‑pack box</th></tr></thead>
-          <tbody id="totalsBody"></tbody>
-        </table>
-        <div id="totalsNotes" class="note"></div>
-      </div>
-    </details>
-  </div>
-
+  <!-- Footer banner -->
   <div class="freBanner">
     <a href="./index.html"><img src="freEV-banner.png" alt="FreEV — Spend your money on cards not calculators"></a>
   </div>
 </main>
 
-<!-- Google tag (gtag.js) -->
+<!-- Google tag (gtag.js) BEFORE first custom script -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-LWMRXKNY5X"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -244,192 +161,281 @@
   gtag('js', new Date());
   gtag('config', 'G-LWMRXKNY5X');
 </script>
+
 <script>
-/* ============================ Helpers ============================ */
-const rarityLetter = r => ({common:'C',uncommon:'U',rare:'R',mythic:'M'}[r] || (r?r[0].toUpperCase():''));
+/* ====================== Helpers & rounding ====================== */
+const rarityLetter = r => ({common:'C',uncommon:'U',rare:'R',mythic:'M'}[r] || (r?r[0].toUpperCase():'')); 
 const sleep = ms => new Promise(res=>setTimeout(res,ms));
-const padCollector = s => { const m=String(s||'').match(/^(\d+)(.*)$/); return m?m[1].padStart(4,'0')+(m[2]||''):(s||''); };
 const parseUSD = s => { const n=parseFloat(String(s).replace(/[^0-9.]/g,'')); return Number.isFinite(n)?n:null; };
 const money = n => Number.isFinite(n)? n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) : '';
-const fmtUSD = n => money(n);
-const fmtCount = n => !Number.isFinite(n)? '' : (Math.abs(n-Math.round(n))<1e-9? Math.round(n).toLocaleString() : (n>=100?n.toFixed(1):n>=10?n.toFixed(2):n.toFixed(3)));
-const fmtInt = n => Number.isFinite(n)? Math.round(n).toLocaleString() : '';
-const zFromConf = c => { c=Math.round(c); if(c>=99)return 2.576; if(c>=95)return 1.96; if(c>=90)return 1.645; if(c>=68)return 1.0; return 1.96; };
-const priceUSD = (card,treat) => { const p=(treat==='foil'?card?.prices?.usd_foil:card?.prices?.usd); const f=parseFloat(p); return Number.isFinite(f)?f:null; };
-
-/* ============================ TCGplayer Fees ============================ */
-/* Marketplace (Level 1–4): 10.25% commission; Pro Seller: 9.25% commission + 2.5% Pro fee;
-   Transaction fee: 2.5% + $0.30 per order (we split these in UI now).
-   Commission+Pro capped at $50 per product. */
-function getSellerPolicy(){
-  const sel = document.getElementById('sellerTier');
-  const v = sel && sel.value ? sel.value : 'mkt-l4';
-  // Transaction fee constants (kept here for a single source of truth)
-  const txPct = 0.025, txFixed = 0.30;
-  if(v === 'pro') return { key:v, label:'Pro Seller', commission:0.0925, pro:0.025, txPct, txFixed };
-  return { key:v, label:'Marketplace Seller', commission:0.1025, pro:0, txPct, txFixed };
-}
-function perCardFeeUSD(price, policy){
-  if(!Number.isFinite(price) || price<=0) return 0;
-  const preCap = price * (policy.commission + policy.pro);
-  return Math.min(preCap, 50.0);
-}
-function computeFeesSummary(packs, useSift, minUSD, policy){
-  let gross=0, commPro=0;
-  for(const row of __ROW_MODELS__){
-    const p = probPoint(row.model); if(!Number.isFinite(p)) continue;
-    const pS = row.nonGame? p : (p*__NORM_SCALE__);
-    const usd = row.price;
-    const ok = (!useSift) || (Number.isFinite(usd) && usd >= minUSD);
-    if(!ok || !Number.isFinite(usd)) continue;
-    const expected = pS * packs;
-    gross  += usd * expected;                     // "gross EV" across packs
-    commPro += perCardFeeUSD(usd, policy) * expected; // commission+pro per expected card
-  }
-  return { gross, commPro };
+function bankersRound(n, decimals=2){
+  const m = Math.pow(10, decimals);
+  const x = n*m;
+  const f = Math.floor(x), diff = x - f;
+  if (Math.abs(diff - 0.5) < 1e-8) return ((f % 2 === 0) ? f : f+1)/m;
+  return Math.round(x)/m;
 }
 
-/* ======================= OTJ model constants (unchanged core EV math) ======================= */
-const PACKS_PER_BOX = 36;
+/* ====================== Fee profiles (TCGplayer) ======================
+   Source: TCGplayer Help Center (Marketplace Fees & Examples). 
+   Level 1–4: 10.25% commission; Pro: 9.25% commission + 2.5% Pro fee; both add 2.5% processing + $0.30/txn. 
+   Each of commission & Pro is capped at $50 per product. :contentReference[oaicite:3]{index=3}
+*/
+const FeeProfiles = {
+  l4: { commission:0.1025, pro:0.0,   processing:0.025, txnFixed:0.30 },
+  pro:{ commission:0.0925, pro:0.025, processing:0.025, txnFixed:0.30 }
+};
+function calcFees(price, sellerType){
+  const fp = FeeProfiles[sellerType] || FeeProfiles.l4;
+  const subtotal = price;   // assumption for per-print estimate
+  const orderTot = price;   // assume items only; shipping/tax vary by order
+  let commission = Math.min(fp.commission * subtotal, 50);
+  let profee     = Math.min(fp.pro        * subtotal, 50);
+  let procPerc   = fp.processing * orderTot;
+  const txn      = fp.txnFixed;
+  commission = bankersRound(commission);
+  profee     = bankersRound(profee);
+  procPerc   = bankersRound(procPerc);
+  const processing = bankersRound(procPerc + txn);
+  const total = bankersRound(commission + profee + processing);
+  return {commission, profee, procPerc, txn, processing, total};
+}
+
+/* ====================== Pack model (OTJ) ======================
+   Heuristic Play Booster model (normalized to 14 playing cards/pack):
+   - Common/Uncommon slots include a portion of the wildcard.
+   - Rare slot: 7/8 Rare, 1/8 Mythic, plus the R/M share from the wildcard.
+   - Foil slot rarity split: ~58%C / ~32%U / ~6.4%R / ~1.1%M.
+   - OTP (Breaking News): roughly 1 per pack (shared across OTP prints).
+   - BIG (The Big Score): treat as “List” ~20% of packs (heuristic).
+   - SPG (Special Guests): treat as nonfoil “List” micro slot (~1/64 packs).
+   We normalize *playing cards* so the mass sums to 14. Non‑game items aren’t normalized.
+   Reference on “20% special card” (heuristic): community summaries around OTJ release. :contentReference[oaicite:4]{index=4}
+*/
+const PACKS_PER_BOX = 36; // OTJ Play Booster displays are 36 packs
 const OTJ_ODDS = {
-  COMMON_SLOTS: 6,
-  UNCOMMON_BASE: 3,
-  RARE_SLOT: 1,
-  WILDCARD: 1,
-  RM_MYTHIC_RATE: 1/7.4,
-  RM_RARE_RATE: 1 - (1/7.4),
+  COMMON_SLOTS: 7 + 0.125,
+  UNCOMMON_BASE: 3 + 0.625,
   WILDCARD_RM: 1/12,
-  WILDCARD_R_SHARE: 2/3,
-  WILDCARD_M_SHARE: 1/3,
-  OTP_U: 2/3,
-  OTP_RM: 1/3,
-  OTP_R_SHARE: 2/3,
-  OTP_M_SHARE: 1/3,
-  LIST_RATE: 1/5,
-  SPG_PER_PACK: 1/64,
-  LAND_COMMON_DUALS: 1/2,
-  LAND_WESTERN: 1/6,
-  LAND_REGULAR: 1/3,
-  LAND_FOIL_RATE: 0.20,
-  FOIL_SLOT: 1.0,
-  FOIL_RARITY: { common:0.70, uncommon:0.22, rare:0.07, mythic:0.01 },
+  RM_MYTHIC_RATE: 1/8,
+  RM_RARE_RATE: 7/8,
+  FOIL_C: 0.58, FOIL_U: 0.32, FOIL_R: 0.064, FOIL_M: 0.011,
+  OTP_PER_PACK: 1.0,        // Breaking News ~1 per pack (shared across prints)
+  BIG_PER_PACK: 0.20,       // “special card” heuristic ~20%
+  SPG_PER_PACK_NF: 1/64,    // nonfoil only, small List-like rate
   NONGAME_TOKEN: 0.65, NONGAME_ART: 0.30, NONGAME_ART_SIGNED: 0.05
 };
 
-/* ========================= Derived odds helpers ========================= */
-const PM = { point(p){ return { type:'point', p } } };
-function probPoint(model){ return model?.type==='point'? model.p : null; }
+/* ====================== State ====================== */
+let __ROWS__=[]; // {name,treat,pModel,price,url,isNonGame}
+let __NORM_SCALE__=1;
 
-/* ========================= Build logic (unchanged) ========================= */
-let __ROW_MODELS__ = [];
-let __META_ROWS__  = [];
-let __NORM_SCALE__ = 1;
-let __SIFT_CSV__   = '';
-let __CSV__        = '';
+/* ====================== Queries ====================== */
+function qMain(englishOnly){
+  let q='e:otj is:booster -finish:glossy -finish:etched -finish:textured';
+  if(englishOnly) q+=' lang:en';
+  return q;
+}
+function qOTP(englishOnly){
+  let q='e:otp is:booster -finish:textured';
+  if(englishOnly) q+=' lang:en';
+  return q;
+}
+function qBIG(englishOnly){
+  let q='e:big is:booster -finish:foil';
+  if(englishOnly) q+=' lang:en';
+  return q;
+}
+function qSPG(englishOnly){
+  let q='e:spg is:booster -finish:foil';
+  if(englishOnly) q+=' lang:en';
+  return q;
+}
+function qTOK(englishOnly){
+  let q='e:totj (layout:token or layout:double_faced_token or layout:emblem)';
+  if(englishOnly) q+=' lang:en';
+  return q;
+}
+function qART(englishOnly){
+  let q='e:aotj';
+  if(englishOnly) q+=' lang:en';
+  return q;
+}
+async function fetchAll(q, tag, statusEl){
+  const base='https://api.scryfall.com/cards/search?unique=prints&order=set&dir=asc&q=';
+  let url=base+encodeURIComponent(q), out=[], p=1;
+  while(url){
+    statusEl.textContent=`Fetching ${tag}… (page ${p})`;
+    const r=await fetch(url);
+    if(!r.ok){ const t=await r.text().catch(()=> ''); throw {set:tag,query:q,status:r.status,details:t}; }
+    const j=await r.json();
+    out=out.concat(j.data||[]);
+    url=j.has_more? j.next_page : null;
+    p++; if(url) await sleep(120);
+  }
+  return out.filter(c=> (c.games||[]).includes('paper'));
+}
 
+/* ====================== Probability helpers ====================== */
+const PM = { point:p=>({type:'point',p}) };
+const probPoint = m => m?.type==='point'? m.p : null;
+
+/* ====================== Build ====================== */
 async function build(){
+  // reset
   document.getElementById('errorBox').style.display='none';
-  document.getElementById('purchasePanel').style.display='none';
-  document.getElementById('purchaseEVContainer').style.display='none';
+  document.getElementById('status').textContent='Building list…';
   document.getElementById('siftPanel').style.display='none';
   document.getElementById('siftTableWrap').style.display='none';
-  document.getElementById('dlRow').style.display='none';
-  document.getElementById('siftSummary').textContent='';
-  document.getElementById('status').textContent='Building list…';
-  document.getElementById('counts').textContent='';
+  document.getElementById('siftBody').innerHTML='';
+  __ROWS__=[]; __NORM_SCALE__=1;
 
-  const englishOnly=document.getElementById('englishOnly').checked;
-  const incOTJ=document.getElementById('includeOTJ').checked;
-  const incOTP=document.getElementById('includeOTP').checked;
-  const incBIG=document.getElementById('includeBIG').checked;
-  const incSPG=document.getElementById('includeSPG').checked;
-  const incTOK=document.getElementById('includeTOK').checked;
-  const incART=document.getElementById('includeART').checked;
+  const englishOnly = document.getElementById('englishOnly').checked;
+  const incOTJ = document.getElementById('includeOTJ').checked;
+  const incOTP = document.getElementById('includeOTP').checked;
+  const incBIG = document.getElementById('includeBIG').checked;
+  const incSPG = document.getElementById('includeSPG').checked;
+  const incTOK = document.getElementById('includeTOK').checked;
+  const incART = document.getElementById('includeART').checked;
+  const tokenFallback = parseUSD(document.getElementById('tokenFallback').value);
+  const artFallback   = parseUSD(document.getElementById('artFallback').value);
+  const status = document.getElementById('status');
+  const counts = document.getElementById('counts');
 
-  function buildQuery(setCode, englishOnly){
-    let q='';
-    if(setCode==='OTJ') q='e:otj is:booster';
-    if(setCode==='OTP') q='e:otp';
-    if(setCode==='BIG') q='e:big';
-    if(setCode==='SPG') q='e:spg';
-    if(setCode==='TOTJ') q='e:totj';
-    if(setCode==='AOTJ') q='e:aotj';
-    if(englishOnly) q+=' lang:en';
-    return q.trim();
-  }
-  function linkOf(card){ return card?.scryfall_uri || ''; }
+  try{
+    const bundles = [];
+    if(incOTJ) bundles.push(['OTJ', await fetchAll(qMain(englishOnly),'OTJ',status)]);
+    if(incOTP) bundles.push(['OTP', await fetchAll(qOTP(englishOnly),'OTP',status)]);
+    if(incBIG) bundles.push(['BIG', await fetchAll(qBIG(englishOnly),'BIG',status)]);
+    if(incSPG) bundles.push(['SPG', await fetchAll(qSPG(englishOnly),'SPG',status)]);
+    if(incTOK) bundles.push(['TOK', await fetchAll(qTOK(englishOnly),'TOTJ tokens',status)]);
+    if(incART) bundles.push(['ART', await fetchAll(qART(englishOnly),'AOTJ art',status)]);
 
-  const queries = [];
-  if(incOTJ) queries.push({ code:'OTJ', q:buildQuery('OTJ',englishOnly) });
-  if(incOTP) queries.push({ code:'OTP', q:buildQuery('OTP',englishOnly) });
-  if(incBIG) queries.push({ code:'BIG', q:buildQuery('BIG',englishOnly) });
-  if(incSPG) queries.push({ code:'SPG', q:buildQuery('SPG',englishOnly) });
-  if(incTOK) queries.push({ code:'TOTJ', q:buildQuery('TOTJ',englishOnly) });
-  if(incART) queries.push({ code:'AOTJ', q:buildQuery('AOTJ',englishOnly) });
+    // Split OTJ pools
+    const otjAll = (bundles.find(b=>b[0]==='OTJ')||[null,[]])[1];
+    const C = otjAll.filter(c=>c.rarity==='common');
+    const U = otjAll.filter(c=>c.rarity==='uncommon');
+    const R = otjAll.filter(c=>c.rarity==='rare');
+    const M = otjAll.filter(c=>c.rarity==='mythic');
 
-  const qEl = document.getElementById('queries');
-  if (qEl) qEl.textContent = queries.map(q=> `${q.code}: ${q.q}`).join('\n');
+    const P = OTJ_ODDS;
 
-  let fetched = {};
-  async function fetchAll(){
-    for(const {code,q} of queries){
-      const url = `https://api.scryfall.com/cards/search?q=${encodeURIComponent(q)}`;
-      const r = await fetch(url);
-      if(!r.ok){ throw new Error(`Scryfall fetch failed for ${code} — ${r.status}`); }
-      const j = await r.json();
-      let all = Array.isArray(j.data)? j.data : [];
-      let next = j.next_page;
-      while(next){
-        const r2=await fetch(next); if(!r2.ok) break;
-        const j2=await r2.json(); all = all.concat(Array.isArray(j2.data)? j2.data : []); next=j2.next_page;
-      }
-      fetched[code]=all;
-      document.getElementById('status').textContent = `Fetched ${code} (${all.length.toLocaleString()} prints)…`;
-      await sleep(60);
+    // Nonfoil main per print
+    const cuTotal = (C.length + U.length) || 1;
+    const wcCU = 1 - P.WILDCARD_RM;
+    const wcCshare = wcCU * (C.length/cuTotal);
+    const wcUshare = wcCU * (U.length/cuTotal);
+    const pCommonNF   = C.length? (P.COMMON_SLOTS/C.length)  + (wcCshare/C.length) : 0;
+    const pUncommonNF = U.length? (P.UNCOMMON_BASE/U.length) + (wcUshare/U.length) : 0;
+    const pRareNF     = R.length? ((P.RM_RARE_RATE)/R.length)     + ((P.WILDCARD_RM*P.RM_RARE_RATE)/R.length) : 0;
+    const pMythicNF   = M.length? ((P.RM_MYTHIC_RATE)/M.length)   + ((P.WILDCARD_RM*P.RM_MYTHIC_RATE)/M.length) : 0;
+
+    // Foil slot split by rarity (only foilable prints)
+    const foilC = C.filter(c=>(c.finishes||[]).includes('foil'));
+    const foilU = U.filter(c=>(c.finishes||[]).includes('foil'));
+    const foilR = R.filter(c=>(c.finishes||[]).includes('foil'));
+    const foilM = M.filter(c=>(c.finishes||[]).includes('foil'));
+    const pFoilC = foilC.length? P.FOIL_C/foilC.length : 0;
+    const pFoilU = foilU.length? P.FOIL_U/foilU.length : 0;
+    const pFoilR = foilR.length? P.FOIL_R/foilR.length : 0;
+    const pFoilM = foilM.length? P.FOIL_M/foilM.length : 0;
+
+    // Push OTJ rows
+    function pushRow(card, treat, p, isNonGame=false, overrideUSD=null){
+      const usd = (overrideUSD!==null)? overrideUSD :
+                  (treat==='foil'? parseUSD(card?.prices?.usd_foil): parseUSD(card?.prices?.usd));
+      __ROWS__.push({
+        name: card.name, treat, pModel: PM.point(p), price: usd, url: card.scryfall_uri||'',
+        isNonGame
+      });
     }
-  }
+    for(const c of otjAll){
+      const f = Array.isArray(c.finishes)?c.finishes:[];
+      if(f.includes('nonfoil')){
+        if(c.rarity==='common')   pushRow(c,'normal',pCommonNF);
+        if(c.rarity==='uncommon') pushRow(c,'normal',pUncommonNF);
+        if(c.rarity==='rare')     pushRow(c,'normal',pRareNF);
+        if(c.rarity==='mythic')   pushRow(c,'normal',pMythicNF);
+      }
+      if(f.includes('foil')){
+        if(c.rarity==='common')   pushRow(c,'foil',pFoilC);
+        if(c.rarity==='uncommon') pushRow(c,'foil',pFoilU);
+        if(c.rarity==='rare')     pushRow(c,'foil',pFoilR);
+        if(c.rarity==='mythic')   pushRow(c,'foil',pFoilM);
+      }
+    }
 
-  try{ await fetchAll(); }catch(e){
-    document.getElementById('errorBox').style.display='';
-    document.getElementById('errorMsg').textContent = 'Load failed';
-    document.getElementById('errorDetails').textContent = String(e&&e.message?e.message:e);
-    document.getElementById('status').textContent='Build failed.';
-    return;
-  }
+    // OTP: 1 per pack distributed across prints (include foil & nonfoil)
+    const otp = (bundles.find(b=>b[0]==='OTP')||[null,[]])[1];
+    if(incOTP && otp.length){
+      const perPrint = P.OTP_PER_PACK / otp.length;
+      for(const c of otp){
+        const fins = c.finishes||[];
+        if(fins.includes('nonfoil')) pushRow(c,'normal',perPrint,false,null);
+        if(fins.includes('foil'))    pushRow(c,'foil',perPrint,false,null);
+      }
+    }
 
-  const data = fetched;
+    // BIG: “The Big Score” — List-like ~20% of packs, nonfoil only
+    const big = (bundles.find(b=>b[0]==='BIG')||[null,[]])[1];
+    if(incBIG && big.length){
+      const perPrint = P.BIG_PER_PACK / big.length;
+      for(const c of big){
+        const fins=c.finishes||[];
+        if(fins.includes('nonfoil')) pushRow(c,'normal',perPrint,false,null);
+      }
+    }
 
-  let rows = [];
-  let meta = [];
+    // SPG: Special Guests — nonfoil only, small List-like rate
+    const spg = (bundles.find(b=>b[0]==='SPG')||[null,[]])[1];
+    if(incSPG && spg.length){
+      const perPrint = P.SPG_PER_PACK_NF / spg.length;
+      for(const c of spg){
+        const fins=c.finishes||[];
+        if(fins.includes('nonfoil')) pushRow(c,'normal',perPrint,false,null);
+      }
+    }
 
-  const otjAll = (data.OTJ||[]).filter(c=> (c.games||[]).includes('paper'));
-  const isBasic = c => /Basic/i.test(c.type_line||'');
-  const isLand = c => /Land/i.test(c.type_line||'');
-  const isFullArt = c => !!c.full_art;
-  const isCommonDual = c => (c.rarity==='common') && isLand(c) && !isBasic(c);
+    // Non‑game: tokens
+    const tok = (bundles.find(b=>b[0]==='TOK')||[null,[]])[1];
+    if(incTOK && tok.length){
+      const per = OTJ_ODDS.NONGAME_TOKEN / tok.length;
+      for(const c of tok){
+        const usd = parseUSD(c?.prices?.usd);
+        const val = Number.isFinite(usd)? usd : (Number.isFinite(tokenFallback)? tokenFallback : null);
+        pushRow(c,'token',per,true,val);
+      }
+    }
+    // Non‑game: art (normal + signed split)
+    const art = (bundles.find(b=>b[0]==='ART')||[null,[]])[1];
+    if(incART && art.length){
+      const n=art.length||1;
+      const pNormal = OTJ_ODDS.NONGAME_ART / n;
+      const pSigned = OTJ_ODDS.NONGAME_ART_SIGNED / n;
+      for(const c of art){
+        const usd = parseUSD(c?.prices?.usd);
+        const val = Number.isFinite(usd)? usd : (Number.isFinite(artFallback)? artFallback : null);
+        pushRow(c,'art',pNormal,true,val);
+        pushRow(c,'signed',pSigned,true,val);
+      }
+    }
 
-  const otjCommons = otjAll.filter(c=> c.rarity==='common' && !isLand(c));
-  const otjUncommons = otjAll.filter(c=> c.rarity==='uncommon' && !isLand(c));
-  const otjRares = otjAll.filter(c=> c.rarity==='rare');
-  const otjMythics = otjAll.filter(c=> c.rarity==='mythic');
+    // Normalize playing-card mass to 14 per pack
+    const mass = __ROWS__.reduce((s,r)=> s + (r.isNonGame?0:(probPoint(r.pModel)||0)), 0);
+    __NORM_SCALE__ = mass>0 ? (14/mass) : 1;
 
-  const landCommonDuals   = otjAll.filter(isCommonDual);
-  const landBasicsRegular = otjAll.filter(c=> isBasic(c) && !isFullArt(c));
-  const landBasicsWestern = otjAll.filter(c=> isBasic(c) && isFullArt(c));
+    // Sort by name, then treatment
+    __ROWS__.sort((a,b)=> (a.name||'').localeCompare(b.name||'') || (a.treat||'').localeCompare(b.treat||''));
 
-  const foilElig = otjAll.filter(c=> !isLand(c) && (c.finishes||[]).includes('foil'));
-  const foilEligC = foilElig.filter(c=> c.rarity==='common');
-  const foilEligU = foilElig.filter(c=> c.rarity==='uncommon');
-  const foilEligR = foilElig.filter(c=> c.rarity==='rare');
-  const foilEligM = foilElig.filter(c=> c.rarity==='mythic');
+    // Counts & UI
+    const tot=__ROWS__.length, nonGame=__ROWS__.filter(r=>r.isNonGame).length;
+    counts.innerHTML = `Built <b>${tot.toLocaleString()}</b> rows — Playing cards: <b>${(tot-nonGame).toLocaleString()}</b>, Non‑game: <b>${nonGame.toLocaleString()}</b>.`;
+    document.getElementById('siftPanel').style.display='';
+    document.getElementById('applySift').disabled=false;
+    document.getElementById('status').textContent=`Done. (Normalization: ${__NORM_SCALE__.toFixed(5)} to 14 cards/pack)`;
 
-  const otpAll = (data.OTP||[]).filter(c=> (c.games||[]).includes('paper'));
-  const otpU = otpAll.filter(c=> c.rarity==='uncommon');
-  const otpR = otpAll.filter(c=> c.rarity==='rare');
-  const otpM = otpAll.filter(c=> c.rarity==='mythic');
-
-  const bigAll = (data.BIG||[]).filter(c=> (c.games||[]).includes('paper'));
-  const spgAllRaw = (data.SPG||[]).filter(c=> (c.games||[]).includes('paper'));
-  const spgForOTJ = spgAllRaw.filter(c=> c.released_at && c.released_at.startsWith('2024-04-19'));
-
-  const tokAll = (data.TOTJ||[]).filter(c=> (c.games||[]).includes('paper'
+    // Initial render with current sellerType & sift
+    applySift();
+  }catch(err){
+    console.error(err);
+    document.getElementById('status').textContent='Error while 
