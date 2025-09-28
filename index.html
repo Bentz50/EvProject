@@ -1,121 +1,107 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<title>FreEV — EV Tools Index</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<style>
-  html{background-color:#0b0d10;}
-  body{margin:0;padding:0;font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#e8ecf1;background:#0b0d10}
-  .eoe-app{max-width:960px;margin:32px auto;padding:0 16px;box-sizing:border-box}
-  a{color:#6ac1ff;text-decoration:underline}
-  h1{font-size:24px;margin:0 0 8px}
-  h2{font-size:18px;margin:16px 0 6px}
-  p{margin:8px 0}
-  .lede{color:#a7b0bb}
-  .panel{background:#151a20;border:1px solid #222a33;border-radius:12px;padding:16px;margin:16px 0}
-  .note{color:#a7b0bb;font-size:13px}
-  table{width:100%;border-collapse:collapse;margin-top:8px}
-  th,td{border:1px solid #222a33;padding:8px 10px;text-align:right}
-  th:first-child,td:first-child{text-align:left}
-  thead th{background:#0e1216;position:sticky;top:0}
-  details.collapse > summary{
-    cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;
-    padding:8px 10px;border:1px solid #222a33;border-radius:8px;background:#0e1216;color:#dfeeff;font-weight:600;
-    margin:-4px 0 8px;
-  }
-  details.collapse > summary::-webkit-details-marker{display:none}
-  details.collapse > summary::after{content:'▼';opacity:.8;transform:rotate(-90deg);transition:transform .18s;margin-left:12px;font-size:12px}
-  details.collapse[open] > summary::after{transform:rotate(0deg)}
-  details.collapse .content{margin-top:8px}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  /* Tools list vertical */
-  .tool-list{list-style:none;padding:0;margin:8px 0}
-  .tool-list li{margin:8px 0}
-  .btn{display:block;width:calc(100% - 28px);margin-top:0;padding:10px 14px;border-radius:8px;border:1px solid #222a33;background:#1b232c;color:#e8ecf1;text-decoration:none;text-align:left}
-  .btn:hover{border-color:#6ac1ff}
+  <title>FreEV has moved — The Expected Value</title>
+  <meta name="description" content="FreEV EV tools have moved to theexpectedvalue.com. Click through to the upgraded site for the latest calculators and methodology." />
+  <link rel="canonical" href="https://theexpectedvalue.com/" />
+  <!-- Optional: gentle redirect after 5 seconds. Set to 0 for immediate; remove this line to disable. -->
+  <meta http-equiv="refresh" content="5; url=https://theexpectedvalue.com/">
 
-  /* Range modes overview with image */
-  .panel.modes{display:grid;grid-template-columns:1.2fr 0.8fr;gap:16px;align-items:center}
-  @media(max-width:900px){.panel.modes{grid-template-columns:1fr;gap:12px}.panel.modes .modes-media{justify-self:center}}
-  .panel.modes .modes-media img{max-width:100%;height:auto;border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.35)}
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="FreEV has moved — The Expected Value" />
+  <meta property="og:description" content="Click through to the upgraded site for the latest FreEV calculators." />
+  <meta property="og:url" content="https://theexpectedvalue.com/" />
+  <meta property="og:image" content="https://theexpectedvalue.com/images/freev-og-card.png" />
 
-</style>
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="FreEV has moved — The Expected Value" />
+  <meta name="twitter:description" content="Go to the new site for the latest EV tools." />
+  <meta name="twitter:image" content="https://theexpectedvalue.com/images/freev-og-card.png" />
+
+  <style>
+    :root {
+      /* Reuse your FreEV tokens so this looks on-brand */
+      --bg: #0b0f14;
+      --panel: #0f1522;
+      --ink: #e6edf3;
+      --muted: #9fb0c2;
+      --accent: #7aa2ff;
+      --accent-soft: rgba(122, 162, 255, 0.25);
+      --border: 1px solid rgba(255, 255, 255, 0.08);
+      --radius: 16px;
+      --pad: 24px;
+      --btn-bg: #0a0a0c;
+      --btn-bg-hover: #141418;
+      --shadow: 0 18px 40px rgba(0,0,0,.35);
+    }
+    *,*::before,*::after { box-sizing: border-box; }
+    html, body {
+      margin: 0; background: var(--bg); color: var(--ink);
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6; text-rendering: optimizeLegibility;
+    }
+    main {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    .card {
+      width: min(780px, 100%);
+      background: var(--panel);
+      border: var(--border);
+      border-radius: var(--radius);
+      padding: clamp(20px, 4vw, 32px);
+      box-shadow: var(--shadow);
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.8rem, 2.6vw + 1rem, 2.6rem);
+      letter-spacing: 0.3px;
+    }
+    p { margin: 0; }
+    .lede { color: var(--muted); margin-top: 8px; }
+    .cta-row {
+      margin-top: 18px;
+      display: flex; gap: 12px; flex-wrap: wrap;
+    }
+    .btn {
+      appearance: none; -webkit-appearance: none;
+      height: 46px; padding: 0 18px; border-radius: 12px; border: var(--border);
+      background: var(--btn-bg); color: var(--ink); font: inherit; font-weight: 600; cursor: pointer; line-height: 1;
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+      transition: background .18s, border-color .18s, transform .18s;
+      text-decoration: none;
+    }
+    .btn::after { content: '›'; opacity: .7; font-size: 1.2rem; transform: translateY(-1px); }
+    .btn:hover, .btn:focus-visible {
+      background: var(--btn-bg-hover); border-color: rgba(122,162,255,.6); transform: translateY(-1px);
+    }
+    .note { color: var(--muted); font-size: .95rem; margin-top: 12px; }
+    .small { font-size: .9rem; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover, a:focus-visible { text-decoration: underline; }
+    a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  </style>
 </head>
 <body>
-<main class="eoe-app">
-  <header>
-    <h1>FreEV — EV Tools Index</h1>
-    <p class="lede">Pick a tool below to load data for that box.</p>
-  </header>
+  <main>
+    <section class="card" aria-labelledby="moved-title">
+      <h1 id="moved-title">FreEV has moved</h1>
+      <p class="lede">The EV tools you’re looking for now live on <strong>The Expected Value</strong>, with faster calculators, clearer methodology, and ongoing updates.</p>
 
-  <!-- Range modes with image -->
-  <section class="panel modes">
-    <figure class="modes-media">
-      <img src="FreEV_full_card_Logo.png" alt="FreEV — Spend your money on cards not calculators" />
-    </figure>
-    <div class="modes-copy">
-	<h2>Thanks for using our tools!</h2>
-      <p>
-        Have suggestions or ideas for new tools? We’d love to hear them —
-        <a href="https://www.facebook.com/SycamoreBazaar" target="_blank" rel="noopener noreferrer">
-          message us on our Facebook page
-        </a>.
-      </p>
-      <h2>Range modes overview</h2>
-      <p><strong>Statistical (CLT)</strong> shows a confidence interval for outcomes if you could repeat the purchase many times. It <em>narrows</em> as you buy more boxes (~1/√n).</p>
-    </div>
-  </section>
-
-  <!-- Confidence section collapsible -->
-  <section class="panel" aria-labelledby="conf">
-    <details class="collapse" id="confDetails">
-      <summary><h2 id="conf" style="margin:0">Confidence levels (for Statistical mode)</h2></summary>
-      <div class="content">
-        <p>For a given purchase, a <strong>C%</strong> band would contain your realized value about <strong>C%</strong> of the time under the model. Higher confidence ⇒ wider band.</p>
-        <table aria-label="Confidence level reference">
-          <thead>
-            <tr><th>Confidence</th><th>z-score (±z·σ)</th><th>Coverage inside band</th><th>Outside band (each tail)</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>68%</td><td>~1.00</td><td>~68%</td><td>~16% lower / ~16% higher</td></tr>
-            <tr><td>90%</td><td>~1.645</td><td>~90%</td><td>~5% lower / ~5% higher</td></tr>
-            <tr><td>95%</td><td>~1.96</td><td>~95%</td><td>~2.5% lower / ~2.5% higher</td></tr>
-            <tr><td>99%</td><td>~2.576</td><td>~99%</td><td>~0.5% lower / ~0.5% higher</td></tr>
-          </tbody>
-        </table>
-        <p class="note">Notes: Per-print pulls assumed independent; real collation correlations narrow true variance slightly.</p>
+      <div class="cta-row" aria-label="Primary action">
+        <a class="btn" href="https://theexpectedvalue.com/" rel="noopener">Go to the new site</a>
       </div>
-    </details>
-  </section>
 
-  <!-- Tool links -->
-  <section class="panel" aria-labelledby="Commander Deck EV tools">
-    <h2 id="tools">Commander Deck EV tools</h2>
-    <ul class="tool-list">
-          <li><a class="btn" href="./commander-ev.html">Single Deck EV</a></li>
-          <li style="display:none"><a class="btn" href="./commander-ev-table.html">All Deck EV Table</a></li>
-    </ul>
-  </section>
-  <!-- Tool links -->
-  <section class="panel" aria-labelledby="Play Box EV tools">
-    <h2 id="tools">Play Box EV tools</h2>
-    <ul class="tool-list">
-          <li><a class="btn" href="./dft-play-ev.html">Aetherdrift — Play Box</a></li>
-          <li><a class="btn" href="./blb-play-ev.html">Bloomburrow — Play Box</a></li>
-          <li><a class="btn" href="./dsk-play-ev.html">Duskmourn: House of Horror — Play Box</a></li>
-		  <li><a class="btn" href="./eoe-play-ev.html">Edge of Eternities — Play Box</a></li>
-          <li><a class="btn" href="./fin-play-ev.html">Final Fantasy — Play Box</a></li>
-          <li><a class="btn" href="./fdn-play-ev.html">Foundations — Play Box</a></li>
-          <li><a class="btn" href="./lci-set-ev.html">Lost Caverns of Ixalan — Set Box</a></li>
-          <li><a class="btn" href="./mh3-play-ev.html">Modern Horizons 3 — Play Box</a></li>
-          <li><a class="btn" href="./mkm-play-ev.html">Murders at Karlov Manor — Play Box</a></li>
-          <li><a class="btn" href="./otj-play-ev.html">Outlaws of Thunder Junction — Play Box</a></li>
-          <li><a class="btn" href="./tdm-play-ev.html">Tarkir: Dragonstorm — Play Box</a></li>
-          <li style="display:none"><a class="btn" href="./woe-set-ev.html">Wilds of Eldraine — Set Box</a></li>
-    </ul>
-  </section>
-</main>
+      <p class="note">You should be redirected automatically in a few seconds. If not, use the button above.</p>
+      <p class="note small">Bookmark the new home: <a href="https://theexpectedvalue.com/" rel="noopener">theexpectedvalue.com</a></p>
+    </section>
+  </main>
 </body>
 </html>
-
